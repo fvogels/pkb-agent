@@ -29,5 +29,12 @@ func NewStartUserInterfaceCommand() *cobra.Command {
 }
 
 func (c *startUserInterfaceCommand) execute() error {
-	return ui.Start()
+	verbose := false
+	verboseFlag := c.CobraCommand.InheritedFlags().Lookup("verbose")
+
+	if verboseFlag != nil {
+		verbose = verboseFlag.Value.String() == "true"
+	}
+
+	return ui.Start(verbose)
 }

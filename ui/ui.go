@@ -9,15 +9,17 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func Start() error {
-	logFile, err := os.Create("ui.log")
-	if err != nil {
-		fmt.Println("Failed to create log")
-	}
-	defer logFile.Close()
+func Start(verbose bool) error {
+	if verbose {
+		logFile, err := os.Create("ui.log")
+		if err != nil {
+			fmt.Println("Failed to create log")
+		}
+		defer logFile.Close()
 
-	logger := slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	slog.SetDefault(logger)
+		logger := slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		slog.SetDefault(logger)
+	}
 
 	model := mainscreen.New()
 
