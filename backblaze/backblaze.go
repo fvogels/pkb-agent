@@ -2,8 +2,10 @@ package backblaze
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
+	"pkb-agent/util"
 
 	"github.com/Backblaze/blazer/b2"
 )
@@ -15,8 +17,25 @@ func NewClient(ctx context.Context) (*b2.Client, error) {
 	return b2.NewClient(ctx, application_key_id, application_key)
 }
 
-func Download(ctx context.Context, client *b2.Client, bucketName string, remoteFilename string, writer io.Writer, concurrentDownloads int) error {
-	bucket, err := client.Bucket(ctx, bucketName)
+type BackblazeClient struct {
+	b2client *b2.Client
+}
+
+func New(ctx context.Context, application_key string, application_key_id string) (*BackblazeClient, error) {
+	b2client, err := b2.NewClient(ctx, application_key_id, application_key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create BackblazeClient: %w", err)
+	}
+
+	client := BackblazeClient{
+		b2client: b2client,
+	}
+
+	return &client, nil
+}
+
+func (client *BackblazeClient) Download(ctx context.Context, bucketName string, remoteFilename string, writer io.Writer, concurrentDownloads int) error {
+	bucket, err := client.b2client.Bucket(ctx, bucketName)
 	if err != nil {
 		return err
 	}
@@ -34,22 +53,22 @@ func Download(ctx context.Context, client *b2.Client, bucketName string, remoteF
 	return nil
 }
 
-func DownloadToFile(ctx context.Context, client *b2.Client, bucketName string, remoteFilename string, localFilename string, concurrentDownloads int) error {
+func (client *BackblazeClient) DownloadToFile(ctx context.Context, bucketName string, remoteFilename string, localFilename string, concurrentDownloads int) error {
 	localFile, err := os.Create(localFilename)
 	if err != nil {
 		return err
 	}
 	defer localFile.Close()
 
-	if err := Download(ctx, client, bucketName, remoteFilename, localFile, concurrentDownloads); err != nil {
+	if err := client.Download(ctx, bucketName, remoteFilename, localFile, concurrentDownloads); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func Delete(ctx context.Context, client *b2.Client, bucketName string, remoteFilename string) error {
-	bucket, err := client.Bucket(ctx, bucketName)
+func (client *BackblazeClient) Delete(ctx context.Context, bucketName string, remoteFilename string) error {
+	bucket, err := client.b2client.Bucket(ctx, bucketName)
 	if err != nil {
 		return err
 	}
@@ -62,8 +81,8 @@ func Delete(ctx context.Context, client *b2.Client, bucketName string, remoteFil
 	return nil
 }
 
-func Upload(ctx context.Context, client *b2.Client, bucketName string, reader io.Reader, remoteFilename string) error {
-	bucket, err := client.Bucket(ctx, bucketName)
+func (client *BackblazeClient) Upload(ctx context.Context, bucketName string, reader io.Reader, remoteFilename string) error {
+	bucket, err := client.b2client.Bucket(ctx, bucketName)
 	if err != nil {
 		return err
 	}
@@ -77,4 +96,15 @@ func Upload(ctx context.Context, client *b2.Client, bucketName string, reader io
 	}
 
 	return nil
+}
+
+func (client *BackblazeClient) ListBuckets(ctx context.Context) ([]string, error) {
+	buckets, err := client.b2client.ListBuckets(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	bucketNames := util.Map(buckets, func(b *b2.Bucket) string { return b.Name() })
+
+	return bucketNames, nil
 }
