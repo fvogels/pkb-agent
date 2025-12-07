@@ -1,8 +1,7 @@
-package snippetloader
+package snippet
 
 import (
 	"pkb-agent/graph"
-	"pkb-agent/graph/nodes/snippet"
 	pathlib "pkb-agent/util/pathlib"
 	"strings"
 
@@ -11,7 +10,7 @@ import (
 
 type Loader struct{}
 
-func New() *Loader {
+func NewLoader() *Loader {
 	return &Loader{}
 }
 
@@ -22,7 +21,7 @@ type metadata struct {
 	Path       pathlib.Path
 }
 
-func (loader *Loader) Load(path pathlib.Path, callback func(node graph.Node) error) error {
+func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) error) error {
 	unparsedMetadata, err := loader.extractMetadata(path)
 	if err != nil {
 		return err
@@ -33,11 +32,13 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node graph.Node) err
 		return err
 	}
 
-	node := snippet.Node{
-		Name:       metadata.Name,
-		Identifier: metadata.Identifier,
-		Path:       path,
-		Links:      metadata.Links,
+	node := graph.Node{
+		Name:      metadata.Name,
+		Links:     metadata.Links,
+		Backlinks: nil,
+		Extra: Extra{
+			Path: path,
+		},
 	}
 
 	if err := callback(&node); err != nil {

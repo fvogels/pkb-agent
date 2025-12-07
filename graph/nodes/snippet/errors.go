@@ -1,4 +1,4 @@
-package snippetloader
+package snippet
 
 type ErrMissingSnippet struct{}
 

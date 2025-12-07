@@ -3,6 +3,8 @@ package metaloader
 import (
 	"fmt"
 	"pkb-agent/graph"
+	"pkb-agent/graph/nodes/atom"
+	"pkb-agent/graph/nodes/snippet"
 	pathlib "pkb-agent/util/pathlib"
 
 	"gopkg.in/yaml.v2"
@@ -18,22 +20,20 @@ type entry struct {
 }
 
 func New() *Loader {
-	return &Loader{
-		loaders: make(map[string]graph.Loader),
-	}
-}
+	loaders := make(map[string]graph.Loader)
+	loaders["snippet"] = snippet.NewLoader()
+	loaders["atom"] = atom.NewLoader()
 
-func (loader *Loader) AddLoader(name string, ldr graph.Loader) error {
-	_, ok := loader.loaders[name]
-	if ok {
-		return &ErrDuplicateLoaderName{duplicateLoaderName: name}
+	loader := Loader{
+		loaders: loaders,
 	}
 
-	loader.loaders[name] = ldr
-	return nil
+	loaders["meta"] = &loader
+
+	return &loader
 }
 
-func (loader *Loader) Load(path pathlib.Path, callback func(node graph.Node) error) error {
+func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) error) error {
 	parentDirectory := path.Parent()
 	source, err := path.ReadFile()
 	if err != nil {

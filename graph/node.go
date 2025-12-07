@@ -1,6 +1,8 @@
 package graph
 
-type Node interface {
-	GetName() string
-	GetLinks() []string
+type Node struct {
+	Name      string
+	Links     []string
+	Backlinks []string
+	Extra     any
 }

@@ -1,27 +1,25 @@
-package atomloader
+package atom
 
 import (
 	"errors"
 	"pkb-agent/graph"
-	"pkb-agent/graph/nodes/atom"
-	pathlib "pkb-agent/util/pathlib"
+	"pkb-agent/util/pathlib"
 
 	"gopkg.in/yaml.v2"
 )
 
 type Loader struct{}
 
-func New() *Loader {
+func NewLoader() *Loader {
 	return &Loader{}
 }
 
 type entry struct {
-	Name       string
-	Identifier string
-	Links      []string
+	Name  string
+	Links []string
 }
 
-func (loader *Loader) Load(path pathlib.Path, callback func(node graph.Node) error) error {
+func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) error) error {
 	source, err := path.ReadFile()
 	if err != nil {
 		return err
@@ -34,10 +32,10 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node graph.Node) err
 
 	var errs []error
 	for _, entry := range entries {
-		node := atom.Node{
-			Name:       entry.Name,
-			Identifier: entry.Identifier,
-			Links:      entry.Links,
+		node := graph.Node{
+			Name:      entry.Name,
+			Links:     entry.Links,
+			Backlinks: nil,
 		}
 
 		if err := callback(&node); err != nil {

@@ -1,11 +1,8 @@
 package graph
 
 import (
-	"fmt"
 	"pkb-agent/graph"
-	"pkb-agent/graph/loaders/atomloader"
-	"pkb-agent/graph/loaders/metaloader"
-	"pkb-agent/graph/loaders/snippetloader"
+	"pkb-agent/graph/metaloader"
 	pathlib "pkb-agent/util/pathlib"
 
 	"github.com/spf13/cobra"
@@ -33,16 +30,9 @@ func NewListNodesCommand() *cobra.Command {
 
 func (c *ListNodesCommand) execute() error {
 	loader := metaloader.New()
-	loader.AddLoader("atom", atomloader.New())
-	loader.AddLoader("snippet", snippetloader.New())
-
 	path := pathlib.New(`F:\repos\pkb\pkb-data\root.yaml`)
-	callback := func(entry graph.Node) error {
-		fmt.Printf("%s\n", entry.GetName())
-		return nil
-	}
 
-	if err := loader.Load(path, callback); err != nil {
+	if err := graph.LoadGraph(path, loader); err != nil {
 		return err
 	}
 
