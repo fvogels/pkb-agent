@@ -23,6 +23,7 @@ func RunCLI() {
 
 	rootCommand.AddCommand(b2.NewB2Command())
 	rootCommand.AddCommand(graph.NewGraphCommand())
+	rootCommand.AddCommand(NewStartUserInterfaceCommand())
 
 	rootCommand.Execute()
 }

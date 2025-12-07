@@ -1,0 +1,33 @@
+package cli
+
+import (
+	"pkb-agent/ui"
+
+	"github.com/spf13/cobra"
+)
+
+type startUserInterfaceCommand struct {
+	CobraCommand cobra.Command
+}
+
+func NewStartUserInterfaceCommand() *cobra.Command {
+	var command *startUserInterfaceCommand
+
+	command = &startUserInterfaceCommand{
+		CobraCommand: cobra.Command{
+			Use:   "ui",
+			Short: "Start ui",
+			Long:  `Start user interface`,
+			Args:  cobra.NoArgs,
+			RunE: func(cmd *cobra.Command, args []string) error {
+				return command.execute()
+			},
+		},
+	}
+
+	return &command.CobraCommand
+}
+
+func (c *startUserInterfaceCommand) execute() error {
+	return ui.Start()
+}
