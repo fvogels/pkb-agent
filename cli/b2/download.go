@@ -2,6 +2,7 @@ package b2
 
 import (
 	"context"
+	"os"
 	"pkb-agent/backblaze"
 
 	"github.com/spf13/cobra"
@@ -44,13 +45,15 @@ func NewDownloadCommand() *cobra.Command {
 
 func (c *DownloadCommand) execute() error {
 	ctx := context.Background()
+	application_key := os.Getenv("APPLICATION_KEY")
+	application_key_id := os.Getenv("APPLICATION_KEY_ID")
 
-	client, err := backblaze.NewClient(ctx)
+	client, err := backblaze.New(ctx, application_key, application_key_id)
 	if err != nil {
 		return err
 	}
 
-	backblaze.DownloadToFile(ctx, client, c.bucketName, c.remoteFilename, c.localFilename, c.concurrentDownloads)
+	client.DownloadToFile(ctx, c.bucketName, c.remoteFilename, c.localFilename, c.concurrentDownloads)
 
 	return nil
 }

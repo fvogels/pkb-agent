@@ -3,6 +3,7 @@ package b2
 import (
 	"context"
 	"fmt"
+	"os"
 	"pkb-agent/backblaze"
 
 	"github.com/spf13/cobra"
@@ -30,7 +31,10 @@ func NewListBucketsCommand() *cobra.Command {
 
 func (c *ListBucketsCommand) execute() error {
 	ctx := context.Background()
-	client, err := backblaze.NewClient(ctx)
+	application_key := os.Getenv("APPLICATION_KEY")
+	application_key_id := os.Getenv("APPLICATION_KEY_ID")
+
+	client, err := backblaze.New(ctx, application_key, application_key_id)
 
 	if err != nil {
 		return fmt.Errorf("failed to create b2 client: %w", err)
@@ -42,7 +46,7 @@ func (c *ListBucketsCommand) execute() error {
 	}
 
 	for _, bucket := range buckets {
-		fmt.Println(bucket.Name())
+		fmt.Println(bucket)
 	}
 
 	return nil
