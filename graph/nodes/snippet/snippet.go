@@ -1,6 +1,6 @@
 package snippet
 
-import pathlib "pkb-agent/util/path"
+import pathlib "pkb-agent/util/pathlib"
 
 type Node struct {
 	Name       string

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"pkb-agent/graph"
 	"pkb-agent/graph/nodes/atom"
-	pathlib "pkb-agent/util/path"
+	pathlib "pkb-agent/util/pathlib"
 
 	"gopkg.in/yaml.v2"
 )

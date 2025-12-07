@@ -6,7 +6,7 @@ import (
 	"pkb-agent/graph/loaders/atomloader"
 	"pkb-agent/graph/loaders/metaloader"
 	"pkb-agent/graph/loaders/snippetloader"
-	pathlib "pkb-agent/util/path"
+	pathlib "pkb-agent/util/pathlib"
 
 	"github.com/spf13/cobra"
 )

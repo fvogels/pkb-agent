@@ -3,7 +3,7 @@ package snippetloader
 import (
 	"pkb-agent/graph"
 	"pkb-agent/graph/nodes/snippet"
-	pathlib "pkb-agent/util/path"
+	pathlib "pkb-agent/util/pathlib"
 	"strings"
 
 	"gopkg.in/yaml.v2"

@@ -3,7 +3,7 @@ package metaloader
 import (
 	"fmt"
 	"pkb-agent/graph"
-	pathlib "pkb-agent/util/path"
+	pathlib "pkb-agent/util/pathlib"
 
 	"gopkg.in/yaml.v2"
 )
