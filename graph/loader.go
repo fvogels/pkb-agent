@@ -2,6 +2,8 @@ package graph
 
 import (
 	"log/slog"
+	"pkb-agent/trie"
+	"pkb-agent/util"
 	pathlib "pkb-agent/util/pathlib"
 )
 
@@ -14,7 +16,7 @@ type GraphLoader struct {
 	nodeLoader Loader
 }
 
-func LoadGraph(root pathlib.Path, loader Loader) error {
+func LoadGraph(root pathlib.Path, loader Loader) (*Graph, error) {
 	graphLoader := GraphLoader{
 		root:       root,
 		nodeLoader: loader,
@@ -22,31 +24,38 @@ func LoadGraph(root pathlib.Path, loader Loader) error {
 	return graphLoader.Load()
 }
 
-func (gl *GraphLoader) Load() error {
+func (gl *GraphLoader) Load() (*Graph, error) {
 	nodes, err := gl.LoadNodes()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := gl.EnsureLinkedNodeExistence(nodes); err != nil {
-		return err
+		return nil, err
 	}
 
 	gl.AddBackLinks(nodes)
 
-	return nil
+	graph := Graph{
+		nodes:    nodes,
+		trieRoot: gl.createTrie(nodes),
+	}
+
+	return &graph, nil
 }
 
-type ErrNameClash struct{}
+func (gl *GraphLoader) createTrie(nodes map[string]*Node) *trie.Node[*Node] {
+	builder := trie.NewBuilder[*Node]()
 
-func (err *ErrNameClash) Error() string {
-	return "name clash"
-}
+	for name, node := range nodes {
+		words := util.LowercaseWords(name)
 
-type ErrUnknownNodes struct{}
+		for _, word := range words {
+			builder.Add(word, node)
+		}
+	}
 
-func (err *ErrUnknownNodes) Error() string {
-	return "unknown node"
+	return builder.Finish()
 }
 
 func (gl *GraphLoader) LoadNodes() (map[string]*Node, error) {
@@ -75,8 +84,9 @@ func (gl *GraphLoader) LoadNodes() (map[string]*Node, error) {
 }
 
 func (gl *GraphLoader) EnsureLinkedNodeExistence(nodes map[string]*Node) error {
-	foundUnknownLinks := false
+	slog.Debug("Checking node links")
 
+	foundUnknownLinks := false
 	for _, node := range nodes {
 		for _, link := range node.Links {
 			if _, found := nodes[link]; !found {
@@ -94,6 +104,8 @@ func (gl *GraphLoader) EnsureLinkedNodeExistence(nodes map[string]*Node) error {
 }
 
 func (gl *GraphLoader) AddBackLinks(nodes map[string]*Node) {
+	slog.Debug("Adding back links to graph")
+
 	for _, node := range nodes {
 		for _, link := range node.Links {
 			linkedNode, ok := nodes[link]
