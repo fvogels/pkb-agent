@@ -28,7 +28,7 @@ func (gl *GraphLoader) Load() error {
 		return err
 	}
 
-	if err := gl.VerifyLinks(nodes); err != nil {
+	if err := gl.EnsureLinkedNodeExistence(nodes); err != nil {
 		return err
 	}
 
@@ -72,7 +72,7 @@ func (gl *GraphLoader) LoadNodes() (map[string]*Node, error) {
 	return nodes, nil
 }
 
-func (gl *GraphLoader) VerifyLinks(nodes map[string]*Node) error {
+func (gl *GraphLoader) EnsureLinkedNodeExistence(nodes map[string]*Node) error {
 	foundUnknownLinks := false
 
 	for _, node := range nodes {
