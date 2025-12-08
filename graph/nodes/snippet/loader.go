@@ -75,7 +75,7 @@ func (loader *Loader) extractMetadata(path pathlib.Path) (string, error) {
 	})
 
 	if !foundMetadataDelimiter {
-		return "", &ErrMissingSnippet{}
+		return "", &ErrMissingSnippet{path: path}
 	}
 
 	metadata := strings.Join(metadataLines, "")

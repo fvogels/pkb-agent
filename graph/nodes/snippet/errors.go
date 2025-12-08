@@ -1,7 +1,15 @@
 package snippet
 
-type ErrMissingSnippet struct{}
+import (
+	"fmt"
+	"pkb-agent/util/pathlib"
+)
+
+type ErrMissingSnippet struct {
+	path pathlib.Path
+}
 
 func (err *ErrMissingSnippet) Error() string {
-	return "only metadata in snippet"
+	return fmt.Sprintf("only metadata in snippet in %s", err.path.String())
+}
 }
