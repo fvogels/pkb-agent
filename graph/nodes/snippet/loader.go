@@ -6,7 +6,7 @@ import (
 	pathlib "pkb-agent/util/pathlib"
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type Loader struct{}
@@ -39,9 +39,13 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 		return err
 	}
 
+	if len(metadata.Name) == 0 {
+		return &ErrMissingName{path: path}
+	}
+
 	node := graph.Node{
 		Name:      metadata.Name,
-		Links:     metadata.Links,
+		Links:     append(metadata.Links, "Snippet"),
 		Backlinks: nil,
 		Extra: Extra{
 			Path: path,
