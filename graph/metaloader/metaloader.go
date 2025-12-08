@@ -1,6 +1,7 @@
 package metaloader
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"pkb-agent/graph"
@@ -8,7 +9,7 @@ import (
 	"pkb-agent/graph/nodes/snippet"
 	pathlib "pkb-agent/util/pathlib"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type Loader struct {
@@ -52,30 +53,30 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 		return err
 	}
 
+	errs := []error{}
 	for _, entry := range entries {
 		pathPattern := pathlib.New(entry.Path)
 
 		paths, err := parentDirectory.Join(pathPattern).Glob()
 		if err != nil {
-			return fmt.Errorf("error globbing %s: %w", pathPattern, err)
+			errs = append(errs, err)
 		}
-
-		fmt.Printf("%v\n", paths)
 
 		for _, targetPath := range paths {
 			subloaderName := entry.Loader
 			subloader, err := loader.findLoader(subloaderName)
 			if err != nil {
-				return err
+				errs = append(errs, err)
+				continue
 			}
 
 			if err := subloader.Load(targetPath, callback); err != nil {
-				return err
+				errs = append(errs, err)
 			}
 		}
 	}
 
-	return nil
+	return errors.Join(errs...)
 }
 
 func (loader *Loader) loadEntries(source []byte) ([]entry, error) {
