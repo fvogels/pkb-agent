@@ -4,6 +4,20 @@ type Builder[T any] struct {
 	root *Node[T]
 }
 
+func NewBuilder[T any]() *Builder[T] {
+	root := Node[T]{
+		Children:     nil,
+		Terminals:    nil,
+		NextTerminal: nil,
+	}
+
+	builder := Builder[T]{
+		root: &root,
+	}
+
+	return &builder
+}
+
 func (builder *Builder[T]) Add(string string, terminal T) {
 	current := builder.root
 
@@ -24,7 +38,7 @@ func (builder *Builder[T]) Add(string string, terminal T) {
 	current.Terminals = append(current.Terminals, terminal)
 }
 
-func (builder *Builder[T]) AddLinks() {
+func (builder *Builder[T]) addLinks() {
 	var lastTerminal *Node[T] = nil
 
 	walker := func(node *Node[T]) {
@@ -37,4 +51,9 @@ func (builder *Builder[T]) AddLinks() {
 	}
 
 	builder.root.walk(walker)
+}
+
+func (builder *Builder[T]) Finish() *Node[T] {
+	builder.addLinks()
+	return builder.root
 }
