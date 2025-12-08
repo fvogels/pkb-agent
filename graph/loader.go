@@ -32,6 +32,8 @@ func (gl *GraphLoader) Load() error {
 		return err
 	}
 
+	gl.AddBackLinks(nodes)
+
 	return nil
 }
 
@@ -89,4 +91,17 @@ func (gl *GraphLoader) EnsureLinkedNodeExistence(nodes map[string]*Node) error {
 	}
 
 	return nil
+}
+
+func (gl *GraphLoader) AddBackLinks(nodes map[string]*Node) {
+	for _, node := range nodes {
+		for _, link := range node.Links {
+			linkedNode, ok := nodes[link]
+			if !ok {
+				panic("missing node; should have been noticed earlier")
+			}
+
+			linkedNode.Backlinks = append(linkedNode.Backlinks, node.Name)
+		}
+	}
 }
