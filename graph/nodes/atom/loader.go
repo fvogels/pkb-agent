@@ -6,7 +6,7 @@ import (
 	"pkb-agent/graph"
 	"pkb-agent/util/pathlib"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type Loader struct{}
@@ -38,7 +38,12 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 	}
 
 	var errs []error
-	for _, entry := range entries {
+	for index, entry := range entries {
+		if len(entry.Name) == 0 {
+			errs = append(errs, &ErrMissingName{path: path, index: index})
+			continue
+		}
+
 		node := graph.Node{
 			Name:      entry.Name,
 			Links:     entry.Links,
