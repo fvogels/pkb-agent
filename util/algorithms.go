@@ -1,5 +1,7 @@
 package util
 
+import "strings"
+
 func Map[T any, R any](xs []T, transformer func(t T) R) []R {
 	result := make([]R, len(xs))
 
@@ -69,4 +71,11 @@ func LowercaseWords(str string) []string {
 	}
 
 	return words
+}
+
+func CollectTo[T any](receiver *[]T) func(T) bool {
+	return func(item T) bool {
+		*receiver = append(*receiver, item)
+		return true
+	}
 }
