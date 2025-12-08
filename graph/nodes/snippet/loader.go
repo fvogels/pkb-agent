@@ -1,6 +1,7 @@
 package snippet
 
 import (
+	"log/slog"
 	"pkb-agent/graph"
 	pathlib "pkb-agent/util/pathlib"
 	"strings"
@@ -22,6 +23,12 @@ type metadata struct {
 }
 
 func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) error) error {
+	slog.Debug(
+		"Loading node file",
+		slog.String("loader", "snippet"),
+		slog.String("path", path.String()),
+	)
+
 	unparsedMetadata, err := loader.extractMetadata(path)
 	if err != nil {
 		return err

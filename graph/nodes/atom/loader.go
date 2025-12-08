@@ -2,6 +2,7 @@ package atom
 
 import (
 	"errors"
+	"log/slog"
 	"pkb-agent/graph"
 	"pkb-agent/util/pathlib"
 
@@ -20,6 +21,12 @@ type entry struct {
 }
 
 func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) error) error {
+	slog.Debug(
+		"Loading node file",
+		slog.String("loader", "atom"),
+		slog.String("path", path.String()),
+	)
+
 	source, err := path.ReadFile()
 	if err != nil {
 		return err

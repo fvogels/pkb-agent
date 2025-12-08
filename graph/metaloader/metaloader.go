@@ -2,6 +2,7 @@ package metaloader
 
 import (
 	"fmt"
+	"log/slog"
 	"pkb-agent/graph"
 	"pkb-agent/graph/nodes/atom"
 	"pkb-agent/graph/nodes/snippet"
@@ -34,6 +35,12 @@ func New() *Loader {
 }
 
 func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) error) error {
+	slog.Debug(
+		"Loading node file",
+		slog.String("loader", "meta"),
+		slog.String("path", path.String()),
+	)
+
 	parentDirectory := path.Parent()
 	source, err := path.ReadFile()
 	if err != nil {
@@ -52,6 +59,8 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 		if err != nil {
 			return fmt.Errorf("error globbing %s: %w", pathPattern, err)
 		}
+
+		fmt.Printf("%v\n", paths)
 
 		for _, targetPath := range paths {
 			subloaderName := entry.Loader
