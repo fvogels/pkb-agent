@@ -51,3 +51,22 @@ func IsLowercaseLetter(char byte) bool {
 func IsDigit(char byte) bool {
 	return '0' <= char && char <= '9'
 }
+
+func LowercaseWords(str string) []string {
+	str = strings.ToLower(str)
+	words := []string{}
+	i := 0
+
+	for i < len(str) {
+		j := i
+		for j != len(str) && IsLowercaseLetter(str[j]) {
+			j++
+		}
+
+		word := str[i:j]
+		words = append(words, word)
+		i = j + 1
+	}
+
+	return words
+}
