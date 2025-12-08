@@ -2,9 +2,11 @@ package pathlib
 
 import (
 	"errors"
+	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
-	"pkb-agent/util"
+	"strings"
 )
 
 type Path struct {
@@ -65,15 +67,38 @@ func (p Path) Basename() string {
 }
 
 func (p Path) Glob() ([]Path, error) {
-	paths, err := filepath.Glob(p.path)
-
+	absolute, err := p.Absolute()
 	if err != nil {
 		return nil, err
 	}
 
-	return util.Map(paths, New), nil
+	if prefix, ok := strings.CutSuffix(absolute.path, "*"); ok {
+		result := []Path{}
+		walker := func(path string, info fs.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if info.Mode().IsRegular() {
+				result = append(result, New(path))
+			}
+
+			return nil
+		}
+
+		filepath.Walk(prefix, walker)
+		return result, nil
+	} else if strings.Contains(p.path, "*") {
+		return nil, fmt.Errorf("unsupported glob pattern")
+	} else {
+		return []Path{p}, nil
+	}
 }
 
 func (p Path) ReadFile() ([]byte, error) {
 	return os.ReadFile(p.path)
+}
+
+func (p Path) String() string {
+	return p.path
 }
