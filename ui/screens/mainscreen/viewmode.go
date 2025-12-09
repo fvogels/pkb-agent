@@ -1,27 +1,59 @@
 package mainscreen
 
 import (
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+type keyMap struct {
+	Quit              key.Binding
+	SwitchToInputMode key.Binding
+	Next              key.Binding
+	Previous          key.Binding
+	Select            key.Binding
+}
+
+var keys = keyMap{
+	Quit: key.NewBinding(
+		key.WithKeys("q"),
+		key.WithHelp("q", "quit"),
+	),
+	SwitchToInputMode: key.NewBinding(
+		key.WithKeys("s"),
+		key.WithHelp("s", "search"),
+	),
+	Next: key.NewBinding(
+		key.WithKeys("down"),
+		key.WithHelp("↓", "next"),
+	),
+	Previous: key.NewBinding(
+		key.WithKeys("up"),
+		key.WithHelp("↑", "next"),
+	),
+	Select: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("↵", "select"),
+	),
+}
 
 type viewMode struct{}
 
 func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.Cmd) {
-	switch message.String() {
-	case "q":
+	switch {
+	case key.Matches(message, keys.Quit):
 		return model, tea.Quit
 
-	case "s":
+	case key.Matches(message, keys.SwitchToInputMode):
 		model.mode = inputMode{}
 		return model, nil
 
-	case "down":
+	case key.Matches(message, keys.Next):
 		return model.onSelecNextRemainingNode()
 
-	case "up":
+	case key.Matches(message, keys.Previous):
 		return model.onSelectPreviousRemainingNode()
 
-	case "enter":
+	case key.Matches(message, keys.Select):
 		return model.onSelectNode()
 
 	default:
