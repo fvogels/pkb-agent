@@ -32,19 +32,31 @@ func (graph *Graph) ListNodeNames() []string {
 func (graph *Graph) FindNameMatches(str string) MatchIterator {
 	trieNode := graph.trieRoot.Descend(str)
 
-	if trieNode != nil && len(trieNode.Terminals) == 0 {
-		trieNode = trieNode.NextTerminal
+	if trieNode == nil {
+		return MatchIterator{
+			current: nil,
+		}
+	}
+
+	if len(trieNode.Terminals) == 0 {
+		next := trieNode.NextTerminal
+
+		if next.Depth >= trieNode.Depth {
+			trieNode = next
+		}
 	}
 
 	return MatchIterator{
-		current: trieNode,
-		index:   0,
+		current:      trieNode,
+		index:        0,
+		minimalDepth: len(str),
 	}
 }
 
 type MatchIterator struct {
-	current *trie.Node[*Node]
-	index   int
+	minimalDepth int
+	current      *trie.Node[*Node]
+	index        int
 }
 
 func (iterator *MatchIterator) Current() *Node {
@@ -61,5 +73,9 @@ func (iterator *MatchIterator) Next() {
 	if iterator.index == len(iterator.current.Terminals) {
 		iterator.current = iterator.current.NextTerminal
 		iterator.index = 0
+
+		if iterator.current != nil && iterator.current.Depth <= iterator.minimalDepth {
+			iterator.current = nil
+		}
 	}
 }
