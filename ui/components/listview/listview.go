@@ -106,7 +106,7 @@ func (model Model[T]) onResize(message tea.WindowSizeMsg) (Model[T], tea.Cmd) {
 }
 
 func (model *Model[T]) ensureSelectedIsVisible() {
-	if model.allowSelection {
+	if model.allowSelection && model.items != nil {
 		if model.selectedIndex < model.firstVisibleIndex {
 			model.firstVisibleIndex = model.selectedIndex
 		} else if model.firstVisibleIndex+model.size.Height <= model.selectedIndex {
@@ -119,7 +119,7 @@ func (model *Model[T]) signalItemSelected() tea.Cmd {
 	index := model.selectedIndex
 	var selectedItem T
 
-	if model.items.Length() == 0 {
+	if model.items == nil || model.items.Length() == 0 {
 		index = -1
 	} else {
 		selectedItem = model.items.At(index)
@@ -154,7 +154,7 @@ func (model Model[T]) onSelectPrevious() (Model[T], tea.Cmd) {
 }
 
 func (model Model[T]) onSelectNext() (Model[T], tea.Cmd) {
-	if model.allowSelection {
+	if model.allowSelection && model.items != nil {
 		if model.selectedIndex != -1 && model.selectedIndex+1 < model.items.Length() {
 			model.selectedIndex++
 		}
