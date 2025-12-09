@@ -2,7 +2,6 @@ package mainscreen
 
 import (
 	"log/slog"
-	"maps"
 	"pkb-agent/graph"
 	"pkb-agent/graph/metaloader"
 	"pkb-agent/ui/components/listview"
@@ -17,15 +16,26 @@ import (
 )
 
 type Model struct {
-	graph     *graph.Graph
-	size      util.Size
-	nodeList  listview.Model
+	graph         *graph.Graph
+	size          util.Size
+	selectedNodes []*graph.Node
+	nodeList      listview.Model[NodeWrapper]
+	// selectedNodeList listview.Model
 	textInput textinput.Model
+}
+
+type NodeWrapper struct {
+	*graph.Node
+}
+
+func (wrapper NodeWrapper) String() string {
+	return wrapper.Name
 }
 
 func New() Model {
 	return Model{
-		nodeList: listview.New(true),
+		nodeList: listview.New[NodeWrapper](true),
+		// selectedNodeList: listview.New(true),
 	}
 }
 
@@ -149,23 +159,23 @@ func (model Model) signalUpdateNodeList() tea.Cmd {
 		input := model.textInput.GetInput()
 		iterator := model.graph.FindNameMatches(input)
 		nameTable := make(map[string]any)
+		nodes := []NodeWrapper{}
 
 		for iterator.Current() != nil {
 			name := iterator.Current().Name
-			nameTable[name] = nil
+			if _, alreadyAdded := nameTable[name]; !alreadyAdded {
+				nameTable[name] = nil
+				nodes = append(nodes, NodeWrapper{Node: iterator.Current()})
+			}
 			iterator.Next()
 		}
 
-		keyGenerator := maps.Keys(nameTable)
-		names := []string{}
-		keyGenerator(util.CollectTo(&names))
-
-		sort.Slice(names, func(i, j int) bool {
-			return names[i] < names[j]
+		sort.Slice(nodes, func(i, j int) bool {
+			return nodes[i].Name < nodes[j].Name
 		})
-		return listview.MsgSetItems{
-			Items: &SliceAdapter[string]{
-				slice: names,
+		return listview.MsgSetItems[NodeWrapper]{
+			Items: &SliceAdapter[NodeWrapper]{
+				slice: nodes,
 			},
 		}
 	}
