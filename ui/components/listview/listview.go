@@ -33,7 +33,7 @@ func New[T any](itemRenderer func(item T) string, allowSelection bool) Model[T] 
 		firstVisibleIndex: 0,
 		selectedIndex:     0,
 		size:              util.Size{Width: 0, Height: 0},
-		selectedItemStyle: lipgloss.NewStyle().Background(lipgloss.Color("#AAAAAA")),
+		selectedItemStyle: lipgloss.NewStyle().Background(lipgloss.Color("#CCCCCC")).Foreground(lipgloss.Color("#000000")),
 		emptyListMessage:  "no nodes found",
 	}
 
