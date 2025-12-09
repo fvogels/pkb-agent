@@ -17,7 +17,19 @@ func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.
 		model.mode = viewMode{}
 		return model, nil
 
+	case "down":
+		updatedNodeList, command := model.remainingNodeView.TypedUpdate(listview.MsgSelectNext{})
+		model.remainingNodeView = updatedNodeList
+		return model, command
+
+	case "up":
+		updatedNodeList, command := model.remainingNodeView.TypedUpdate(listview.MsgSelectPrevious{})
+		model.remainingNodeView = updatedNodeList
+		return model, command
+
 	case "enter":
+		model.mode = viewMode{}
+
 		if len(model.remainingNodes) > 0 {
 			selectedNode := model.remainingNodeView.GetSelectedItem()
 			model.selectedNodes = append(model.selectedNodes, selectedNode)

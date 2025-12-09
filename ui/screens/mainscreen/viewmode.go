@@ -14,7 +14,7 @@ func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.C
 	case "q":
 		return model, tea.Quit
 
-	case " ":
+	case "s":
 		model.mode = inputMode{}
 		return model, nil
 
