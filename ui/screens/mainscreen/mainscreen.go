@@ -38,12 +38,15 @@ func New() Model {
 		mode:              viewMode{},
 		remainingNodeView: listview.New(renderer, true),
 		selectedNodeView:  listview.New(renderer, true),
+		textInput:         textinput.New(),
 	}
 }
 
 func (model Model) Init() tea.Cmd {
-	return tea.Sequence(
+	return tea.Batch(
 		model.remainingNodeView.Init(),
+		model.selectedNodeView.Init(),
+		model.textInput.Init(),
 		model.signalLoadGraph(),
 	)
 }
@@ -117,7 +120,7 @@ func (model Model) View() string {
 		0,
 		lipgloss.NewStyle().Height(5).Render(model.selectedNodeView.View()),
 		lipgloss.NewStyle().Height(model.size.Height-6).Render(model.remainingNodeView.View()),
-		model.textInput.View(),
+		model.mode.renderStatusBar(&model),
 	)
 }
 
@@ -166,7 +169,13 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	})
 	model.remainingNodeView = updatedRemainingNodeView
 
-	return model, tea.Batch(command1, command2)
+	updatedTextInput, command3 := model.textInput.TypedUpdate(tea.WindowSizeMsg{
+		Width:  message.Width,
+		Height: 1,
+	})
+	model.textInput = updatedTextInput
+
+	return model, tea.Batch(command1, command2, command3)
 }
 
 func (model Model) signalUpdateRemainingNodes() tea.Cmd {

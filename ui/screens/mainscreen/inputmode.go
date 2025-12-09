@@ -8,8 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type inputMode struct {
-}
+type inputMode struct{}
 
 func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.Cmd) {
 	switch message.String() {
@@ -57,4 +56,8 @@ func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.
 
 		return model, command
 	}
+}
+
+func (mode inputMode) renderStatusBar(model *Model) string {
+	return model.textInput.View()
 }
