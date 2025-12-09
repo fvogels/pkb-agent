@@ -20,12 +20,12 @@ type Model struct {
 	graph *graph.Graph
 	size  util.Size
 
-	selectableNodes []*graph.Node
-	selectedNodes   []*graph.Node
+	remainingNodes []*graph.Node
+	selectedNodes  []*graph.Node
 
-	selectableNodeView listview.Model[*graph.Node]
-	selectedNodeView   listview.Model[*graph.Node]
-	textInput          textinput.Model
+	remainingNodeView listview.Model[*graph.Node]
+	selectedNodeView  listview.Model[*graph.Node]
+	textInput         textinput.Model
 }
 
 func New() Model {
@@ -34,14 +34,14 @@ func New() Model {
 	}
 
 	return Model{
-		selectableNodeView: listview.New(renderer, true),
-		selectedNodeView:   listview.New(renderer, true),
+		remainingNodeView: listview.New(renderer, true),
+		selectedNodeView:  listview.New(renderer, true),
 	}
 }
 
 func (model Model) Init() tea.Cmd {
 	return tea.Sequence(
-		model.selectableNodeView.Init(),
+		model.remainingNodeView.Init(),
 		model.signalLoadGraph(),
 	)
 }
@@ -66,9 +66,9 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	case textinput.MsgInputUpdated:
 		return model.onInputUpdated(message)
 
-	case msgToSelectableNodeView:
-		updatedSelectableNodeList, command := model.selectableNodeView.TypedUpdate(message.wrapped)
-		model.selectableNodeView = updatedSelectableNodeList
+	case msgToRemainingNodeView:
+		updatedRemainingNodeList, command := model.remainingNodeView.TypedUpdate(message.wrapped)
+		model.remainingNodeView = updatedRemainingNodeList
 		return model, command
 
 	case msgToSelectedNodeView:
@@ -76,21 +76,21 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		model.selectedNodeView = updatedSelectedNodeList
 		return model, command
 
-	case msgSelectableNodesUpdated:
-		model.selectableNodes = message.selectableNodes
-		updatedSelectableNodesView, command := model.selectableNodeView.TypedUpdate(
+	case msgRemainingNodesUpdated:
+		model.remainingNodes = message.remainingNodes
+		updatedRemainingNodesView, command := model.remainingNodeView.TypedUpdate(
 			listview.MsgSetItems[*graph.Node]{
 				Items: &SliceAdapter[*graph.Node]{
-					slice: model.selectableNodes,
+					slice: model.remainingNodes,
 				},
 			},
 		)
-		model.selectableNodeView = updatedSelectableNodesView
+		model.remainingNodeView = updatedRemainingNodesView
 		return model, command
 
 	default:
-		updatedSelectableNodeView, command1 := model.selectableNodeView.TypedUpdate(message)
-		model.selectableNodeView = updatedSelectableNodeView
+		updatedRemainingNodeView, command1 := model.remainingNodeView.TypedUpdate(message)
+		model.remainingNodeView = updatedRemainingNodeView
 
 		updatedSelectedNodeView, command2 := model.selectedNodeView.TypedUpdate(message)
 		model.selectedNodeView = updatedSelectedNodeView
@@ -103,7 +103,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 }
 
 func (model Model) onInputUpdated(_ textinput.MsgInputUpdated) (Model, tea.Cmd) {
-	return model, model.signalUpdateSelectableNodes()
+	return model, model.signalUpdateRemainingNodes()
 }
 
 func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
@@ -112,18 +112,18 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 		return model, tea.Quit
 
 	case "down":
-		updatedNodeList, command := model.selectableNodeView.TypedUpdate(listview.MsgSelectNext{})
-		model.selectableNodeView = updatedNodeList
+		updatedNodeList, command := model.remainingNodeView.TypedUpdate(listview.MsgSelectNext{})
+		model.remainingNodeView = updatedNodeList
 		return model, command
 
 	case "up":
-		updatedNodeList, command := model.selectableNodeView.TypedUpdate(listview.MsgSelectPrevious{})
-		model.selectableNodeView = updatedNodeList
+		updatedNodeList, command := model.remainingNodeView.TypedUpdate(listview.MsgSelectPrevious{})
+		model.remainingNodeView = updatedNodeList
 		return model, command
 
 	case "enter":
-		if len(model.selectableNodes) > 0 {
-			selectedNode := model.selectableNodeView.GetSelectedItem()
+		if len(model.remainingNodes) > 0 {
+			selectedNode := model.remainingNodeView.GetSelectedItem()
 			model.selectedNodes = append(model.selectedNodes, selectedNode)
 
 			updatedSelectedNodeView, command1 := model.selectedNodeView.TypedUpdate(listview.MsgSetItems[*graph.Node]{
@@ -137,7 +137,7 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 			return model, tea.Batch(
 				command1,
 				command2,
-				model.signalUpdateSelectableNodes(),
+				model.signalUpdateRemainingNodes(),
 			)
 		}
 
@@ -155,14 +155,14 @@ func (model Model) View() string {
 	return lipgloss.JoinVertical(
 		0,
 		lipgloss.NewStyle().Height(5).Render(model.selectedNodeView.View()),
-		lipgloss.NewStyle().Height(model.size.Height-6).Render(model.selectableNodeView.View()),
+		lipgloss.NewStyle().Height(model.size.Height-6).Render(model.remainingNodeView.View()),
 		model.textInput.View(),
 	)
 }
 
 func (model Model) onGraphLoaded(message MsgGraphLoaded) (Model, tea.Cmd) {
 	model.graph = message.graph
-	return model, model.signalUpdateSelectableNodes()
+	return model, model.signalUpdateRemainingNodes()
 }
 
 func (model *Model) signalLoadGraph() tea.Cmd {
@@ -199,27 +199,27 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	})
 	model.selectedNodeView = updatedSelectedNodeView
 
-	updatedSelectableNodeView, command2 := model.selectableNodeView.TypedUpdate(tea.WindowSizeMsg{
+	updatedRemainingNodeView, command2 := model.remainingNodeView.TypedUpdate(tea.WindowSizeMsg{
 		Width:  message.Width,
 		Height: message.Height - 6,
 	})
-	model.selectableNodeView = updatedSelectableNodeView
+	model.remainingNodeView = updatedRemainingNodeView
 
 	return model, tea.Batch(command1, command2)
 }
 
-func (model Model) signalUpdateSelectableNodes() tea.Cmd {
+func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 	input := model.textInput.GetInput()
 	iterator := model.graph.FindMatchingNodes(input)
 	selectedNodes := model.selectedNodes
 
 	return func() tea.Msg {
 		nameSet := util.NewSet[string]()
-		selectableNodes := []*graph.Node{}
+		remaining := []*graph.Node{}
 
 		for iterator.Current() != nil {
 			// The same node can occur more than once during iteration
-			// Ensure that we add each node only once to selectableNodes
+			// Ensure that we add each node only once to remainingNodes
 			name := iterator.Current().Name
 			if nameSet.Contains(name) {
 				iterator.Next()
@@ -234,15 +234,15 @@ func (model Model) signalUpdateSelectableNodes() tea.Cmd {
 			}
 
 			nameSet.Add(name)
-			selectableNodes = append(selectableNodes, iterator.Current())
+			remaining = append(remaining, iterator.Current())
 			iterator.Next()
 		}
 
-		sort.Slice(selectableNodes, func(i, j int) bool {
-			return selectableNodes[i].Name < selectableNodes[j].Name
+		sort.Slice(remaining, func(i, j int) bool {
+			return remaining[i].Name < remaining[j].Name
 		})
-		return msgSelectableNodesUpdated{
-			selectableNodes: selectableNodes,
+		return msgRemainingNodesUpdated{
+			remainingNodes: remaining,
 		}
 	}
 }

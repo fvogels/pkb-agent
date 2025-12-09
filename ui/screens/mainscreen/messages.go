@@ -12,7 +12,7 @@ type MsgGraphLoaded struct {
 
 type MsgUpdateNodeList struct{}
 
-type msgToSelectableNodeView struct {
+type msgToRemainingNodeView struct {
 	wrapped tea.Msg
 }
 
@@ -20,6 +20,6 @@ type msgToSelectedNodeView struct {
 	wrapped tea.Msg
 }
 
-type msgSelectableNodesUpdated struct {
-	selectableNodes []*graph.Node
+type msgRemainingNodesUpdated struct {
+	remainingNodes []*graph.Node
 }
