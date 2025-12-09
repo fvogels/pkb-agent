@@ -24,6 +24,16 @@ func Filter[T any](xs []T, predicate func(t T) bool) []T {
 	return result
 }
 
+func All[T any](xs []T, predicate func(t T) bool) bool {
+	for _, x := range xs {
+		if !predicate(x) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func FindIndex[T any](xs []T, predicate func(t T) bool) int {
 	for index, x := range xs {
 		if predicate(x) {
