@@ -90,7 +90,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 }
 
 func (model Model) onInputUpdated(_ textinput.MsgInputUpdated) (Model, tea.Cmd) {
-	return model, model.signalUpdateNodeList()
+	return model, model.signalUpdateNodeLists()
 }
 
 func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
@@ -111,7 +111,7 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 	case "enter":
 		selectedNode := model.selectableNodeList.GetSelectedItem()
 		model.selectedNodes = append(model.selectableNodes, selectedNode)
-		return model, model.signalUpdateNodeList()
+		return model, model.signalUpdateNodeLists()
 
 	default:
 		updatedTextInput, command := model.textInput.TypedUpdate(message)
@@ -132,7 +132,7 @@ func (model Model) View() string {
 
 func (model Model) onGraphLoaded(message MsgGraphLoaded) (Model, tea.Cmd) {
 	model.graph = message.graph
-	return model, model.signalUpdateNodeList()
+	return model, model.signalUpdateNodeLists()
 }
 
 func (model *Model) signalLoadGraph() tea.Cmd {
@@ -172,7 +172,7 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	return model, command
 }
 
-func (model Model) signalUpdateNodeList() tea.Cmd {
+func (model Model) signalUpdateNodeLists() tea.Cmd {
 	return func() tea.Msg {
 		input := model.textInput.GetInput()
 		iterator := model.graph.FindNameMatches(input)
