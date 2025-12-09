@@ -17,14 +17,10 @@ func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.
 		return model, nil
 
 	case "down":
-		updatedNodeList, command := model.remainingNodeView.TypedUpdate(listview.MsgSelectNext{})
-		model.remainingNodeView = updatedNodeList
-		return model, command
+		return model.onSelecNextRemainingNode()
 
 	case "up":
-		updatedNodeList, command := model.remainingNodeView.TypedUpdate(listview.MsgSelectPrevious{})
-		model.remainingNodeView = updatedNodeList
-		return model, command
+		return model.onSelectPreviousRemainingNode()
 
 	case "enter":
 		model.mode = viewMode{}

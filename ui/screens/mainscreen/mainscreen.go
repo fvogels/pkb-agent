@@ -234,3 +234,15 @@ func (adapter *SliceAdapter[T]) Length() int {
 func (adapter *SliceAdapter[T]) At(index int) T {
 	return adapter.slice[index]
 }
+
+func (model Model) onSelectPreviousRemainingNode() (Model, tea.Cmd) {
+	updatedNodeList, command := model.remainingNodeView.TypedUpdate(listview.MsgSelectPrevious{})
+	model.remainingNodeView = updatedNodeList
+	return model, command
+}
+
+func (model Model) onSelecNextRemainingNode() (Model, tea.Cmd) {
+	updatedNodeList, command := model.remainingNodeView.TypedUpdate(listview.MsgSelectNext{})
+	model.remainingNodeView = updatedNodeList
+	return model, command
+}
