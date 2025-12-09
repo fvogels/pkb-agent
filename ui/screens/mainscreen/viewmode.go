@@ -5,15 +5,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type keyMap struct {
+var viewModeKeyMap = struct {
 	Quit              key.Binding
 	SwitchToInputMode key.Binding
 	Next              key.Binding
 	Previous          key.Binding
 	Select            key.Binding
-}
-
-var keys = keyMap{
+}{
 	Quit: key.NewBinding(
 		key.WithKeys("q"),
 		key.WithHelp("q", "quit"),
@@ -40,20 +38,20 @@ type viewMode struct{}
 
 func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.Cmd) {
 	switch {
-	case key.Matches(message, keys.Quit):
+	case key.Matches(message, viewModeKeyMap.Quit):
 		return model, tea.Quit
 
-	case key.Matches(message, keys.SwitchToInputMode):
+	case key.Matches(message, viewModeKeyMap.SwitchToInputMode):
 		model.mode = inputMode{}
 		return model, nil
 
-	case key.Matches(message, keys.Next):
+	case key.Matches(message, viewModeKeyMap.Next):
 		return model.onSelecNextRemainingNode()
 
-	case key.Matches(message, keys.Previous):
+	case key.Matches(message, viewModeKeyMap.Previous):
 		return model.onSelectPreviousRemainingNode()
 
-	case key.Matches(message, keys.Select):
+	case key.Matches(message, viewModeKeyMap.Select):
 		return model.onSelectNode()
 
 	default:
