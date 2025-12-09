@@ -158,14 +158,14 @@ func (model Model) signalUpdateNodeList() tea.Cmd {
 	return func() tea.Msg {
 		input := model.textInput.GetInput()
 		iterator := model.graph.FindNameMatches(input)
-		nameTable := make(map[string]any)
-		nodes := []NodeWrapper{}
+		nameSet := util.NewSet[string]()
+		nodes := []*graph.Node{}
 
 		for iterator.Current() != nil {
 			name := iterator.Current().Name
-			if _, alreadyAdded := nameTable[name]; !alreadyAdded {
-				nameTable[name] = nil
-				nodes = append(nodes, NodeWrapper{Node: iterator.Current()})
+			if !nameSet.Contains(name) {
+				nameSet.Add(name)
+				nodes = append(nodes, iterator.Current())
 			}
 			iterator.Next()
 		}
