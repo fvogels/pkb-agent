@@ -6,10 +6,11 @@ type Builder[T any] struct {
 
 func NewBuilder[T any]() *Builder[T] {
 	root := Node[T]{
-		Depth:        0,
-		Children:     nil,
-		Terminals:    nil,
-		NextTerminal: nil,
+		Depth:             0,
+		Children:          nil,
+		Terminals:         nil,
+		NextTerminal:      nil,
+		NextTerminalDepth: 0,
 	}
 
 	builder := Builder[T]{
@@ -43,12 +44,19 @@ func (builder *Builder[T]) Add(string string, terminal T) {
 
 func (builder *Builder[T]) addLinks() {
 	var lastTerminal *Node[T] = nil
+	minDepth := 0
 
 	walker := func(node *Node[T]) {
+		if node.Depth < minDepth {
+			minDepth = node.Depth
+		}
+
 		node.NextTerminal = lastTerminal
+		node.NextTerminalDepth = minDepth
 
 		if len(node.Terminals) > 0 {
 			lastTerminal = node
+			minDepth = node.Depth
 		}
 	}
 

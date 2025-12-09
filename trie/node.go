@@ -1,10 +1,11 @@
 package trie
 
 type Node[T any] struct {
-	Depth        int
-	Children     []*Node[T]
-	Terminals    []T
-	NextTerminal *Node[T]
+	Depth             int
+	Children          []*Node[T]
+	Terminals         []T
+	NextTerminal      *Node[T]
+	NextTerminalDepth int
 }
 
 func (node *Node[T]) walk(callback func(*Node[T])) {
@@ -32,6 +33,8 @@ func (node *Node[T]) walkBackwards(callback func(*Node[T])) {
 	callback(node)
 }
 
+// Descend finds the descendant one reaches by following each character in the given string.
+// If no such descendant exists, nil is returned.
 func (node *Node[T]) Descend(str string) *Node[T] {
 	current := node
 
