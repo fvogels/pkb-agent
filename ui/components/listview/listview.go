@@ -116,10 +116,15 @@ func (model *Model) ensureSelectedIsVisible() {
 }
 
 func (model *Model) signalItemSelected() tea.Cmd {
+	index := model.selectedIndex
+
+	if model.items.Length() == 0 {
+		index = -1
+	}
+
 	return func() tea.Msg {
 		return MsgItemSelected{
-			Index: model.selectedIndex,
-			Item:  model.items.At(model.selectedIndex),
+			Index: index,
 		}
 	}
 }

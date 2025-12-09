@@ -10,5 +10,4 @@ type MsgSelectNext struct{}
 
 type MsgItemSelected struct {
 	Index int
-	Item  string
 }
