@@ -19,6 +19,7 @@ import (
 type Model struct {
 	graph *graph.Graph
 	size  util.Size
+	mode  mode
 
 	remainingNodes []*graph.Node
 	selectedNodes  []*graph.Node
@@ -34,6 +35,7 @@ func New() Model {
 	}
 
 	return Model{
+		mode:              viewMode{},
 		remainingNodeView: listview.New(renderer, true),
 		selectedNodeView:  listview.New(renderer, true),
 	}
@@ -107,48 +109,7 @@ func (model Model) onInputUpdated(_ textinput.MsgInputUpdated) (Model, tea.Cmd) 
 }
 
 func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
-	switch message.String() {
-	case "esc":
-		return model, tea.Quit
-
-	case "down":
-		updatedNodeList, command := model.remainingNodeView.TypedUpdate(listview.MsgSelectNext{})
-		model.remainingNodeView = updatedNodeList
-		return model, command
-
-	case "up":
-		updatedNodeList, command := model.remainingNodeView.TypedUpdate(listview.MsgSelectPrevious{})
-		model.remainingNodeView = updatedNodeList
-		return model, command
-
-	case "enter":
-		if len(model.remainingNodes) > 0 {
-			selectedNode := model.remainingNodeView.GetSelectedItem()
-			model.selectedNodes = append(model.selectedNodes, selectedNode)
-
-			updatedSelectedNodeView, command1 := model.selectedNodeView.TypedUpdate(listview.MsgSetItems[*graph.Node]{
-				Items: NewSliceAdapter(model.selectedNodes),
-			})
-			model.selectedNodeView = updatedSelectedNodeView
-
-			updatedTextInput, command2 := model.textInput.TypedUpdate(textinput.MsgClear{})
-			model.textInput = updatedTextInput
-
-			return model, tea.Batch(
-				command1,
-				command2,
-				model.signalUpdateRemainingNodes(),
-			)
-		}
-
-		return model, nil
-
-	default:
-		updatedTextInput, command := model.textInput.TypedUpdate(message)
-		model.textInput = updatedTextInput
-
-		return model, command
-	}
+	return model.mode.onKeyPressed(model, message)
 }
 
 func (model Model) View() string {
