@@ -32,6 +32,10 @@ func (graph *Graph) ListNodeNames() []string {
 func (graph *Graph) FindNameMatches(str string) MatchIterator {
 	trieNode := graph.trieRoot.Descend(str)
 
+	if trieNode != nil && len(trieNode.Terminals) == 0 {
+		trieNode = trieNode.NextTerminal
+	}
+
 	return MatchIterator{
 		current: trieNode,
 		index:   0,
