@@ -201,7 +201,7 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 
 func (model Model) signalUpdateSelectableNodes() tea.Cmd {
 	input := model.textInput.GetInput()
-	iterator := model.graph.FindNameMatches(input)
+	iterator := model.graph.FindMatchingNodes(input)
 
 	return func() tea.Msg {
 		nameSet := util.NewSet[string]()

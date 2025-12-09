@@ -24,7 +24,7 @@ func TestDescend(t *testing.T) {
 		g, err := builder.Finish()
 		require.NoError(t, err)
 
-		iterator := g.FindNameMatches("a")
+		iterator := g.FindMatchingNodes("a")
 		require.NotNil(t, iterator.Current())
 		require.Equal(t, "a", iterator.Current().Name)
 		iterator.Next()
@@ -45,7 +45,7 @@ func TestDescend(t *testing.T) {
 		g, err := builder.Finish()
 		require.NoError(t, err)
 
-		iterator := g.FindNameMatches("a")
+		iterator := g.FindMatchingNodes("a")
 		require.NotNil(t, iterator.Current())
 		require.Equal(t, "aaa", iterator.Current().Name)
 		iterator.Next()

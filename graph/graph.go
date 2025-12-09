@@ -29,8 +29,8 @@ func (graph *Graph) ListNodeNames() []string {
 	return result
 }
 
-func (graph *Graph) FindNameMatches(str string) MatchIterator {
-	trieNode := graph.trieRoot.Descend(str)
+func (graph *Graph) FindMatchingNodes(nameMatch string) MatchIterator {
+	trieNode := graph.trieRoot.Descend(nameMatch)
 
 	if trieNode == nil {
 		return MatchIterator{
@@ -49,7 +49,7 @@ func (graph *Graph) FindNameMatches(str string) MatchIterator {
 	return MatchIterator{
 		current:      trieNode,
 		index:        0,
-		minimalDepth: len(str),
+		minimalDepth: len(nameMatch),
 	}
 }
 
