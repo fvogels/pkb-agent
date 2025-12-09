@@ -1,9 +1,6 @@
 package graph
 
 import (
-	"log/slog"
-	"pkb-agent/trie"
-	"pkb-agent/util"
 	pathlib "pkb-agent/util/pathlib"
 )
 
@@ -25,95 +22,24 @@ func LoadGraph(root pathlib.Path, loader Loader) (*Graph, error) {
 }
 
 func (gl *GraphLoader) Load() (*Graph, error) {
-	nodes, err := gl.LoadNodes()
+	builder, err := gl.LoadNodes()
 	if err != nil {
 		return nil, err
-	}
-
-	if err := gl.EnsureLinkedNodeExistence(nodes); err != nil {
-		return nil, err
-	}
-
-	gl.AddBackLinks(nodes)
-
-	graph := Graph{
-		nodes:    nodes,
-		trieRoot: gl.createTrie(nodes),
-	}
-
-	return &graph, nil
-}
-
-func (gl *GraphLoader) createTrie(nodes map[string]*Node) *trie.Node[*Node] {
-	builder := trie.NewBuilder[*Node]()
-
-	for name, node := range nodes {
-		words := util.LowercaseWords(name)
-
-		for _, word := range words {
-			builder.Add(word, node)
-		}
 	}
 
 	return builder.Finish()
 }
 
-func (gl *GraphLoader) LoadNodes() (map[string]*Node, error) {
-	nodes := make(map[string]*Node)
-	duplicatesFound := false
+func (gl *GraphLoader) LoadNodes() (*Builder, error) {
+	builder := NewBuilder()
 
 	callback := func(node *Node) error {
-		if _, alreadyExists := nodes[node.Name]; alreadyExists {
-			slog.Debug("Multiple nodes with same name", slog.String("name", node.Name))
-			duplicatesFound = true
-		}
-
-		nodes[node.Name] = node
-		return nil
+		return builder.AddNode(node)
 	}
 
 	if err := gl.nodeLoader.Load(gl.root, callback); err != nil {
 		return nil, err
 	}
 
-	if duplicatesFound {
-		return nodes, &ErrNameClash{}
-	}
-
-	return nodes, nil
-}
-
-func (gl *GraphLoader) EnsureLinkedNodeExistence(nodes map[string]*Node) error {
-	slog.Debug("Checking node links")
-
-	foundUnknownLinks := false
-	for _, node := range nodes {
-		for _, link := range node.Links {
-			if _, found := nodes[link]; !found {
-				slog.Debug("Unknown link", slog.String("node", node.Name), slog.String("link target", link))
-				foundUnknownLinks = true
-			}
-		}
-	}
-
-	if foundUnknownLinks {
-		return &ErrUnknownNodes{}
-	}
-
-	return nil
-}
-
-func (gl *GraphLoader) AddBackLinks(nodes map[string]*Node) {
-	slog.Debug("Adding back links to graph")
-
-	for _, node := range nodes {
-		for _, link := range node.Links {
-			linkedNode, ok := nodes[link]
-			if !ok {
-				panic("missing node; should have been noticed earlier")
-			}
-
-			linkedNode.Backlinks = append(linkedNode.Backlinks, node.Name)
-		}
-	}
+	return builder, nil
 }
