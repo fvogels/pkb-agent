@@ -99,7 +99,7 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 func (model Model) View() string {
 	return lipgloss.JoinVertical(
 		0,
-		model.nodeList.View(),
+		lipgloss.NewStyle().Height(model.size.Height-1).Render(model.nodeList.View()),
 		model.textInput.View(),
 	)
 }
