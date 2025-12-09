@@ -9,16 +9,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type List[T Item] interface {
+type List[T any] interface {
 	At(index int) T
 	Length() int
 }
 
-type Item interface {
-	String() string
-}
-
-type Model[T Item] struct {
+type Model[T any] struct {
+	itemRenderer      func(item T) string
 	items             List[T]
 	allowSelection    bool
 	firstVisibleIndex int
@@ -28,8 +25,9 @@ type Model[T Item] struct {
 	selectedItemStyle lipgloss.Style
 }
 
-func New[T Item](allowSelection bool) Model[T] {
+func New[T any](itemRenderer func(item T) string, allowSelection bool) Model[T] {
 	model := Model[T]{
+		itemRenderer:      itemRenderer,
 		allowSelection:    allowSelection,
 		items:             nil,
 		firstVisibleIndex: 0,
@@ -80,7 +78,7 @@ func (model Model[T]) View() string {
 	accumulatedHeight := 0
 
 	for currentIndex < model.items.Length() && accumulatedHeight < model.size.Height {
-		item := model.items.At(currentIndex).String()
+		item := model.itemRenderer(model.items.At(currentIndex))
 
 		if model.allowSelection && currentIndex == model.selectedIndex {
 			item = model.selectedItemStyle.Width(model.size.Width).MaxWidth(model.size.Width).Render(item)
@@ -170,6 +168,10 @@ func (model Model[T]) onSelectNext() (Model[T], tea.Cmd) {
 	}
 }
 
-func (model Model[T]) GetSelectedIndex() int {
+func (model *Model[T]) GetSelectedIndex() int {
 	return model.selectedIndex
+}
+
+func (model *Model[T]) GetSelectedItem() T {
+	return model.items.At(model.selectedIndex)
 }
