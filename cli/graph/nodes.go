@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"fmt"
 	"pkb-agent/graph"
 	"pkb-agent/graph/metaloader"
 	pathlib "pkb-agent/util/pathlib"
@@ -32,8 +33,14 @@ func (c *ListNodesCommand) execute() error {
 	loader := metaloader.New()
 	path := pathlib.New(`F:\repos\pkb\pkb-data\root.yaml`)
 
-	if err := graph.LoadGraph(path, loader); err != nil {
+	g, err := graph.LoadGraph(path, loader)
+	if err != nil {
 		return err
+	}
+
+	names := g.ListNodeNames()
+	for _, name := range names {
+		fmt.Println(name)
 	}
 
 	return nil
