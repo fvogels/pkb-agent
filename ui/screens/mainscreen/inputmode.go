@@ -1,10 +1,6 @@
 package mainscreen
 
 import (
-	"pkb-agent/graph"
-	"pkb-agent/ui/components/listview"
-	"pkb-agent/ui/components/textinput"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -23,28 +19,7 @@ func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.
 		return model.onSelectPreviousRemainingNode()
 
 	case "enter":
-		model.mode = viewMode{}
-
-		if len(model.remainingNodes) > 0 {
-			selectedNode := model.remainingNodeView.GetSelectedItem()
-			model.selectedNodes = append(model.selectedNodes, selectedNode)
-
-			updatedSelectedNodeView, command1 := model.selectedNodeView.TypedUpdate(listview.MsgSetItems[*graph.Node]{
-				Items: NewSliceAdapter(model.selectedNodes),
-			})
-			model.selectedNodeView = updatedSelectedNodeView
-
-			updatedTextInput, command2 := model.textInput.TypedUpdate(textinput.MsgClear{})
-			model.textInput = updatedTextInput
-
-			return model, tea.Batch(
-				command1,
-				command2,
-				model.signalUpdateRemainingNodes(),
-			)
-		}
-
-		return model, nil
+		return model.onSelectNode()
 
 	default:
 		updatedTextInput, command := model.textInput.TypedUpdate(message)
