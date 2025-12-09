@@ -9,13 +9,17 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type List interface {
-	At(index int) string
+type List[T Item] interface {
+	At(index int) T
 	Length() int
 }
 
-type Model struct {
-	items             List
+type Item interface {
+	String() string
+}
+
+type Model[T Item] struct {
+	items             List[T]
 	allowSelection    bool
 	firstVisibleIndex int
 	selectedIndex     int
@@ -24,8 +28,8 @@ type Model struct {
 	selectedItemStyle lipgloss.Style
 }
 
-func New(allowSelection bool) Model {
-	model := Model{
+func New[T Item](allowSelection bool) Model[T] {
+	model := Model[T]{
 		allowSelection:    allowSelection,
 		items:             nil,
 		firstVisibleIndex: 0,
@@ -38,19 +42,19 @@ func New(allowSelection bool) Model {
 	return model
 }
 
-func (model Model) Init() tea.Cmd {
+func (model Model[T]) Init() tea.Cmd {
 	return nil
 }
 
-func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
+func (model Model[T]) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 	return model.TypedUpdate(message)
 }
 
-func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
+func (model Model[T]) TypedUpdate(message tea.Msg) (Model[T], tea.Cmd) {
 	debug.ShowBubbleTeaMessage(message)
 
 	switch message := message.(type) {
-	case MsgSetItems:
+	case MsgSetItems[T]:
 		return model.onSetItems(message)
 
 	case MsgSelectPrevious:
@@ -66,7 +70,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	return model, nil
 }
 
-func (model Model) View() string {
+func (model Model[T]) View() string {
 	if model.items == nil || model.items.Length() == 0 {
 		return model.emptyListMessage
 	}
@@ -76,7 +80,7 @@ func (model Model) View() string {
 	accumulatedHeight := 0
 
 	for currentIndex < model.items.Length() && accumulatedHeight < model.size.Height {
-		item := model.items.At(currentIndex)
+		item := model.items.At(currentIndex).String()
 
 		if model.allowSelection && currentIndex == model.selectedIndex {
 			item = model.selectedItemStyle.Width(model.size.Width).MaxWidth(model.size.Width).Render(item)
@@ -92,7 +96,7 @@ func (model Model) View() string {
 	return style.Render(lipgloss.JoinVertical(0, visibleItems...))
 }
 
-func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
+func (model Model[T]) onResize(message tea.WindowSizeMsg) (Model[T], tea.Cmd) {
 	model.size = util.Size{
 		Width:  message.Width,
 		Height: message.Height,
@@ -103,7 +107,7 @@ func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	return model, nil
 }
 
-func (model *Model) ensureSelectedIsVisible() {
+func (model *Model[T]) ensureSelectedIsVisible() {
 	if model.allowSelection {
 		if model.selectedIndex < model.firstVisibleIndex {
 			model.firstVisibleIndex = model.selectedIndex
@@ -113,28 +117,32 @@ func (model *Model) ensureSelectedIsVisible() {
 	}
 }
 
-func (model *Model) signalItemSelected() tea.Cmd {
+func (model *Model[T]) signalItemSelected() tea.Cmd {
 	index := model.selectedIndex
+	var selectedItem T
 
 	if model.items.Length() == 0 {
 		index = -1
+	} else {
+		selectedItem = model.items.At(index)
 	}
 
 	return func() tea.Msg {
-		return MsgItemSelected{
+		return MsgItemSelected[T]{
 			Index: index,
+			Item:  selectedItem,
 		}
 	}
 }
 
-func (model Model) onSetItems(message MsgSetItems) (Model, tea.Cmd) {
+func (model Model[T]) onSetItems(message MsgSetItems[T]) (Model[T], tea.Cmd) {
 	model.items = message.Items
 	model.selectedIndex = 0
 	model.firstVisibleIndex = 0
 	return model, model.signalItemSelected()
 }
 
-func (model Model) onSelectPrevious() (Model, tea.Cmd) {
+func (model Model[T]) onSelectPrevious() (Model[T], tea.Cmd) {
 	if model.allowSelection {
 		if model.selectedIndex > 0 {
 			model.selectedIndex--
@@ -147,7 +155,7 @@ func (model Model) onSelectPrevious() (Model, tea.Cmd) {
 	}
 }
 
-func (model Model) onSelectNext() (Model, tea.Cmd) {
+func (model Model[T]) onSelectNext() (Model[T], tea.Cmd) {
 	if model.allowSelection {
 		if model.selectedIndex != -1 && model.selectedIndex+1 < model.items.Length() {
 			model.selectedIndex++
@@ -160,4 +168,8 @@ func (model Model) onSelectNext() (Model, tea.Cmd) {
 	} else {
 		return model, nil
 	}
+}
+
+func (model Model[T]) GetSelectedIndex() int {
+	return model.selectedIndex
 }
