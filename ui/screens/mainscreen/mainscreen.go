@@ -37,7 +37,7 @@ func New() Model {
 	return Model{
 		mode:              viewMode{},
 		remainingNodeView: listview.New(renderer, true),
-		selectedNodeView:  listview.New(renderer, true),
+		selectedNodeView:  listview.New(renderer, false),
 		textInput:         textinput.New(),
 	}
 }
