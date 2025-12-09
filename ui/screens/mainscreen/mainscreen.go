@@ -65,6 +65,16 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	case textinput.MsgInputUpdated:
 		return model.onInputUpdated(message)
 
+	case MsgToSelectableNodeList:
+		updatedSelectableNodeList, command := model.selectableNodeList.TypedUpdate(message)
+		model.selectableNodeList = updatedSelectableNodeList
+		return model, command
+
+	case MsgToSelectedNodeList:
+		updatedSelectedNodeList, command := model.selectedNodeList.TypedUpdate(message)
+		model.selectedNodeList = updatedSelectedNodeList
+		return model, command
+
 	default:
 		updatedNodeList, command1 := model.selectableNodeList.TypedUpdate(message)
 		model.selectableNodeList = updatedNodeList
