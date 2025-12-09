@@ -42,15 +42,14 @@ func (builder *Builder[T]) addLinks() {
 	var lastTerminal *Node[T] = nil
 
 	walker := func(node *Node[T]) {
-		if node.Terminals != nil {
-			if lastTerminal != nil {
-				lastTerminal.NextTerminal = node
-			}
+		node.NextTerminal = lastTerminal
+
+		if len(node.Terminals) > 0 {
 			lastTerminal = node
 		}
 	}
 
-	builder.root.walk(walker)
+	builder.root.walkBackwards(walker)
 }
 
 func (builder *Builder[T]) Finish() *Node[T] {

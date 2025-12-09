@@ -18,6 +18,19 @@ func (node *Node[T]) walk(callback func(*Node[T])) {
 	}
 }
 
+func (node *Node[T]) walkBackwards(callback func(*Node[T])) {
+	if node.Children != nil {
+		for i := len(node.Children) - 1; i >= 0; i-- {
+			child := node.Children[i]
+			if child != nil {
+				child.walkBackwards(callback)
+			}
+		}
+	}
+
+	callback(node)
+}
+
 func (node *Node[T]) Descend(str string) *Node[T] {
 	current := node
 
