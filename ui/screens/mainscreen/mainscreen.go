@@ -79,10 +79,13 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		updatedSelectableNodeList, command1 := model.selectableNodeList.TypedUpdate(message)
 		model.selectableNodeList = updatedSelectableNodeList
 
-		updatedTextInput, command2 := model.textInput.TypedUpdate(message)
+		updatedSelectedNodeList, command2 := model.selectedNodeList.TypedUpdate(message)
+		model.selectedNodeList = updatedSelectedNodeList
+
+		updatedTextInput, command3 := model.textInput.TypedUpdate(message)
 		model.textInput = updatedTextInput
 
-		return model, tea.Batch(command1, command2)
+		return model, tea.Batch(command1, command2, command3)
 	}
 }
 
