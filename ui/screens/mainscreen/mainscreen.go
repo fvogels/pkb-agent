@@ -76,8 +76,8 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		return model, command
 
 	default:
-		updatedNodeList, command1 := model.selectableNodeList.TypedUpdate(message)
-		model.selectableNodeList = updatedNodeList
+		updatedSelectableNodeList, command1 := model.selectableNodeList.TypedUpdate(message)
+		model.selectableNodeList = updatedSelectableNodeList
 
 		updatedTextInput, command2 := model.textInput.TypedUpdate(message)
 		model.textInput = updatedTextInput
