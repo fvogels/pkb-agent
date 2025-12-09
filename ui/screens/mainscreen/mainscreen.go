@@ -33,8 +33,8 @@ func New() Model {
 	}
 
 	return Model{
-		selectableNodeList: listview.New[*graph.Node](renderer, true),
-		selectedNodeList:   listview.New[*graph.Node](renderer, true),
+		selectableNodeList: listview.New(renderer, true),
+		selectedNodeList:   listview.New(renderer, true),
 	}
 }
 
