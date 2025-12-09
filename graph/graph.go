@@ -74,7 +74,7 @@ func (iterator *MatchIterator) Next() {
 		iterator.current = iterator.current.NextTerminal
 		iterator.index = 0
 
-		if iterator.current != nil && iterator.current.Depth <= iterator.minimalDepth {
+		if iterator.current != nil && iterator.current.NextTerminalDepth <= iterator.minimalDepth {
 			iterator.current = nil
 		}
 	}
