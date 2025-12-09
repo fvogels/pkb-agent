@@ -20,7 +20,6 @@ type Model struct {
 	firstVisibleIndex int
 	selectedIndex     int
 	size              util.Size
-	filter            func(item string) bool
 	emptyListMessage  string
 	selectedItemStyle lipgloss.Style
 }
@@ -32,7 +31,6 @@ func New(allowSelection bool) Model {
 		firstVisibleIndex: 0,
 		selectedIndex:     0,
 		size:              util.Size{Width: 0, Height: 0},
-		filter:            func(item string) bool { return true },
 		selectedItemStyle: lipgloss.NewStyle().Background(lipgloss.Color("#AAAAAA")),
 		emptyListMessage:  "no nodes found",
 	}
