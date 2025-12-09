@@ -24,8 +24,6 @@ type Model struct {
 }
 
 func New() Model {
-	debug.Milestone()
-
 	return Model{
 		nodeList: listview.New(true),
 	}
@@ -148,18 +146,14 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 
 func (model Model) signalUpdateNodeList() tea.Cmd {
 	return func() tea.Msg {
-		iterator := model.graph.FindNameMatches(model.textInput.GetInput())
+		input := model.textInput.GetInput()
+		iterator := model.graph.FindNameMatches(input)
 		nameTable := make(map[string]any)
 
-		debug.Milestone()
 		for iterator.Current() != nil {
-			debug.Milestone()
 			name := iterator.Current().Name
-			debug.Milestone()
 			nameTable[name] = nil
-			debug.Milestone()
 			iterator.Next()
-			debug.Milestone()
 		}
 
 		keyGenerator := maps.Keys(nameTable)
