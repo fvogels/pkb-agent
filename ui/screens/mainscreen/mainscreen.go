@@ -191,9 +191,11 @@ func (model Model) signalUpdateNodeLists() tea.Cmd {
 		sort.Slice(nodes, func(i, j int) bool {
 			return nodes[i].Name < nodes[j].Name
 		})
-		return listview.MsgSetItems[*graph.Node]{
-			Items: &SliceAdapter[*graph.Node]{
-				slice: nodes,
+		return MsgToSelectableNodeList{
+			wrapped: listview.MsgSetItems[*graph.Node]{
+				Items: &SliceAdapter[*graph.Node]{
+					slice: nodes,
+				},
 			},
 		}
 	}
