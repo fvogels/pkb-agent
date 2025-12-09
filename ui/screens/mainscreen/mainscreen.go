@@ -2,20 +2,25 @@ package mainscreen
 
 import (
 	"log/slog"
+	"maps"
 	"pkb-agent/graph"
 	"pkb-agent/graph/metaloader"
 	"pkb-agent/ui/components/listview"
+	"pkb-agent/ui/components/textinput"
 	"pkb-agent/ui/debug"
 	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
+	"sort"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
-	graph    *graph.Graph
-	nodeList listview.Model
-	size     util.Size
+	graph     *graph.Graph
+	size      util.Size
+	nodeList  listview.Model
+	textInput textinput.Model
 }
 
 func New() Model {
@@ -34,24 +39,15 @@ func (model Model) Init() tea.Cmd {
 }
 
 func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
+	return model.TypedUpdate(message)
+}
+
+func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	debug.ShowBubbleTeaMessage(message)
 
 	switch message := message.(type) {
 	case tea.KeyMsg:
-		switch message.String() {
-		case "q":
-			return model, tea.Quit
-
-		case "down":
-			updatedNodeList, command := model.nodeList.TypedUpdate(listview.MsgSelectNext{})
-			model.nodeList = updatedNodeList
-			return model, command
-
-		case "up":
-			updatedNodeList, command := model.nodeList.TypedUpdate(listview.MsgSelectPrevious{})
-			model.nodeList = updatedNodeList
-			return model, command
-		}
+		return model.onKeyPressed(message)
 
 	case tea.WindowSizeMsg:
 		return model.onResized(message)
@@ -59,17 +55,53 @@ func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 	case MsgGraphLoaded:
 		return model.onGraphLoaded(message)
 
+	case textinput.MsgInputUpdated:
+		return model.onInputUpdated(message)
+
 	default:
-		updatedNodeList, command := model.nodeList.TypedUpdate(message)
+		updatedNodeList, command1 := model.nodeList.TypedUpdate(message)
+		model.nodeList = updatedNodeList
+
+		updatedTextInput, command2 := model.textInput.TypedUpdate(message)
+		model.textInput = updatedTextInput
+
+		return model, tea.Batch(command1, command2)
+	}
+}
+
+func (model Model) onInputUpdated(_ textinput.MsgInputUpdated) (Model, tea.Cmd) {
+	return model, model.signalUpdateNodeList()
+}
+
+func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
+	switch message.String() {
+	case "esc":
+		return model, tea.Quit
+
+	case "down":
+		updatedNodeList, command := model.nodeList.TypedUpdate(listview.MsgSelectNext{})
 		model.nodeList = updatedNodeList
 		return model, command
-	}
 
-	return model, nil
+	case "up":
+		updatedNodeList, command := model.nodeList.TypedUpdate(listview.MsgSelectPrevious{})
+		model.nodeList = updatedNodeList
+		return model, command
+
+	default:
+		updatedTextInput, command := model.textInput.TypedUpdate(message)
+		model.textInput = updatedTextInput
+
+		return model, command
+	}
 }
 
 func (model Model) View() string {
-	return model.nodeList.View()
+	return lipgloss.JoinVertical(
+		0,
+		model.nodeList.View(),
+		model.textInput.View(),
+	)
 }
 
 func (model Model) onGraphLoaded(message MsgGraphLoaded) (Model, tea.Cmd) {
@@ -105,7 +137,10 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: message.Height,
 	}
 
-	updatedNodeList, command := model.nodeList.TypedUpdate(message)
+	updatedNodeList, command := model.nodeList.TypedUpdate(tea.WindowSizeMsg{
+		Width:  message.Width,
+		Height: message.Height - 1,
+	})
 	model.nodeList = updatedNodeList
 
 	return model, command
@@ -113,15 +148,27 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 
 func (model Model) signalUpdateNodeList() tea.Cmd {
 	return func() tea.Msg {
-		iterator := model.graph.FindNameMatches("")
-		names := []string{}
+		iterator := model.graph.FindNameMatches(model.textInput.GetInput())
+		nameTable := make(map[string]any)
 
+		debug.Milestone()
 		for iterator.Current() != nil {
+			debug.Milestone()
 			name := iterator.Current().Name
-			names = append(names, name)
+			debug.Milestone()
+			nameTable[name] = nil
+			debug.Milestone()
 			iterator.Next()
+			debug.Milestone()
 		}
 
+		keyGenerator := maps.Keys(nameTable)
+		names := []string{}
+		keyGenerator(util.CollectTo(&names))
+
+		sort.Slice(names, func(i, j int) bool {
+			return names[i] < names[j]
+		})
 		return listview.MsgSetItems{
 			Items: &SliceAdapter[string]{
 				slice: names,
