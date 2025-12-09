@@ -9,6 +9,7 @@ import (
 	"pkb-agent/ui/debug"
 	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
+	"slices"
 	"sort"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -121,18 +122,26 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 		return model, command
 
 	case "enter":
-		selectedNode := model.selectableNodeView.GetSelectedItem()
-		model.selectedNodes = append(model.selectedNodes, selectedNode)
+		if len(model.selectableNodes) > 0 {
+			selectedNode := model.selectableNodeView.GetSelectedItem()
+			model.selectedNodes = append(model.selectedNodes, selectedNode)
 
-		updatedSelectedNodeView, command := model.selectedNodeView.TypedUpdate(listview.MsgSetItems[*graph.Node]{
-			Items: NewSliceAdapter(model.selectedNodes),
-		})
-		model.selectedNodeView = updatedSelectedNodeView
+			updatedSelectedNodeView, command1 := model.selectedNodeView.TypedUpdate(listview.MsgSetItems[*graph.Node]{
+				Items: NewSliceAdapter(model.selectedNodes),
+			})
+			model.selectedNodeView = updatedSelectedNodeView
 
-		return model, tea.Batch(
-			command,
-			model.signalUpdateSelectableNodes(),
-		)
+			updatedTextInput, command2 := model.textInput.TypedUpdate(textinput.MsgClear{})
+			model.textInput = updatedTextInput
+
+			return model, tea.Batch(
+				command1,
+				command2,
+				model.signalUpdateSelectableNodes(),
+			)
+		}
+
+		return model, nil
 
 	default:
 		updatedTextInput, command := model.textInput.TypedUpdate(message)
@@ -202,17 +211,30 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 func (model Model) signalUpdateSelectableNodes() tea.Cmd {
 	input := model.textInput.GetInput()
 	iterator := model.graph.FindMatchingNodes(input)
+	selectedNodes := model.selectedNodes
 
 	return func() tea.Msg {
 		nameSet := util.NewSet[string]()
 		selectableNodes := []*graph.Node{}
 
 		for iterator.Current() != nil {
+			// The same node can occur more than once during iteration
+			// Ensure that we add each node only once to selectableNodes
 			name := iterator.Current().Name
-			if !nameSet.Contains(name) {
-				nameSet.Add(name)
-				selectableNodes = append(selectableNodes, iterator.Current())
+			if nameSet.Contains(name) {
+				iterator.Next()
+				continue
 			}
+
+			if !util.All(selectedNodes, func(selectedNode *graph.Node) bool {
+				return slices.Contains(iterator.Current().Links, selectedNode.Name)
+			}) {
+				iterator.Next()
+				continue
+			}
+
+			nameSet.Add(name)
+			selectableNodes = append(selectableNodes, iterator.Current())
 			iterator.Next()
 		}
 
