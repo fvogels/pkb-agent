@@ -25,6 +25,10 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	case tea.KeyMsg:
 		return model.onKeyPressed(message)
 
+	case MsgClear:
+		model.input = ""
+		return model, model.signalUpdate()
+
 	default:
 		return model, nil
 	}
