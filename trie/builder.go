@@ -6,6 +6,7 @@ type Builder[T any] struct {
 
 func NewBuilder[T any]() *Builder[T] {
 	root := Node[T]{
+		Depth:        0,
 		Children:     nil,
 		Terminals:    nil,
 		NextTerminal: nil,
@@ -26,7 +27,9 @@ func (builder *Builder[T]) Add(string string, terminal T) {
 			current.Children = make([]*Node[T], 128)
 		}
 		if current.Children[char] == nil {
-			current.Children[char] = &Node[T]{}
+			current.Children[char] = &Node[T]{
+				Depth: current.Depth + 1,
+			}
 		}
 		current = current.Children[char]
 	}

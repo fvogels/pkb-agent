@@ -1,6 +1,7 @@
 package trie
 
 type Node[T any] struct {
+	Depth        int
 	Children     []*Node[T]
 	Terminals    []T
 	NextTerminal *Node[T]
