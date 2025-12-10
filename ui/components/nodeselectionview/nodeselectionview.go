@@ -40,11 +40,16 @@ func New() Model {
 		return node.Name
 	}
 
+	remainingNodesView := listview.New(renderer, true)
+
+	selectedNodesView := listview.New(renderer, false)
+	selectedNodesView.SetNonselectedStyle(lipgloss.NewStyle().Background(lipgloss.Color("#AAFFAA")))
+
 	return Model{
 		remainingNodes:     &emptyList{},
 		selectedNodes:      &emptyList{},
-		remainingNodesView: listview.New(renderer, true),
-		selectedNodesView:  listview.New(renderer, false),
+		remainingNodesView: remainingNodesView,
+		selectedNodesView:  selectedNodesView,
 	}
 }
 
