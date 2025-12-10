@@ -11,6 +11,7 @@ var viewModeKeyMap = struct {
 	Next              key.Binding
 	Previous          key.Binding
 	Select            key.Binding
+	UnselectLast      key.Binding
 }{
 	Quit: key.NewBinding(
 		key.WithKeys("q"),
@@ -31,6 +32,10 @@ var viewModeKeyMap = struct {
 	Select: key.NewBinding(
 		key.WithKeys("enter"),
 		key.WithHelp("↵", "select"),
+	),
+	UnselectLast: key.NewBinding(
+		key.WithKeys("delete"),
+		key.WithHelp("del", "pop"),
 	),
 }
 
@@ -53,6 +58,9 @@ func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.C
 
 	case key.Matches(message, viewModeKeyMap.Select):
 		return model.onSelectNode()
+
+	case key.Matches(message, viewModeKeyMap.UnselectLast):
+		return model.onUnselectLast()
 
 	default:
 		return model, nil

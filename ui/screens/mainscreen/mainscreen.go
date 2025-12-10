@@ -243,3 +243,12 @@ func (model Model) onSelectNode() (Model, tea.Cmd) {
 
 	return model, nil
 }
+
+func (model Model) onUnselectLast() (Model, tea.Cmd) {
+	if len(model.selectedNodes) > 0 {
+		model.selectedNodes = model.selectedNodes[:len(model.selectedNodes)-1]
+		return model, model.signalUpdateRemainingNodes()
+	} else {
+		return model, nil
+	}
+}
