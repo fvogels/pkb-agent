@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"pkb-agent/graph"
 	"pkb-agent/graph/metaloader"
-	"pkb-agent/ui/components/listview"
+	"pkb-agent/ui/components/nodeselectionview"
 	"pkb-agent/ui/components/textinput"
 	"pkb-agent/ui/debug"
 	"pkb-agent/util"
@@ -24,28 +24,21 @@ type Model struct {
 	remainingNodes []*graph.Node
 	selectedNodes  []*graph.Node
 
-	remainingNodeView listview.Model[*graph.Node]
-	selectedNodeView  listview.Model[*graph.Node]
+	nodeSelectionView nodeselectionview.Model
 	textInput         textinput.Model
 }
 
 func New() Model {
-	renderer := func(node *graph.Node) string {
-		return node.Name
-	}
-
 	return Model{
 		mode:              viewMode{},
-		remainingNodeView: listview.New(renderer, true),
-		selectedNodeView:  listview.New(renderer, false),
+		nodeSelectionView: nodeselectionview.New(),
 		textInput:         textinput.New(),
 	}
 }
 
 func (model Model) Init() tea.Cmd {
 	return tea.Batch(
-		model.remainingNodeView.Init(),
-		model.selectedNodeView.Init(),
+		model.nodeSelectionView.Init(),
 		model.textInput.Init(),
 		model.signalLoadGraph(),
 	)
@@ -71,39 +64,24 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	case textinput.MsgInputUpdated:
 		return model.onInputUpdated(message)
 
-	case msgToRemainingNodeView:
-		updatedRemainingNodeList, command := model.remainingNodeView.TypedUpdate(message.wrapped)
-		model.remainingNodeView = updatedRemainingNodeList
-		return model, command
-
-	case msgToSelectedNodeView:
-		updatedSelectedNodeList, command := model.selectedNodeView.TypedUpdate(message.wrapped)
-		model.selectedNodeView = updatedSelectedNodeList
-		return model, command
-
 	case msgRemainingNodesUpdated:
 		model.remainingNodes = message.remainingNodes
-		updatedRemainingNodesView, command := model.remainingNodeView.TypedUpdate(
-			listview.MsgSetItems[*graph.Node]{
-				Items: &SliceAdapter[*graph.Node]{
-					slice: model.remainingNodes,
-				},
+		updatedNodeSelectionView, command := model.nodeSelectionView.TypedUpdate(nodeselectionview.MsgSetRemainingNodes{
+			RemainingNodes: &SliceAdapter[*graph.Node]{
+				slice: model.remainingNodes,
 			},
-		)
-		model.remainingNodeView = updatedRemainingNodesView
+		})
+		model.nodeSelectionView = updatedNodeSelectionView
 		return model, command
 
 	default:
-		updatedRemainingNodeView, command1 := model.remainingNodeView.TypedUpdate(message)
-		model.remainingNodeView = updatedRemainingNodeView
+		updatedNodeSelectionView, command1 := model.nodeSelectionView.TypedUpdate(message)
+		model.nodeSelectionView = updatedNodeSelectionView
 
-		updatedSelectedNodeView, command2 := model.selectedNodeView.TypedUpdate(message)
-		model.selectedNodeView = updatedSelectedNodeView
-
-		updatedTextInput, command3 := model.textInput.TypedUpdate(message)
+		updatedTextInput, command2 := model.textInput.TypedUpdate(message)
 		model.textInput = updatedTextInput
 
-		return model, tea.Batch(command1, command2, command3)
+		return model, tea.Batch(command1, command2)
 	}
 }
 
@@ -118,8 +96,7 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 func (model Model) View() string {
 	return lipgloss.JoinVertical(
 		0,
-		lipgloss.NewStyle().Height(5).Render(model.selectedNodeView.View()),
-		lipgloss.NewStyle().Height(model.size.Height-6).Render(model.remainingNodeView.View()),
+		lipgloss.NewStyle().Height(model.size.Height-1).Render(model.nodeSelectionView.View()),
 		model.mode.renderStatusBar(&model),
 	)
 }
@@ -157,25 +134,19 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: message.Height,
 	}
 
-	updatedSelectedNodeView, command1 := model.selectedNodeView.TypedUpdate(tea.WindowSizeMsg{
+	updatedNodeSelectionView, command1 := model.nodeSelectionView.TypedUpdate(tea.WindowSizeMsg{
 		Width:  message.Width,
-		Height: 5,
+		Height: message.Height - 1,
 	})
-	model.selectedNodeView = updatedSelectedNodeView
+	model.nodeSelectionView = updatedNodeSelectionView
 
-	updatedRemainingNodeView, command2 := model.remainingNodeView.TypedUpdate(tea.WindowSizeMsg{
-		Width:  message.Width,
-		Height: message.Height - 6,
-	})
-	model.remainingNodeView = updatedRemainingNodeView
-
-	updatedTextInput, command3 := model.textInput.TypedUpdate(tea.WindowSizeMsg{
+	updatedTextInput, command2 := model.textInput.TypedUpdate(tea.WindowSizeMsg{
 		Width:  message.Width,
 		Height: 1,
 	})
 	model.textInput = updatedTextInput
 
-	return model, tea.Batch(command1, command2, command3)
+	return model, tea.Batch(command1, command2)
 }
 
 func (model Model) signalUpdateRemainingNodes() tea.Cmd {
@@ -236,28 +207,28 @@ func (adapter *SliceAdapter[T]) At(index int) T {
 }
 
 func (model Model) onSelectPreviousRemainingNode() (Model, tea.Cmd) {
-	updatedNodeList, command := model.remainingNodeView.TypedUpdate(listview.MsgSelectPrevious{})
-	model.remainingNodeView = updatedNodeList
+	updatedNodeSelectionView, command := model.nodeSelectionView.TypedUpdate(nodeselectionview.MsgSelectPrevious{})
+	model.nodeSelectionView = updatedNodeSelectionView
 	return model, command
 }
 
 func (model Model) onSelecNextRemainingNode() (Model, tea.Cmd) {
-	updatedNodeList, command := model.remainingNodeView.TypedUpdate(listview.MsgSelectNext{})
-	model.remainingNodeView = updatedNodeList
+	updatedNodeSelectionView, command := model.nodeSelectionView.TypedUpdate(nodeselectionview.MsgSelectNext{})
+	model.nodeSelectionView = updatedNodeSelectionView
 	return model, command
 }
 
 func (model Model) onSelectNode() (Model, tea.Cmd) {
 	model.mode = viewMode{}
 
-	if len(model.remainingNodes) > 0 {
-		selectedNode := model.remainingNodeView.GetSelectedItem()
+	selectedNode := model.nodeSelectionView.GetSelectedRemainingNode()
+	if selectedNode != nil {
 		model.selectedNodes = append(model.selectedNodes, selectedNode)
 
-		updatedSelectedNodeView, command1 := model.selectedNodeView.TypedUpdate(listview.MsgSetItems[*graph.Node]{
-			Items: NewSliceAdapter(model.selectedNodes),
+		updatedNodeSelectionView, command1 := model.nodeSelectionView.TypedUpdate(nodeselectionview.MsgSetSelectedNodes{
+			SelectedNodes: NewSliceAdapter(model.selectedNodes),
 		})
-		model.selectedNodeView = updatedSelectedNodeView
+		model.nodeSelectionView = updatedNodeSelectionView
 
 		updatedTextInput, command2 := model.textInput.TypedUpdate(textinput.MsgClear{})
 		model.textInput = updatedTextInput
