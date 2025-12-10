@@ -122,6 +122,7 @@ func loadGraph() *graph.Graph {
 
 	g, err := graph.LoadGraph(path, loader)
 	if err != nil {
+		slog.Debug("error loading graph", slog.String("error", err.Error()))
 		panic("failed to load graph!")
 	}
 
