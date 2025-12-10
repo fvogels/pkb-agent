@@ -48,7 +48,7 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: message.Height,
 	}
 
-	updatedViewer, command := model.Update(message)
+	updatedViewer, command := model.viewer.Update(message)
 	model.viewer = updatedViewer
 
 	return model, command

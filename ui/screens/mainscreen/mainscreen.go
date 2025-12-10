@@ -7,6 +7,7 @@ import (
 	"pkb-agent/ui/components/nodeselectionview"
 	"pkb-agent/ui/components/textinput"
 	"pkb-agent/ui/debug"
+	"pkb-agent/ui/nodeviewers/nodeviewer"
 	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
 	"slices"
@@ -26,7 +27,7 @@ type Model struct {
 
 	nodeSelectionView nodeselectionview.Model
 	textInput         textinput.Model
-	// nodeViewer        nodeviewer.Model
+	nodeViewer        nodeviewer.Model
 }
 
 func New() Model {
@@ -34,7 +35,7 @@ func New() Model {
 		mode:              viewMode{},
 		nodeSelectionView: nodeselectionview.New(),
 		textInput:         textinput.New(),
-		// nodeViewer:        nodeviewer.New(),
+		nodeViewer:        nodeviewer.New(),
 	}
 }
 
@@ -80,7 +81,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 
 		util.UpdateChild(&model.nodeSelectionView, message, &commands)
 		util.UpdateChild(&model.textInput, message, &commands)
-		// util.UpdateChild(&model.nodeViewer, message, &commands)
+		util.UpdateChild(&model.nodeViewer, message, &commands)
 
 		return model, tea.Batch(commands...)
 	}
@@ -98,7 +99,7 @@ func (model Model) View() string {
 	return lipgloss.JoinVertical(
 		0,
 		lipgloss.NewStyle().Height(10).Render(model.nodeSelectionView.View()),
-		// lipgloss.NewStyle().Height(model.size.Height-11).Render(model.nodeViewer.View()),
+		lipgloss.NewStyle().Height(model.size.Height-11).Render(model.nodeViewer.View()),
 		model.mode.renderStatusBar(&model),
 	)
 }
@@ -140,10 +141,10 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Width:  message.Width,
 		Height: 10,
 	}, &commands)
-	// util.UpdateChild(&model.nodeViewer, tea.WindowSizeMsg{
-	// 	Width:  message.Width,
-	// 	Height: message.Height - 11,
-	// }, &commands)
+	util.UpdateChild(&model.nodeViewer, tea.WindowSizeMsg{
+		Width:  message.Width,
+		Height: message.Height - 11,
+	}, &commands)
 	util.UpdateChild(&model.textInput, tea.WindowSizeMsg{
 		Width:  message.Width,
 		Height: 1,
