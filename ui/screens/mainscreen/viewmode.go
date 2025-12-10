@@ -51,13 +51,13 @@ func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.C
 		return model, nil
 
 	case key.Matches(message, viewModeKeyMap.Next):
-		return model.onSelecNextRemainingNode()
+		return model.onSelectNextRemainingNode()
 
 	case key.Matches(message, viewModeKeyMap.Previous):
 		return model.onSelectPreviousRemainingNode()
 
 	case key.Matches(message, viewModeKeyMap.Select):
-		return model.onSelectNode()
+		return model.onNodeSelected()
 
 	case key.Matches(message, viewModeKeyMap.UnselectLast):
 		return model.onUnselectLast()

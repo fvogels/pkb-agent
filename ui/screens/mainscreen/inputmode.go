@@ -44,7 +44,7 @@ func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.
 		return model.onSelectPreviousRemainingNode()
 
 	case key.Matches(message, viewModeKeyMap.Select):
-		return model.onSelectNode()
+		return model.onNodeSelected()
 
 	default:
 		updatedTextInput, command := model.textInput.TypedUpdate(message)

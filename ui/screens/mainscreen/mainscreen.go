@@ -26,6 +26,7 @@ type Model struct {
 
 	nodeSelectionView nodeselectionview.Model
 	textInput         textinput.Model
+	// nodeViewer        nodeviewer.Model
 }
 
 func New() Model {
@@ -33,6 +34,7 @@ func New() Model {
 		mode:              viewMode{},
 		nodeSelectionView: nodeselectionview.New(),
 		textInput:         textinput.New(),
+		// nodeViewer:        nodeviewer.New(),
 	}
 }
 
@@ -78,6 +80,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 
 		util.UpdateChild(&model.nodeSelectionView, message, &commands)
 		util.UpdateChild(&model.textInput, message, &commands)
+		// util.UpdateChild(&model.nodeViewer, message, &commands)
 
 		return model, tea.Batch(commands...)
 	}
@@ -94,7 +97,8 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 func (model Model) View() string {
 	return lipgloss.JoinVertical(
 		0,
-		lipgloss.NewStyle().Height(model.size.Height-1).Render(model.nodeSelectionView.View()),
+		lipgloss.NewStyle().Height(10).Render(model.nodeSelectionView.View()),
+		// lipgloss.NewStyle().Height(model.size.Height-11).Render(model.nodeViewer.View()),
 		model.mode.renderStatusBar(&model),
 	)
 }
@@ -113,8 +117,6 @@ func (model *Model) signalLoadGraph() tea.Cmd {
 }
 
 func loadGraph() *graph.Graph {
-	slog.Debug("loading graph")
-
 	loader := metaloader.New()
 	path := pathlib.New(`F:\repos\pkb\pkb-data\root.yaml`)
 
@@ -136,8 +138,12 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	commands := []tea.Cmd{}
 	util.UpdateChild(&model.nodeSelectionView, tea.WindowSizeMsg{
 		Width:  message.Width,
-		Height: message.Height - 1,
+		Height: 10,
 	}, &commands)
+	// util.UpdateChild(&model.nodeViewer, tea.WindowSizeMsg{
+	// 	Width:  message.Width,
+	// 	Height: message.Height - 11,
+	// }, &commands)
 	util.UpdateChild(&model.textInput, tea.WindowSizeMsg{
 		Width:  message.Width,
 		Height: 1,
@@ -211,7 +217,7 @@ func (model Model) onSelectNextRemainingNode() (Model, tea.Cmd) {
 	return util.UpdateSingleChild(&model, &model.nodeSelectionView, nodeselectionview.MsgSelectNext{})
 }
 
-func (model Model) onSelectNode() (Model, tea.Cmd) {
+func (model Model) onNodeSelected() (Model, tea.Cmd) {
 	model.mode = viewMode{}
 
 	selectedNode := model.nodeSelectionView.GetSelectedRemainingNode()
