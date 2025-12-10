@@ -11,6 +11,8 @@ import (
 
 type Loader struct{}
 
+type Extra struct{}
+
 func NewLoader() *Loader {
 	return &Loader{}
 }
@@ -26,6 +28,8 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 		slog.String("loader", "atom"),
 		slog.String("path", path.String()),
 	)
+
+	extra := Extra{}
 
 	source, err := path.ReadFile()
 	if err != nil {
@@ -48,6 +52,7 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 			Name:      entry.Name,
 			Links:     entry.Links,
 			Backlinks: nil,
+			Extra:     &extra,
 		}
 
 		if err := callback(&node); err != nil {
