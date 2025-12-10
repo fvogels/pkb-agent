@@ -216,13 +216,19 @@ func (model Model) onSelectNode() (Model, tea.Cmd) {
 
 	selectedNode := model.nodeSelectionView.GetSelectedRemainingNode()
 	if selectedNode != nil {
-		model.selectedNodes = append(model.selectedNodes, selectedNode)
+		updatedSelectedNodes := append(model.selectedNodes, selectedNode)
 
-		commands := []tea.Cmd{model.signalUpdateRemainingNodes()}
-		util.UpdateChild(&model.nodeSelectionView, nodeselectionview.MsgSetSelectedNodes{
-			SelectedNodes: NewSliceAdapter(model.selectedNodes),
-		}, &commands)
+		commands := []tea.Cmd{}
 		util.UpdateChild(&model.textInput, textinput.MsgClear{}, &commands)
+		updatedModel, command := model.setSelectedNodes(updatedSelectedNodes)
+		model = updatedModel
+		commands = append(commands, command)
+
+		util.UpdateChild(&model.nodeSelectionView, nodeselectionview.MsgSetSelectedNodes{
+			SelectedNodes: NewSliceAdapter(updatedSelectedNodes),
+		}, &commands)
+
+		commands = append(commands, model.signalUpdateRemainingNodes())
 
 		return model, tea.Batch(
 			commands...,
