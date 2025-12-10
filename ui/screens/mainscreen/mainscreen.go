@@ -234,9 +234,23 @@ func (model Model) onSelectNode() (Model, tea.Cmd) {
 
 func (model Model) onUnselectLast() (Model, tea.Cmd) {
 	if len(model.selectedNodes) > 0 {
-		model.selectedNodes = model.selectedNodes[:len(model.selectedNodes)-1]
-		return model, model.signalUpdateRemainingNodes()
+		updatedSelectedNodes := model.selectedNodes[:len(model.selectedNodes)-1]
+
+		return model.setSelectedNodes(updatedSelectedNodes)
 	} else {
 		return model, nil
 	}
+}
+
+func (model Model) setSelectedNodes(selectedNodes []*graph.Node) (Model, tea.Cmd) {
+	model.selectedNodes = selectedNodes
+
+	commands := []tea.Cmd{}
+	util.UpdateChild(&model.nodeSelectionView, nodeselectionview.MsgSetSelectedNodes{
+		SelectedNodes: NewSliceAdapter(model.selectedNodes),
+	}, &commands)
+
+	commands = append(commands, model.signalUpdateRemainingNodes())
+
+	return model, tea.Batch(commands...)
 }
