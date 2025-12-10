@@ -73,43 +73,39 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 
 	case MsgSetRemainingNodes:
 		model.remainingNodes = message.RemainingNodes
-		updatedRemainingNodesView, command := model.remainingNodesView.TypedUpdate(listview.MsgSetItems[*graph.Node]{
+
+		return util.UpdateSingleChild(&model, &model.remainingNodesView, listview.MsgSetItems[*graph.Node]{
 			Items: message.RemainingNodes,
 		})
-		model.remainingNodesView = updatedRemainingNodesView
-		return model, command
 
 	case MsgSetSelectedNodes:
 		model.selectedNodes = message.SelectedNodes
-		updatedSelectedNodesView, command1 := model.selectedNodesView.TypedUpdate(listview.MsgSetItems[*graph.Node]{
+
+		commands := []tea.Cmd{}
+		util.UpdateChild(&model.selectedNodesView, listview.MsgSetItems[*graph.Node]{
 			Items: message.SelectedNodes,
-		})
-		model.selectedNodesView = updatedSelectedNodesView
+		}, &commands)
 
 		// Number of selected nodes has changed
 		// This affects selected node list's size
-		updatedModel, command2 := model.updateChildSizes()
+		updatedModel, command := model.updateChildSizes()
+		commands = append(commands, command)
 
-		return updatedModel, tea.Batch(command1, command2)
+		return updatedModel, tea.Batch(commands...)
 
 	case MsgSelectPrevious:
-		updatedRemainingNodesView, command := model.remainingNodesView.TypedUpdate(listview.MsgSelectPrevious{})
-		model.remainingNodesView = updatedRemainingNodesView
-		return model, command
+		return util.UpdateSingleChild(&model, &model.remainingNodesView, listview.MsgSelectPrevious{})
 
 	case MsgSelectNext:
-		updatedRemainingNodesView, command := model.remainingNodesView.TypedUpdate(listview.MsgSelectNext{})
-		model.remainingNodesView = updatedRemainingNodesView
-		return model, command
+		return util.UpdateSingleChild(&model, &model.remainingNodesView, listview.MsgSelectNext{})
 
 	default:
-		updatedSelectedNodesView, command1 := model.selectedNodesView.TypedUpdate(message)
-		model.selectedNodesView = updatedSelectedNodesView
+		commands := []tea.Cmd{}
 
-		updatedRemainingNodesView, command2 := model.remainingNodesView.TypedUpdate(message)
-		model.remainingNodesView = updatedRemainingNodesView
+		util.UpdateChild(&model.selectedNodesView, message, &commands)
+		util.UpdateChild(&model.remainingNodesView, message, &commands)
 
-		return model, tea.Batch(command1, command2)
+		return model, tea.Batch(commands...)
 	}
 }
 
@@ -139,17 +135,17 @@ func (model Model) GetSelectedRemainingNode() *graph.Node {
 }
 
 func (model Model) updateChildSizes() (Model, tea.Cmd) {
-	updatedSelectedNodesView, command1 := model.selectedNodesView.TypedUpdate(tea.WindowSizeMsg{
+	commands := []tea.Cmd{}
+
+	util.UpdateChild(&model.selectedNodesView, tea.WindowSizeMsg{
 		Width:  model.size.Width,
 		Height: model.selectedNodes.Length(),
-	})
-	model.selectedNodesView = updatedSelectedNodesView
+	}, &commands)
 
-	updatedRemainingNodesView, command2 := model.remainingNodesView.TypedUpdate(tea.WindowSizeMsg{
+	util.UpdateChild(&model.remainingNodesView, tea.WindowSizeMsg{
 		Width:  model.size.Width,
 		Height: model.size.Height - model.selectedNodes.Length(),
-	})
-	model.remainingNodesView = updatedRemainingNodesView
+	}, &commands)
 
-	return model, tea.Batch(command1, command2)
+	return model, tea.Batch(commands...)
 }
