@@ -17,8 +17,8 @@ var viewModeKeyMap = struct {
 		key.WithHelp("q", "quit"),
 	),
 	SwitchToInputMode: key.NewBinding(
-		key.WithKeys("s"),
-		key.WithHelp("s", "search"),
+		key.WithKeys("/"),
+		key.WithHelp("/", "search"),
 	),
 	Next: key.NewBinding(
 		key.WithKeys("down"),
