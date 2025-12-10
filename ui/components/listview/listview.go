@@ -15,26 +15,28 @@ type List[T any] interface {
 }
 
 type Model[T any] struct {
-	itemRenderer      func(item T) string
-	items             List[T]
-	allowSelection    bool
-	firstVisibleIndex int
-	selectedIndex     int
-	size              util.Size
-	emptyListMessage  string
-	selectedItemStyle lipgloss.Style
+	itemRenderer         func(item T) string
+	items                List[T]
+	allowSelection       bool
+	firstVisibleIndex    int
+	selectedIndex        int
+	size                 util.Size
+	emptyListMessage     string
+	nonselectedItemStyle lipgloss.Style
+	selectedItemStyle    lipgloss.Style
 }
 
 func New[T any](itemRenderer func(item T) string, allowSelection bool) Model[T] {
 	model := Model[T]{
-		itemRenderer:      itemRenderer,
-		allowSelection:    allowSelection,
-		items:             nil,
-		firstVisibleIndex: 0,
-		selectedIndex:     0,
-		size:              util.Size{Width: 0, Height: 0},
-		selectedItemStyle: lipgloss.NewStyle().Background(lipgloss.Color("#CCCCCC")).Foreground(lipgloss.Color("#000000")),
-		emptyListMessage:  "no nodes found",
+		itemRenderer:         itemRenderer,
+		allowSelection:       allowSelection,
+		items:                nil,
+		firstVisibleIndex:    0,
+		selectedIndex:        0,
+		size:                 util.Size{Width: 0, Height: 0},
+		nonselectedItemStyle: lipgloss.NewStyle(),
+		selectedItemStyle:    lipgloss.NewStyle().Background(lipgloss.Color("#CCCCCC")).Foreground(lipgloss.Color("#000000")),
+		emptyListMessage:     "no nodes found",
 	}
 
 	return model
@@ -77,12 +79,20 @@ func (model Model[T]) View() string {
 	currentIndex := model.firstVisibleIndex
 	accumulatedHeight := 0
 
+	selectedStyle := model.selectedItemStyle.Width(model.size.Width).MaxWidth(model.size.Width)
+	nonselectedStyle := model.nonselectedItemStyle.Width(model.size.Width).MaxWidth(model.size.Width)
+
 	for currentIndex < model.items.Length() && accumulatedHeight < model.size.Height {
 		item := model.itemRenderer(model.items.At(currentIndex))
 
+		var style lipgloss.Style
 		if model.allowSelection && currentIndex == model.selectedIndex {
-			item = model.selectedItemStyle.Width(model.size.Width).MaxWidth(model.size.Width).Render(item)
+			style = selectedStyle
+		} else {
+			style = nonselectedStyle
 		}
+
+		item = style.Render(item)
 
 		visibleItems = append(visibleItems, item)
 
@@ -174,4 +184,12 @@ func (model *Model[T]) GetSelectedIndex() int {
 
 func (model *Model[T]) GetSelectedItem() T {
 	return model.items.At(model.selectedIndex)
+}
+
+func (model *Model[T]) SetSelectedStyle(style lipgloss.Style) {
+	model.selectedItemStyle = style
+}
+
+func (model *Model[T]) SetNonselectedStyle(style lipgloss.Style) {
+	model.nonselectedItemStyle = style
 }
