@@ -207,7 +207,7 @@ func (model Model) onSelectPreviousRemainingNode() (Model, tea.Cmd) {
 	return util.UpdateSingleChild(&model, &model.nodeSelectionView, nodeselectionview.MsgSelectPrevious{})
 }
 
-func (model Model) onSelecNextRemainingNode() (Model, tea.Cmd) {
+func (model Model) onSelectNextRemainingNode() (Model, tea.Cmd) {
 	return util.UpdateSingleChild(&model, &model.nodeSelectionView, nodeselectionview.MsgSelectNext{})
 }
 

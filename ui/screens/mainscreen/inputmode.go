@@ -38,7 +38,7 @@ func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.
 		return model, nil
 
 	case key.Matches(message, viewModeKeyMap.Next):
-		return model.onSelecNextRemainingNode()
+		return model.onSelectNextRemainingNode()
 
 	case key.Matches(message, viewModeKeyMap.Previous):
 		return model.onSelectPreviousRemainingNode()
