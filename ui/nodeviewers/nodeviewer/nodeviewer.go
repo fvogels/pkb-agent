@@ -1,8 +1,14 @@
 package nodeviewer
 
 import (
+	"log/slog"
+	"pkb-agent/graph/nodes/atom"
+	"pkb-agent/graph/nodes/snippet"
+	"pkb-agent/ui/debug"
 	"pkb-agent/ui/nodeviewers/nullviewer"
+	"pkb-agent/ui/nodeviewers/snippetviewer"
 	"pkb-agent/util"
+	"reflect"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -27,6 +33,8 @@ func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
+	debug.ShowBubbleTeaMessage(message)
+
 	switch message := message.(type) {
 	case tea.WindowSizeMsg:
 		return model.onResized(message)
@@ -55,27 +63,33 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 }
 
 func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
-	return model, nil
-	// node := message.Node
+	node := message.Node
 
-	// switch nodeData := node.Extra.(type) {
-	// case *atom.Extra:
-	// 	model.viewer = nullviewer.New()
+	switch nodeData := node.Extra.(type) {
+	case *atom.Extra:
+		slog.Debug("atom")
+		model.viewer = nullviewer.New()
 
-	// case *snippet.Extra:
-	// 	model.viewer = snippetviewer.New(nodeData)
+	case *snippet.Extra:
+		slog.Debug("snippet")
+		model.viewer = snippetviewer.New(nodeData)
 
-	// default:
-	// 	model.viewer = nullviewer.New()
-	// }
+	default:
+		slog.Debug(
+			"unrecognized node type",
+			slog.String("type", reflect.TypeOf(node.Extra).String()),
+		)
 
-	// commands := []tea.Cmd{}
+		model.viewer = nullviewer.New()
+	}
 
-	// commands = append(commands, model.viewer.Init())
-	// util.UpdateUntypedChild(&model.viewer, tea.WindowSizeMsg{
-	// 	Width:  model.size.Width,
-	// 	Height: model.size.Height,
-	// }, &commands)
+	commands := []tea.Cmd{}
 
-	// return model, tea.Batch(commands...)
+	commands = append(commands, model.viewer.Init())
+	util.UpdateUntypedChild(&model.viewer, tea.WindowSizeMsg{
+		Width:  model.size.Width,
+		Height: model.size.Height,
+	}, &commands)
+
+	return model, tea.Batch(commands...)
 }
