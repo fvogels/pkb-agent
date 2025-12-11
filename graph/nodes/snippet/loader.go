@@ -47,7 +47,7 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 		Name:      metadata.Name,
 		Links:     append(metadata.Links, "Snippet"),
 		Backlinks: nil,
-		Extra: Extra{
+		Extra: &Extra{
 			Path: path,
 		},
 	}
