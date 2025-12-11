@@ -76,6 +76,9 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 			},
 		})
 
+	case nodeselectionview.MsgRemainingNodeHighlighted:
+		return model.onNodeHighlighted(message)
+
 	default:
 		commands := []tea.Cmd{}
 
@@ -266,4 +269,16 @@ func (model Model) setSelectedNodes(selectedNodes []*graph.Node) (Model, tea.Cmd
 	commands = append(commands, model.signalUpdateRemainingNodes())
 
 	return model, tea.Batch(commands...)
+}
+
+// onNodeHighlighted is called whenever a new node is being highlighted in the list of remaining nodes.
+func (model Model) onNodeHighlighted(message nodeselectionview.MsgRemainingNodeHighlighted) (Model, tea.Cmd) {
+	highlighedNode := message.Node
+
+	if highlighedNode == nil {
+		// No node was highlighted
+		return model, nil
+	} else {
+		return util.UpdateSingleChild(&model, &model.nodeViewer, nodeviewer.MsgSetNode{Node: highlighedNode})
+	}
 }
