@@ -1,5 +1,11 @@
 package nodeselectionview
 
+import (
+	"pkb-agent/graph"
+
+	tea "github.com/charmbracelet/bubbletea"
+)
+
 type MsgSetRemainingNodes struct {
 	RemainingNodes List
 }
@@ -11,3 +17,15 @@ type MsgSetSelectedNodes struct {
 type MsgSelectNext struct{}
 
 type MsgSelectPrevious struct{}
+
+type msgRemainingNodesWrapper struct {
+	wrapped tea.Msg
+}
+
+type msgSelectedNodesWrapper struct {
+	wrapped tea.Msg
+}
+
+type MsgRemainingNodeHighlighted struct {
+	Node *graph.Node
+}

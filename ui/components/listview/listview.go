@@ -1,7 +1,6 @@
 package listview
 
 import (
-	"log/slog"
 	"pkb-agent/ui/debug"
 	"pkb-agent/util"
 
@@ -15,28 +14,30 @@ type List[T any] interface {
 }
 
 type Model[T any] struct {
-	itemRenderer         func(item T) string
-	items                List[T]
-	allowSelection       bool
-	firstVisibleIndex    int
-	selectedIndex        int
-	size                 util.Size
-	emptyListMessage     string
-	nonselectedItemStyle lipgloss.Style
-	selectedItemStyle    lipgloss.Style
+	itemRenderer           func(item T) string
+	items                  List[T]
+	allowSelection         bool
+	firstVisibleIndex      int
+	selectedIndex          int
+	size                   util.Size
+	emptyListMessage       string
+	nonselectedItemStyle   lipgloss.Style
+	selectedItemStyle      lipgloss.Style
+	outgoingMessageWrapper func(tea.Msg) tea.Msg
 }
 
-func New[T any](itemRenderer func(item T) string, allowSelection bool) Model[T] {
+func New[T any](itemRenderer func(item T) string, allowSelection bool, outgoingMessageWrapper func(tea.Msg) tea.Msg) Model[T] {
 	model := Model[T]{
-		itemRenderer:         itemRenderer,
-		allowSelection:       allowSelection,
-		items:                nil,
-		firstVisibleIndex:    0,
-		selectedIndex:        0,
-		size:                 util.Size{Width: 0, Height: 0},
-		nonselectedItemStyle: lipgloss.NewStyle(),
-		selectedItemStyle:    lipgloss.NewStyle().Background(lipgloss.Color("#CCCCCC")).Foreground(lipgloss.Color("#000000")),
-		emptyListMessage:     "no nodes found",
+		itemRenderer:           itemRenderer,
+		allowSelection:         allowSelection,
+		items:                  &emptyList[T]{},
+		firstVisibleIndex:      0,
+		selectedIndex:          0,
+		size:                   util.Size{Width: 0, Height: 0},
+		nonselectedItemStyle:   lipgloss.NewStyle(),
+		selectedItemStyle:      lipgloss.NewStyle().Background(lipgloss.Color("#CCCCCC")).Foreground(lipgloss.Color("#000000")),
+		emptyListMessage:       "no nodes found",
+		outgoingMessageWrapper: outgoingMessageWrapper,
 	}
 
 	return model
@@ -71,7 +72,7 @@ func (model Model[T]) TypedUpdate(message tea.Msg) (Model[T], tea.Cmd) {
 }
 
 func (model Model[T]) View() string {
-	if model.items == nil || model.items.Length() == 0 {
+	if model.items.Length() == 0 {
 		return model.emptyListMessage
 	}
 
@@ -127,27 +128,39 @@ func (model *Model[T]) ensureSelectedIsVisible() {
 
 func (model *Model[T]) signalItemSelected() tea.Cmd {
 	index := model.selectedIndex
-	var selectedItem T
-
-	if model.items == nil || model.items.Length() == 0 {
-		index = -1
-	} else {
-		selectedItem = model.items.At(index)
-	}
+	selectedItem := model.items.At(index)
 
 	return func() tea.Msg {
-		return MsgItemSelected[T]{
+		message := MsgItemSelected[T]{
 			Index: index,
 			Item:  selectedItem,
 		}
+
+		return model.outgoingMessageWrapper(message)
+	}
+}
+
+func (model *Model[T]) signalNoItemsSelected() tea.Cmd {
+	return func() tea.Msg {
+		message := MsgNoItemSelected{}
+		return model.outgoingMessageWrapper(message)
 	}
 }
 
 func (model Model[T]) onSetItems(message MsgSetItems[T]) (Model[T], tea.Cmd) {
 	model.items = message.Items
-	model.selectedIndex = 0
-	model.firstVisibleIndex = 0
-	return model, model.signalItemSelected()
+
+	if !model.allowSelection {
+		return model, nil
+	}
+
+	if model.items.Length() > 0 {
+		model.selectedIndex = 0
+		model.firstVisibleIndex = 0
+		return model, model.signalItemSelected()
+	} else {
+		return model, model.signalNoItemsSelected()
+	}
 }
 
 func (model Model[T]) onSelectPrevious() (Model[T], tea.Cmd) {
@@ -169,8 +182,6 @@ func (model Model[T]) onSelectNext() (Model[T], tea.Cmd) {
 			model.selectedIndex++
 		}
 		model.ensureSelectedIsVisible()
-
-		slog.Debug("new index", slog.Int("index", model.firstVisibleIndex))
 
 		return model, model.signalItemSelected()
 	} else {

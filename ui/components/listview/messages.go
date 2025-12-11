@@ -12,3 +12,5 @@ type MsgItemSelected[T any] struct {
 	Index int
 	Item  T
 }
+
+type MsgNoItemSelected struct{}
