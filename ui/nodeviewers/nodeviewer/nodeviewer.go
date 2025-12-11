@@ -41,9 +41,10 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 
 	case MsgSetNode:
 		return model.onSetNode(message)
-	}
 
-	return model, nil
+	default:
+		return util.UpdateSingleUntypedChild(&model, &model.viewer, message)
+	}
 }
 
 func (model Model) View() string {
@@ -67,11 +68,9 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 
 	switch nodeData := node.Extra.(type) {
 	case *atom.Extra:
-		slog.Debug("atom")
 		model.viewer = nullviewer.New()
 
 	case *snippet.Extra:
-		slog.Debug("snippet")
 		model.viewer = snippetviewer.New(nodeData)
 
 	default:
