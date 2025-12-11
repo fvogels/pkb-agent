@@ -1,7 +1,9 @@
 package snippetviewer
 
 import (
+	"log/slog"
 	"pkb-agent/graph/nodes/snippet"
+	"pkb-agent/ui/debug"
 	"pkb-agent/util"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -16,20 +18,23 @@ type Model struct {
 func New(nodeData *snippet.Extra) Model {
 	return Model{
 		nodeData: nodeData,
+		source:   "loading",
 	}
 }
 
 func (model Model) Init() tea.Cmd {
-	return model.signalLoadSnippet
+	return model.signalLoadSnippet()
 }
 
 func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
+	debug.ShowBubbleTeaMessage(message)
+
 	switch message := message.(type) {
 	case tea.WindowSizeMsg:
 		return model.onResized(message)
 
 	case msgSnippetLoaded:
-		model.source = message.source
+		return model.onSnippetLoaded(message)
 	}
 
 	return model, nil
@@ -48,10 +53,16 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	return model, nil
 }
 
-func (model *Model) signalLoadSnippet() tea.Msg {
+func (model *Model) signalLoadSnippet() tea.Cmd {
 	return func() tea.Msg {
 		return msgSnippetLoaded{
 			source: "source!",
 		}
 	}
+}
+
+func (model Model) onSnippetLoaded(message msgSnippetLoaded) (Model, tea.Cmd) {
+	slog.Debug("SNIPPET LOADED")
+	model.source = message.source
+	return model, nil
 }
