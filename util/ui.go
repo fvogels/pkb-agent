@@ -23,3 +23,9 @@ func UpdateSingleChild[M any, T Updatable[T]](model *M, child *T, message tea.Ms
 	*child = updatedChild
 	return *model, command
 }
+
+func UpdateSingleUntypedChild[M any](model *M, child *tea.Model, message tea.Msg) (M, tea.Cmd) {
+	updatedChild, command := (*child).Update(message)
+	*child = updatedChild
+	return *model, command
+}
