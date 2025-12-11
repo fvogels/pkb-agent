@@ -54,9 +54,16 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 }
 
 func (model *Model) signalLoadSnippet() tea.Cmd {
+	data := model.nodeData
+
 	return func() tea.Msg {
+		source, err := data.GetSource()
+		if err != nil {
+			panic("failed to get snippet source")
+		}
+
 		return msgSnippetLoaded{
-			source: "source!",
+			source: source,
 		}
 	}
 }
