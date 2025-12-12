@@ -8,6 +8,7 @@ import (
 	"pkb-agent/ui/components/textinput"
 	"pkb-agent/ui/debug"
 	"pkb-agent/ui/layout"
+	"pkb-agent/ui/layout/border"
 	"pkb-agent/ui/layout/vertical"
 	"pkb-agent/ui/nodeviewers/nodeviewer"
 	"pkb-agent/util"
@@ -44,7 +45,7 @@ func New() Model {
 	)
 	vlayout.Add(
 		func(size util.Size) int { return size.Height - 11 },
-		layout.Wrap(func(m *Model) *nodeviewer.Model { return &m.nodeViewer }),
+		border.New(layout.Wrap(func(m *Model) *nodeviewer.Model { return &m.nodeViewer })),
 	)
 	vlayout.Add(
 		func(_ util.Size) int { return 1 },
