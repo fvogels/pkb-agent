@@ -1,6 +1,7 @@
 package listview
 
 import (
+	"fmt"
 	"pkb-agent/ui/debug"
 	"pkb-agent/util"
 
@@ -128,6 +129,12 @@ func (model *Model[T]) ensureSelectedIsVisible() {
 
 func (model *Model[T]) signalItemSelected() tea.Cmd {
 	index := model.selectedIndex
+
+	// Sanity check
+	if index >= model.items.Length() {
+		panic(fmt.Sprintf("invalid index %d in listview of size %d", index, model.items.Length()))
+	}
+
 	selectedItem := model.items.At(index)
 
 	return func() tea.Msg {
@@ -154,9 +161,10 @@ func (model Model[T]) onSetItems(message MsgSetItems[T]) (Model[T], tea.Cmd) {
 		return model, nil
 	}
 
+	model.selectedIndex = 0
+	model.firstVisibleIndex = 0
+
 	if model.items.Length() > 0 {
-		model.selectedIndex = 0
-		model.firstVisibleIndex = 0
 		return model, model.signalItemSelected()
 	} else {
 		return model, model.signalNoItemsSelected()
@@ -164,7 +172,7 @@ func (model Model[T]) onSetItems(message MsgSetItems[T]) (Model[T], tea.Cmd) {
 }
 
 func (model Model[T]) onSelectPrevious() (Model[T], tea.Cmd) {
-	if model.allowSelection {
+	if model.allowSelection && model.items.Length() > 0 {
 		if model.selectedIndex > 0 {
 			model.selectedIndex--
 		}
@@ -177,8 +185,8 @@ func (model Model[T]) onSelectPrevious() (Model[T], tea.Cmd) {
 }
 
 func (model Model[T]) onSelectNext() (Model[T], tea.Cmd) {
-	if model.allowSelection && model.items != nil {
-		if model.selectedIndex != -1 && model.selectedIndex+1 < model.items.Length() {
+	if model.allowSelection && model.items.Length() > 0 {
+		if model.selectedIndex+1 < model.items.Length() {
 			model.selectedIndex++
 		}
 		model.ensureSelectedIsVisible()
