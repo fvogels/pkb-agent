@@ -1,9 +1,13 @@
 package graph
 
-type ErrNameClash struct{}
+import "fmt"
+
+type ErrNameClash struct {
+	name string
+}
 
 func (err *ErrNameClash) Error() string {
-	return "name clash"
+	return fmt.Sprintf("name clash: %s", err.name)
 }
 
 type ErrUnknownNodes struct{}

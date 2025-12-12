@@ -21,7 +21,9 @@ func NewBuilder() *Builder {
 func (builder *Builder) AddNode(node *Node) error {
 	if _, alreadyExists := builder.nodes[node.Name]; alreadyExists {
 		slog.Debug("Multiple nodes with same name", slog.String("name", node.Name))
-		return &ErrNameClash{}
+		return &ErrNameClash{
+			name: node.Name,
+		}
 	}
 
 	builder.nodes[node.Name] = node
