@@ -122,7 +122,7 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 }
 
 func (model Model) View() string {
-	return model.layout.View(&model)
+	return model.layout.LayoutView(&model)
 	// return lipgloss.JoinVertical(
 	// 	0,
 	// 	lipgloss.NewStyle().Height(10).Render(model.nodeSelectionView.View()),
@@ -163,7 +163,7 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: message.Height,
 	}
 
-	command := model.layout.Resize(&model, util.Size{
+	command := model.layout.LayoutResize(&model, util.Size{
 		Width:  message.Width,
 		Height: message.Height,
 	})

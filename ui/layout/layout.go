@@ -7,12 +7,7 @@ import (
 )
 
 type Layout[T any] interface {
-	Resize(model *T, size util.Size) tea.Cmd
-	View(model *T) string
-}
-
-type Child[T any] interface {
-	LayoutUpdate(parent *T, size util.Size) tea.Cmd
+	LayoutResize(parent *T, size util.Size) tea.Cmd
 	LayoutView(parent *T) string
 }
 
@@ -21,7 +16,7 @@ type Component[T any] interface {
 	View() string
 }
 
-func Wrap[M any, C Component[C]](get func(*M) *C) Child[M] {
+func Wrap[M any, C Component[C]](get func(*M) *C) Layout[M] {
 	return wrapper[M, C]{
 		get: get,
 	}
@@ -31,7 +26,7 @@ type wrapper[M any, C Component[C]] struct {
 	get func(*M) *C
 }
 
-func (w wrapper[M, C]) LayoutUpdate(parent *M, size util.Size) tea.Cmd {
+func (w wrapper[M, C]) LayoutResize(parent *M, size util.Size) tea.Cmd {
 	component := w.get(parent)
 	message := tea.WindowSizeMsg{
 		Width:  size.Width,

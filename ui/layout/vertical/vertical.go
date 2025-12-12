@@ -15,7 +15,7 @@ type VerticalLayout[T any] struct {
 type child[T any] struct {
 	determineHeight func(size util.Size) int
 	computedHeight  int
-	component       layout.Child[T]
+	component       layout.Layout[T]
 }
 
 func New[T any]() VerticalLayout[T] {
@@ -24,14 +24,14 @@ func New[T any]() VerticalLayout[T] {
 	}
 }
 
-func (layout *VerticalLayout[T]) Resize(model *T, size util.Size) tea.Cmd {
+func (layout *VerticalLayout[T]) LayoutResize(parent *T, size util.Size) tea.Cmd {
 	commands := []tea.Cmd{}
 
 	for index := range layout.children {
 		child := &layout.children[index]
 		child.computedHeight = child.determineHeight(size)
 
-		command := child.component.LayoutUpdate(model, util.Size{
+		command := child.component.LayoutResize(parent, util.Size{
 			Width:  size.Width,
 			Height: child.computedHeight,
 		})
@@ -42,7 +42,7 @@ func (layout *VerticalLayout[T]) Resize(model *T, size util.Size) tea.Cmd {
 	return tea.Batch(commands...)
 }
 
-func (layout *VerticalLayout[T]) View(model *T) string {
+func (layout *VerticalLayout[T]) LayoutView(model *T) string {
 	parts := []string{}
 
 	for _, child := range layout.children {
@@ -54,7 +54,7 @@ func (layout *VerticalLayout[T]) View(model *T) string {
 	return lipgloss.JoinVertical(0, parts...)
 }
 
-func (layout *VerticalLayout[T]) Add(determineHeight func(size util.Size) int, component layout.Child[T]) {
+func (layout *VerticalLayout[T]) Add(determineHeight func(size util.Size) int, component layout.Layout[T]) {
 	layout.children = append(layout.children, child[T]{
 		determineHeight: determineHeight,
 		component:       component,
