@@ -7,6 +7,8 @@ import (
 	"pkb-agent/ui/components/nodeselectionview"
 	"pkb-agent/ui/components/textinput"
 	"pkb-agent/ui/debug"
+	"pkb-agent/ui/layout"
+	"pkb-agent/ui/layout/vertical"
 	"pkb-agent/ui/nodeviewers/nodeviewer"
 	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
@@ -14,7 +16,6 @@ import (
 	"sort"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
@@ -26,17 +27,39 @@ type Model struct {
 	selectedNodes  []*graph.Node
 
 	nodeSelectionView nodeselectionview.Model
-	textInput         textinput.Model
 	nodeViewer        nodeviewer.Model
+	textInput         textinput.Model
+
+	layout layout.Layout[Model]
 }
 
 func New() Model {
-	return Model{
+	vlayout := vertical.New[Model]()
+
+	// Layout configuration must happen before Model object creation
+	// Otherwise the Model object will contain a copy
+	vlayout.Add(
+		func(_ util.Size) int { return 10 },
+		layout.Wrap(func(m *Model) *nodeselectionview.Model { return &m.nodeSelectionView }),
+	)
+	vlayout.Add(
+		func(size util.Size) int { return size.Height - 11 },
+		layout.Wrap(func(m *Model) *nodeviewer.Model { return &m.nodeViewer }),
+	)
+	vlayout.Add(
+		func(_ util.Size) int { return 1 },
+		layout.Wrap(func(m *Model) *textinput.Model { return &m.textInput }),
+	)
+
+	model := Model{
 		mode:              viewMode{},
 		nodeSelectionView: nodeselectionview.New(),
 		textInput:         textinput.New(),
 		nodeViewer:        nodeviewer.New(),
+		layout:            &vlayout,
 	}
+
+	return model
 }
 
 func (model Model) Init() tea.Cmd {
@@ -99,12 +122,13 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 }
 
 func (model Model) View() string {
-	return lipgloss.JoinVertical(
-		0,
-		lipgloss.NewStyle().Height(10).Render(model.nodeSelectionView.View()),
-		lipgloss.NewStyle().Height(model.size.Height-11).Render(model.nodeViewer.View()),
-		model.mode.renderStatusBar(&model),
-	)
+	return model.layout.View(&model)
+	// return lipgloss.JoinVertical(
+	// 	0,
+	// 	lipgloss.NewStyle().Height(10).Render(model.nodeSelectionView.View()),
+	// 	lipgloss.NewStyle().Height(model.size.Height-11).Render(model.nodeViewer.View()),
+	// 	model.mode.renderStatusBar(&model),
+	// )
 }
 
 func (model Model) onGraphLoaded(message MsgGraphLoaded) (Model, tea.Cmd) {
@@ -139,21 +163,28 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: message.Height,
 	}
 
-	commands := []tea.Cmd{}
-	util.UpdateChild(&model.nodeSelectionView, tea.WindowSizeMsg{
+	command := model.layout.Resize(&model, util.Size{
 		Width:  message.Width,
-		Height: 10,
-	}, &commands)
-	util.UpdateChild(&model.nodeViewer, tea.WindowSizeMsg{
-		Width:  message.Width,
-		Height: message.Height - 11,
-	}, &commands)
-	util.UpdateChild(&model.textInput, tea.WindowSizeMsg{
-		Width:  message.Width,
-		Height: 1,
-	}, &commands)
+		Height: message.Height,
+	})
 
-	return model, tea.Batch(commands...)
+	return model, command
+
+	// commands := []tea.Cmd{}
+	// util.UpdateChild(&model.nodeSelectionView, tea.WindowSizeMsg{
+	// 	Width:  message.Width,
+	// 	Height: 10,
+	// }, &commands)
+	// util.UpdateChild(&model.nodeViewer, tea.WindowSizeMsg{
+	// 	Width:  message.Width,
+	// 	Height: message.Height - 11,
+	// }, &commands)
+	// util.UpdateChild(&model.textInput, tea.WindowSizeMsg{
+	// 	Width:  message.Width,
+	// 	Height: 1,
+	// }, &commands)
+
+	// return model, tea.Batch(commands...)
 }
 
 func (model Model) signalUpdateRemainingNodes() tea.Cmd {
