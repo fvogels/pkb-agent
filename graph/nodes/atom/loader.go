@@ -50,7 +50,7 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 
 		node := graph.Node{
 			Name:      entry.Name,
-			Links:     entry.Links,
+			Links:     append(entry.Links, "Atom"),
 			Backlinks: nil,
 			Extra:     &extra,
 		}
