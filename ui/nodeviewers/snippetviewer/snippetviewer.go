@@ -1,7 +1,6 @@
 package snippetviewer
 
 import (
-	"log/slog"
 	"pkb-agent/graph/nodes/snippet"
 	"pkb-agent/ui/debug"
 	"pkb-agent/util"
@@ -69,7 +68,6 @@ func (model *Model) signalLoadSnippet() tea.Cmd {
 }
 
 func (model Model) onSnippetLoaded(message msgSnippetLoaded) (Model, tea.Cmd) {
-	slog.Debug("SNIPPET LOADED")
 	model.source = message.source
 	return model, nil
 }
