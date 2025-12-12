@@ -3,8 +3,10 @@ package nodeviewer
 import (
 	"log/slog"
 	"pkb-agent/graph/nodes/atom"
+	"pkb-agent/graph/nodes/bookmark"
 	"pkb-agent/graph/nodes/snippet"
 	"pkb-agent/ui/debug"
+	"pkb-agent/ui/nodeviewers/bookmarkviewer"
 	"pkb-agent/ui/nodeviewers/nullviewer"
 	"pkb-agent/ui/nodeviewers/snippetviewer"
 	"pkb-agent/util"
@@ -72,6 +74,9 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 
 	case *snippet.Extra:
 		model.viewer = snippetviewer.New(nodeData)
+
+	case *bookmark.Extra:
+		model.viewer = bookmarkviewer.New(nodeData)
 
 	default:
 		slog.Debug(
