@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"pkb-agent/graph"
 	"pkb-agent/graph/nodes/atom"
+	"pkb-agent/graph/nodes/bookmark"
 	"pkb-agent/graph/nodes/snippet"
 	pathlib "pkb-agent/util/pathlib"
 
@@ -25,6 +26,7 @@ func New() *Loader {
 	loaders := make(map[string]graph.Loader)
 	loaders["snippet"] = snippet.NewLoader()
 	loaders["atom"] = atom.NewLoader()
+	loaders["bookmark"] = bookmark.NewLoader()
 
 	loader := Loader{
 		loaders: loaders,
