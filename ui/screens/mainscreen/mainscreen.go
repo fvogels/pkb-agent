@@ -196,6 +196,19 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 			iterator.Next()
 		}
 
+		imax := len(remaining)
+		for i := 0; i != imax; i++ {
+			node := remaining[i]
+
+			for _, linkedNodeName := range node.Links {
+				if !nameSet.Contains(linkedNodeName) {
+					nameSet.Add(linkedNodeName)
+					linkedNode := model.graph.FindNode(linkedNodeName)
+					remaining = append(remaining, linkedNode)
+				}
+			}
+		}
+
 		sort.Slice(remaining, func(i, j int) bool {
 			return remaining[i].Name < remaining[j].Name
 		})
