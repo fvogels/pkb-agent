@@ -12,7 +12,7 @@ import (
 type Loader struct{}
 
 type Extra struct {
-	url string
+	URL string
 }
 
 func NewLoader() *Loader {
@@ -51,9 +51,9 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 
 		node := graph.Node{
 			Name:      entry.Name,
-			Links:     entry.Links,
+			Links:     append(entry.Links, "Bookmark"),
 			Backlinks: nil,
-			Extra:     &Extra{url: entry.URL},
+			Extra:     &Extra{URL: entry.URL},
 		}
 
 		if err := callback(&node); err != nil {
