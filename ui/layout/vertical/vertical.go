@@ -8,7 +8,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type VerticalLayout[T any] struct {
+type Layout[T any] struct {
 	children []child[T]
 }
 
@@ -18,13 +18,13 @@ type child[T any] struct {
 	component       layout.Layout[T]
 }
 
-func New[T any]() VerticalLayout[T] {
-	return VerticalLayout[T]{
+func New[T any]() Layout[T] {
+	return Layout[T]{
 		children: nil,
 	}
 }
 
-func (layout *VerticalLayout[T]) LayoutResize(parent *T, size util.Size) tea.Cmd {
+func (layout *Layout[T]) LayoutResize(parent *T, size util.Size) tea.Cmd {
 	commands := []tea.Cmd{}
 
 	for index := range layout.children {
@@ -42,7 +42,7 @@ func (layout *VerticalLayout[T]) LayoutResize(parent *T, size util.Size) tea.Cmd
 	return tea.Batch(commands...)
 }
 
-func (layout *VerticalLayout[T]) LayoutView(model *T) string {
+func (layout *Layout[T]) LayoutView(model *T) string {
 	parts := []string{}
 
 	for _, child := range layout.children {
@@ -54,7 +54,7 @@ func (layout *VerticalLayout[T]) LayoutView(model *T) string {
 	return lipgloss.JoinVertical(0, parts...)
 }
 
-func (layout *VerticalLayout[T]) Add(determineHeight func(size util.Size) int, component layout.Layout[T]) {
+func (layout *Layout[T]) Add(determineHeight func(size util.Size) int, component layout.Layout[T]) {
 	layout.children = append(layout.children, child[T]{
 		determineHeight: determineHeight,
 		component:       component,

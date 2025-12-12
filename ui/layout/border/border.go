@@ -8,20 +8,20 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type BorderLayout[T any] struct {
+type Layout[T any] struct {
 	child       layout.Layout[T]
 	size        util.Size
 	borderStyle lipgloss.Border
 }
 
-func New[T any](child layout.Layout[T]) *BorderLayout[T] {
-	return &BorderLayout[T]{
+func New[T any](child layout.Layout[T]) *Layout[T] {
+	return &Layout[T]{
 		child:       child,
 		borderStyle: lipgloss.DoubleBorder(),
 	}
 }
 
-func (layout *BorderLayout[T]) LayoutResize(parent *T, size util.Size) tea.Cmd {
+func (layout *Layout[T]) LayoutResize(parent *T, size util.Size) tea.Cmd {
 	layout.size = size
 
 	childSize := util.Size{
@@ -32,7 +32,7 @@ func (layout *BorderLayout[T]) LayoutResize(parent *T, size util.Size) tea.Cmd {
 	return layout.child.LayoutResize(parent, childSize)
 }
 
-func (layout *BorderLayout[T]) LayoutView(model *T) string {
+func (layout *Layout[T]) LayoutView(model *T) string {
 	style := lipgloss.NewStyle().Border(layout.borderStyle).Width(layout.size.Width - 2).Height(layout.size.Height - 2)
 	return style.Render(layout.child.LayoutView(model))
 }
