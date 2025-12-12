@@ -123,12 +123,6 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 
 func (model Model) View() string {
 	return model.layout.LayoutView(&model)
-	// return lipgloss.JoinVertical(
-	// 	0,
-	// 	lipgloss.NewStyle().Height(10).Render(model.nodeSelectionView.View()),
-	// 	lipgloss.NewStyle().Height(model.size.Height-11).Render(model.nodeViewer.View()),
-	// 	model.mode.renderStatusBar(&model),
-	// )
 }
 
 func (model Model) onGraphLoaded(message MsgGraphLoaded) (Model, tea.Cmd) {
@@ -169,22 +163,6 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	})
 
 	return model, command
-
-	// commands := []tea.Cmd{}
-	// util.UpdateChild(&model.nodeSelectionView, tea.WindowSizeMsg{
-	// 	Width:  message.Width,
-	// 	Height: 10,
-	// }, &commands)
-	// util.UpdateChild(&model.nodeViewer, tea.WindowSizeMsg{
-	// 	Width:  message.Width,
-	// 	Height: message.Height - 11,
-	// }, &commands)
-	// util.UpdateChild(&model.textInput, tea.WindowSizeMsg{
-	// 	Width:  message.Width,
-	// 	Height: 1,
-	// }, &commands)
-
-	// return model, tea.Batch(commands...)
 }
 
 func (model Model) signalUpdateRemainingNodes() tea.Cmd {
