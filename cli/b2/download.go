@@ -70,5 +70,7 @@ func (c *DownloadCommand) execute() error {
 		value = <-channel
 	}
 
+	close(channel)
+
 	return nil
 }
