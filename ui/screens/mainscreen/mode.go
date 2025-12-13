@@ -1,9 +1,15 @@
 package mainscreen
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	"pkb-agent/util"
+
+	tea "github.com/charmbracelet/bubbletea"
+)
 
 type mode interface {
 	onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.Cmd)
 
-	renderStatusBar(model *Model) string
+	activate(model *Model) tea.Cmd
+	resize(model *Model, size util.Size) tea.Cmd
+	render(model *Model) string
 }

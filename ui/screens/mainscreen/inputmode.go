@@ -1,11 +1,17 @@
 package mainscreen
 
 import (
+	"pkb-agent/ui/components/nodeselectionview"
+	"pkb-agent/ui/components/textinput"
+	"pkb-agent/ui/layout"
+	"pkb-agent/ui/layout/border"
+	"pkb-agent/ui/layout/vertical"
+	"pkb-agent/ui/nodeviewers/nodeviewer"
+	"pkb-agent/util"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
-
-type inputMode struct{}
 
 var inputModeKeyMap = struct {
 	Cancel   key.Binding
@@ -31,10 +37,36 @@ var inputModeKeyMap = struct {
 	),
 }
 
+type inputMode struct {
+	layout layout.Layout[Model]
+}
+
+func NewInputMode() *inputMode {
+	vlayout := vertical.New[Model]()
+
+	vlayout.Add(
+		func(_ util.Size) int { return 10 },
+		layout.Wrap(func(m *Model) *nodeselectionview.Model { return &m.nodeSelectionView }),
+	)
+	vlayout.Add(
+		func(size util.Size) int { return size.Height - 11 },
+		border.New(layout.Wrap(func(m *Model) *nodeviewer.Model { return &m.nodeViewer })),
+	)
+	vlayout.Add(
+		func(_ util.Size) int { return 1 },
+		layout.Wrap(func(m *Model) *textinput.Model { return &m.textInput }),
+	)
+
+	return &inputMode{
+		layout: &vlayout,
+	}
+}
+
 func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.Cmd) {
 	switch {
 	case key.Matches(message, inputModeKeyMap.Cancel):
-		model.mode = viewMode{}
+		model.mode = model.viewMode
+		model.viewMode.activate(&model)
 		return model, nil
 
 	case key.Matches(message, viewModeKeyMap.Next):
@@ -54,6 +86,14 @@ func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.
 	}
 }
 
-func (mode inputMode) renderStatusBar(model *Model) string {
-	return model.textInput.View()
+func (mode inputMode) render(model *Model) string {
+	return mode.layout.LayoutView(model)
+}
+
+func (mode inputMode) activate(model *Model) tea.Cmd {
+	return mode.layout.LayoutResize(model, model.size)
+}
+
+func (mode inputMode) resize(model *Model, size util.Size) tea.Cmd {
+	return mode.layout.LayoutResize(model, model.size)
 }

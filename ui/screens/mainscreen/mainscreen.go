@@ -7,9 +7,6 @@ import (
 	"pkb-agent/ui/components/nodeselectionview"
 	"pkb-agent/ui/components/textinput"
 	"pkb-agent/ui/debug"
-	"pkb-agent/ui/layout"
-	"pkb-agent/ui/layout/border"
-	"pkb-agent/ui/layout/vertical"
 	"pkb-agent/ui/nodeviewers/nodeviewer"
 	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
@@ -31,33 +28,21 @@ type Model struct {
 	nodeViewer        nodeviewer.Model
 	textInput         textinput.Model
 
-	layout layout.Layout[Model]
+	viewMode  *viewMode
+	inputMode *inputMode
 }
 
 func New() Model {
-	vlayout := vertical.New[Model]()
-
-	// Layout configuration must happen before Model object creation
-	// Otherwise the Model object will contain a copy
-	vlayout.Add(
-		func(_ util.Size) int { return 10 },
-		layout.Wrap(func(m *Model) *nodeselectionview.Model { return &m.nodeSelectionView }),
-	)
-	vlayout.Add(
-		func(size util.Size) int { return size.Height - 11 },
-		border.New(layout.Wrap(func(m *Model) *nodeviewer.Model { return &m.nodeViewer })),
-	)
-	vlayout.Add(
-		func(_ util.Size) int { return 1 },
-		layout.Wrap(func(m *Model) *textinput.Model { return &m.textInput }),
-	)
+	viewMode := NewViewMode()
+	inputMode := NewInputMode()
 
 	model := Model{
-		mode:              viewMode{},
+		mode:              viewMode,
 		nodeSelectionView: nodeselectionview.New(),
 		textInput:         textinput.New(),
 		nodeViewer:        nodeviewer.New(),
-		layout:            &vlayout,
+		viewMode:          viewMode,
+		inputMode:         inputMode,
 	}
 
 	return model
@@ -123,7 +108,7 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 }
 
 func (model Model) View() string {
-	return model.layout.LayoutView(&model)
+	return model.mode.render(&model)
 }
 
 func (model Model) onGraphLoaded(message MsgGraphLoaded) (Model, tea.Cmd) {
@@ -158,7 +143,7 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: message.Height,
 	}
 
-	command := model.layout.LayoutResize(&model, util.Size{
+	command := model.mode.resize(&model, util.Size{
 		Width:  message.Width,
 		Height: message.Height,
 	})
@@ -245,7 +230,7 @@ func (model Model) onSelectNextRemainingNode() (Model, tea.Cmd) {
 }
 
 func (model Model) onNodeSelected() (Model, tea.Cmd) {
-	model.mode = viewMode{}
+	model.mode = model.viewMode
 
 	selectedNode := model.nodeSelectionView.GetSelectedRemainingNode()
 	if selectedNode != nil {
