@@ -86,7 +86,7 @@ func (model Model) openFile() (Model, tea.Cmd) {
 		panic("failed to create backblaze client")
 	}
 
-	if err := client.DownloadToFile(ctx, model.nodeData.BucketName, model.nodeData.Filename, model.nodeData.Filename, 1); err != nil {
+	if err := client.DownloadToFile(ctx, model.nodeData.BucketName, model.nodeData.Filename, model.nodeData.Filename, 1, func(n int) {}); err != nil {
 		slog.Error(
 			"Failed to download file from BackBlaze",
 			slog.String("bucket", model.nodeData.BucketName),
