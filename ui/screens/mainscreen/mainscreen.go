@@ -28,21 +28,27 @@ type Model struct {
 	nodeViewer        nodeviewer.Model
 	textInput         textinput.Model
 
+	layoutConfiguration *layoutConfiguration
+
 	viewMode  *viewMode
 	inputMode *inputMode
 }
 
 func New() Model {
-	viewMode := NewViewMode()
-	inputMode := NewInputMode()
+	layoutConfiguration := layoutConfiguration{
+		nodeSelectionViewHeight: 10,
+	}
+	viewMode := NewViewMode(&layoutConfiguration)
+	inputMode := NewInputMode(&layoutConfiguration)
 
 	model := Model{
-		mode:              viewMode,
-		nodeSelectionView: nodeselectionview.New(),
-		textInput:         textinput.New(),
-		nodeViewer:        nodeviewer.New(),
-		viewMode:          viewMode,
-		inputMode:         inputMode,
+		mode:                viewMode,
+		nodeSelectionView:   nodeselectionview.New(),
+		textInput:           textinput.New(),
+		nodeViewer:          nodeviewer.New(),
+		layoutConfiguration: &layoutConfiguration,
+		viewMode:            viewMode,
+		inputMode:           inputMode,
 	}
 
 	return model
@@ -143,10 +149,7 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: message.Height,
 	}
 
-	command := model.mode.resize(&model, util.Size{
-		Width:  message.Width,
-		Height: message.Height,
-	})
+	command := model.mode.resize(&model, model.size)
 
 	return model, command
 }
@@ -287,4 +290,10 @@ func (model Model) onNodeHighlighted(message nodeselectionview.MsgRemainingNodeH
 	} else {
 		return util.UpdateSingleChild(&model, &model.nodeViewer, nodeviewer.MsgSetNode{Node: highlighedNode})
 	}
+}
+
+func (model Model) updateLayoutConfiguration(update func(*layoutConfiguration)) (Model, tea.Cmd) {
+	update(model.layoutConfiguration)
+	command := model.mode.resize(&model, model.size)
+	return model, command
 }

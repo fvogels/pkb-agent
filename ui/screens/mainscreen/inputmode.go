@@ -41,15 +41,15 @@ type inputMode struct {
 	layout layout.Layout[Model]
 }
 
-func NewInputMode() *inputMode {
+func NewInputMode(layoutConfiguration *layoutConfiguration) *inputMode {
 	vlayout := vertical.New[Model]()
 
 	vlayout.Add(
-		func(_ util.Size) int { return 10 },
+		func(_ util.Size) int { return layoutConfiguration.nodeSelectionViewHeight },
 		border.New(layout.Wrap(func(m *Model) *nodeselectionview.Model { return &m.nodeSelectionView })),
 	)
 	vlayout.Add(
-		func(size util.Size) int { return size.Height - 11 },
+		func(size util.Size) int { return size.Height - layoutConfiguration.nodeSelectionViewHeight - 1 },
 		border.New(layout.Wrap(func(m *Model) *nodeviewer.Model { return &m.nodeViewer })),
 	)
 	vlayout.Add(

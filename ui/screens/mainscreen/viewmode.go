@@ -13,12 +13,14 @@ import (
 )
 
 var viewModeKeyMap = struct {
-	Quit              key.Binding
-	SwitchToInputMode key.Binding
-	Next              key.Binding
-	Previous          key.Binding
-	Select            key.Binding
-	UnselectLast      key.Binding
+	Quit                    key.Binding
+	SwitchToInputMode       key.Binding
+	Next                    key.Binding
+	Previous                key.Binding
+	Select                  key.Binding
+	UnselectLast            key.Binding
+	GrowNodeSelectionView   key.Binding
+	ShrinkNodeSelectionView key.Binding
 }{
 	Quit: key.NewBinding(
 		key.WithKeys("q"),
@@ -44,21 +46,29 @@ var viewModeKeyMap = struct {
 		key.WithKeys("delete"),
 		key.WithHelp("del", "pop"),
 	),
+	GrowNodeSelectionView: key.NewBinding(
+		key.WithKeys("+"),
+		key.WithHelp("+", "grow node list"),
+	),
+	ShrinkNodeSelectionView: key.NewBinding(
+		key.WithKeys("-"),
+		key.WithHelp("-", "shrink node list"),
+	),
 }
 
 type viewMode struct {
 	layout layout.Layout[Model]
 }
 
-func NewViewMode() *viewMode {
+func NewViewMode(layoutConfiguration *layoutConfiguration) *viewMode {
 	vlayout := vertical.New[Model]()
 
 	vlayout.Add(
-		func(_ util.Size) int { return 10 },
+		func(_ util.Size) int { return layoutConfiguration.nodeSelectionViewHeight },
 		border.New(layout.Wrap(func(m *Model) *nodeselectionview.Model { return &m.nodeSelectionView })),
 	)
 	vlayout.Add(
-		func(size util.Size) int { return size.Height - 10 },
+		func(size util.Size) int { return size.Height - layoutConfiguration.nodeSelectionViewHeight },
 		border.New(layout.Wrap(func(m *Model) *nodeviewer.Model { return &m.nodeViewer })),
 	)
 
@@ -88,6 +98,18 @@ func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.C
 
 	case key.Matches(message, viewModeKeyMap.UnselectLast):
 		return model.onUnselectLast()
+
+	case key.Matches(message, viewModeKeyMap.GrowNodeSelectionView):
+		return model.updateLayoutConfiguration(func(c *layoutConfiguration) {
+			c.nodeSelectionViewHeight++
+		})
+
+	case key.Matches(message, viewModeKeyMap.ShrinkNodeSelectionView):
+		return model.updateLayoutConfiguration(func(c *layoutConfiguration) {
+			if c.nodeSelectionViewHeight > 5 {
+				c.nodeSelectionViewHeight--
+			}
+		})
 
 	default:
 		return util.UpdateSingleChild(&model, &model.nodeViewer, message)
