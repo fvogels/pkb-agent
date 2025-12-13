@@ -3,9 +3,11 @@ package nodeviewer
 import (
 	"log/slog"
 	"pkb-agent/graph/nodes/atom"
+	"pkb-agent/graph/nodes/backblaze"
 	"pkb-agent/graph/nodes/bookmark"
 	"pkb-agent/graph/nodes/snippet"
 	"pkb-agent/ui/debug"
+	"pkb-agent/ui/nodeviewers/bbviewer"
 	"pkb-agent/ui/nodeviewers/bookmarkviewer"
 	"pkb-agent/ui/nodeviewers/nullviewer"
 	"pkb-agent/ui/nodeviewers/snippetviewer"
@@ -77,6 +79,9 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 
 	case *bookmark.Extra:
 		model.viewer = bookmarkviewer.New(nodeData)
+
+	case *backblaze.Extra:
+		model.viewer = bbviewer.New(nodeData)
 
 	default:
 		slog.Debug(
