@@ -1,6 +1,8 @@
 package backblaze
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -46,7 +48,7 @@ func (client *BackblazeClient) Download(ctx context.Context, bucketName string, 
 
 	remoteReader.ConcurrentDownloads = concurrentDownloads
 
-	observableReader := ObservableReader{
+	observableReader := observableReader{
 		observedReader: remoteReader,
 		totalBytesRead: 0,
 		callback:       callback,
@@ -59,13 +61,24 @@ func (client *BackblazeClient) Download(ctx context.Context, bucketName string, 
 	return nil
 }
 
-type ObservableReader struct {
+func (client *BackblazeClient) DownloadToBuffer(ctx context.Context, bucketName string, remoteFilename string, concurrentDownloads int, callback func(progress int)) ([]byte, error) {
+	var buffer bytes.Buffer
+	writer := bufio.NewWriter(&buffer)
+
+	if err := client.Download(ctx, bucketName, remoteFilename, writer, 2, callback); err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
+}
+
+type observableReader struct {
 	observedReader io.Reader
 	totalBytesRead int
 	callback       func(totalBytesRead int)
 }
 
-func (reader *ObservableReader) Read(buffer []byte) (int, error) {
+func (reader *observableReader) Read(buffer []byte) (int, error) {
 	byte_count, err := reader.observedReader.Read(buffer)
 	reader.totalBytesRead += byte_count
 	reader.callback(reader.totalBytesRead)
