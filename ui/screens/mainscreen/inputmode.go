@@ -46,7 +46,7 @@ func NewInputMode() *inputMode {
 
 	vlayout.Add(
 		func(_ util.Size) int { return 10 },
-		layout.Wrap(func(m *Model) *nodeselectionview.Model { return &m.nodeSelectionView }),
+		border.New(layout.Wrap(func(m *Model) *nodeselectionview.Model { return &m.nodeSelectionView })),
 	)
 	vlayout.Add(
 		func(size util.Size) int { return size.Height - 11 },
@@ -76,6 +76,8 @@ func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.
 		return model.onSelectPreviousRemainingNode()
 
 	case key.Matches(message, viewModeKeyMap.Select):
+		model.mode = model.viewMode
+		model.mode.activate(&model)
 		return model.onNodeSelected()
 
 	default:

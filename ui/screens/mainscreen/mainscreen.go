@@ -230,8 +230,6 @@ func (model Model) onSelectNextRemainingNode() (Model, tea.Cmd) {
 }
 
 func (model Model) onNodeSelected() (Model, tea.Cmd) {
-	model.mode = model.viewMode
-
 	selectedNode := model.nodeSelectionView.GetSelectedRemainingNode()
 	if selectedNode != nil {
 		updatedSelectedNodes := append(model.selectedNodes, selectedNode)

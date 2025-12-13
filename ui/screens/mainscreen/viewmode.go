@@ -55,7 +55,7 @@ func NewViewMode() *viewMode {
 
 	vlayout.Add(
 		func(_ util.Size) int { return 10 },
-		layout.Wrap(func(m *Model) *nodeselectionview.Model { return &m.nodeSelectionView }),
+		border.New(layout.Wrap(func(m *Model) *nodeselectionview.Model { return &m.nodeSelectionView })),
 	)
 	vlayout.Add(
 		func(size util.Size) int { return size.Height - 10 },
