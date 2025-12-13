@@ -11,5 +11,5 @@ type ErrMissingName struct {
 }
 
 func (err *ErrMissingName) Error() string {
-	return fmt.Sprintf("atom node missing name in file %s, index %d", err.path.String(), err.index)
+	return fmt.Sprintf("bookmark node missing name in file %s, index %d", err.path.String(), err.index)
 }
