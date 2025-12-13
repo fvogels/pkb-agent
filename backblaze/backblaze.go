@@ -34,7 +34,7 @@ func New(ctx context.Context, application_key string, application_key_id string)
 	return &client, nil
 }
 
-func (client *BackblazeClient) Download(ctx context.Context, bucketName string, remoteFilename string, writer io.Writer, concurrentDownloads int) error {
+func (client *BackblazeClient) Download(ctx context.Context, bucketName string, remoteFilename string, writer io.Writer, concurrentDownloads int, callback func(progress int)) error {
 	bucket, err := client.b2client.Bucket(ctx, bucketName)
 	if err != nil {
 		return err
@@ -46,21 +46,41 @@ func (client *BackblazeClient) Download(ctx context.Context, bucketName string, 
 
 	remoteReader.ConcurrentDownloads = concurrentDownloads
 
-	if _, err := io.Copy(writer, remoteReader); err != nil {
+	observableReader := ObservableReader{
+		observedReader: remoteReader,
+		totalBytesRead: 0,
+		callback:       callback,
+	}
+
+	if _, err := io.Copy(writer, &observableReader); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (client *BackblazeClient) DownloadToFile(ctx context.Context, bucketName string, remoteFilename string, localFilename string, concurrentDownloads int) error {
+type ObservableReader struct {
+	observedReader io.Reader
+	totalBytesRead int
+	callback       func(totalBytesRead int)
+}
+
+func (reader *ObservableReader) Read(buffer []byte) (int, error) {
+	byte_count, err := reader.observedReader.Read(buffer)
+	reader.totalBytesRead += byte_count
+	reader.callback(reader.totalBytesRead)
+
+	return byte_count, err
+}
+
+func (client *BackblazeClient) DownloadToFile(ctx context.Context, bucketName string, remoteFilename string, localFilename string, concurrentDownloads int, callback func(progress int)) error {
 	localFile, err := os.Create(localFilename)
 	if err != nil {
 		return err
 	}
 	defer localFile.Close()
 
-	if err := client.Download(ctx, bucketName, remoteFilename, localFile, concurrentDownloads); err != nil {
+	if err := client.Download(ctx, bucketName, remoteFilename, localFile, concurrentDownloads, callback); err != nil {
 		return err
 	}
 
