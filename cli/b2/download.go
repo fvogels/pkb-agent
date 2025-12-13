@@ -2,6 +2,7 @@ package b2
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"pkb-agent/backblaze"
 
@@ -53,7 +54,21 @@ func (c *DownloadCommand) execute() error {
 		return err
 	}
 
-	client.DownloadToFile(ctx, c.bucketName, c.remoteFilename, c.localFilename, c.concurrentDownloads)
+	channel := make(chan int)
+
+	go func() {
+		client.DownloadToFile(ctx, c.bucketName, c.remoteFilename, c.localFilename, c.concurrentDownloads, func(n int) {
+			channel <- n
+		})
+
+		channel <- -1
+	}()
+
+	value := <-channel
+	for value != -1 {
+		fmt.Printf("Downloaded %d bytes\n", value)
+		value = <-channel
+	}
 
 	return nil
 }
