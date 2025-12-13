@@ -90,7 +90,7 @@ func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.C
 		return model.onUnselectLast()
 
 	default:
-		return model, nil
+		return util.UpdateSingleChild(&model, &model.nodeViewer, message)
 	}
 }
 
