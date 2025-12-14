@@ -20,7 +20,7 @@ func NewBuilder() *Builder {
 
 func (builder *Builder) AddNode(node *Node) error {
 	if _, alreadyExists := builder.nodes[node.Name]; alreadyExists {
-		slog.Debug("Multiple nodes with same name", slog.String("name", node.Name))
+		slog.Error("Multiple nodes with same name", slog.String("name", node.Name))
 		return &ErrNameClash{
 			name: node.Name,
 		}
@@ -54,7 +54,7 @@ func (builder *Builder) ensureLinkedNodeExistence() error {
 	for _, node := range nodes {
 		for _, link := range node.Links {
 			if _, found := nodes[link]; !found {
-				slog.Debug("Unknown link", slog.String("node", node.Name), slog.String("link target", link))
+				slog.Error("Unknown link", slog.String("node", node.Name), slog.String("link target", link))
 				foundUnknownLinks = true
 			}
 		}

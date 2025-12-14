@@ -138,7 +138,7 @@ func loadGraph() *graph.Graph {
 
 	g, err := graph.LoadGraph(path, loader)
 	if err != nil {
-		slog.Debug("error loading graph", slog.String("error", err.Error()))
+		slog.Error("error loading graph", slog.String("error", err.Error()))
 		panic("failed to load graph!")
 	}
 
@@ -214,10 +214,6 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 			return strings.ToLower(remaining[i].Name) < strings.ToLower(remaining[j].Name)
 		})
 
-		if bestMatch != nil {
-			slog.Debug("best match", "value", *bestMatch)
-		}
-
 		bestMatchIndex := 0
 		if bestMatch != nil {
 			var found bool
@@ -240,7 +236,6 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 			}
 		}
 
-		slog.Debug("updating remaining nodes", slog.Int("bestMatchIndex", bestMatchIndex))
 		return msgRemainingNodesUpdated{
 			remainingNodes: remaining,
 			selectionIndex: bestMatchIndex,
