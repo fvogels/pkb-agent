@@ -15,3 +15,7 @@ type MsgItemSelected[T any] struct {
 }
 
 type MsgNoItemSelected struct{}
+
+type MsgSetItemRenderer[T any] struct {
+	Renderer func(item T) string
+}

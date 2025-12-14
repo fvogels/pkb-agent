@@ -37,9 +37,11 @@ func (emptyList *emptyList) Length() int {
 }
 
 func New() Model {
-	remainingNodesView := listview.New(renderNode, true, wrapRemainingNodesViewMessage)
+	dummyRenderer := func(node *graph.Node) string { return "" }
 
-	selectedNodesView := listview.New(renderNode, false, wrapSelectedNodesViewMessage)
+	remainingNodesView := listview.New(dummyRenderer, true, wrapRemainingNodesViewMessage)
+
+	selectedNodesView := listview.New(dummyRenderer, false, wrapSelectedNodesViewMessage)
 	selectedNodesView.SetNonselectedStyle(lipgloss.NewStyle().Background(lipgloss.Color("#AAFFAA")))
 
 	return Model{
@@ -157,9 +159,17 @@ func (model Model) updateChildSizes() (Model, tea.Cmd) {
 		Height: model.selectedNodes.Length(),
 	}, &commands)
 
+	util.UpdateChild(&model.selectedNodesView, listview.MsgSetItemRenderer[*graph.Node]{
+		Renderer: model.createRenderer(),
+	}, &commands)
+
 	util.UpdateChild(&model.remainingNodesView, tea.WindowSizeMsg{
 		Width:  model.size.Width,
 		Height: model.size.Height - model.selectedNodes.Length(),
+	}, &commands)
+
+	util.UpdateChild(&model.remainingNodesView, listview.MsgSetItemRenderer[*graph.Node]{
+		Renderer: model.createRenderer(),
 	}, &commands)
 
 	return model, tea.Batch(commands...)
@@ -173,6 +183,12 @@ func (model Model) signalRemainingNodeHighlighted(node *graph.Node) tea.Cmd {
 	}
 }
 
+func (model Model) createRenderer() func(*graph.Node) string {
+	return func(node *graph.Node) string {
+		return node.Name
+	}
+}
+
 func wrapSelectedNodesViewMessage(message tea.Msg) tea.Msg {
 	return msgSelectedNodesWrapper{
 		wrapped: message,
@@ -183,8 +199,4 @@ func wrapRemainingNodesViewMessage(message tea.Msg) tea.Msg {
 	return msgRemainingNodesWrapper{
 		wrapped: message,
 	}
-}
-
-func renderNode(node *graph.Node) string {
-	return node.Name
 }

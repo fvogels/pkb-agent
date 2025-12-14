@@ -65,6 +65,9 @@ func (model Model[T]) TypedUpdate(message tea.Msg) (Model[T], tea.Cmd) {
 	case MsgSelectNext:
 		return model.onSelectNext()
 
+	case MsgSetItemRenderer[T]:
+		return model.onSetItemRenderer(message)
+
 	case tea.WindowSizeMsg:
 		return model.onResize(message)
 	}
@@ -216,4 +219,9 @@ func (model *Model[T]) SetNonselectedStyle(style lipgloss.Style) {
 
 func (model *Model[T]) SetEmptyListMessage(message string) {
 	model.emptyListMessage = message
+}
+
+func (model Model[T]) onSetItemRenderer(message MsgSetItemRenderer[T]) (Model[T], tea.Cmd) {
+	model.itemRenderer = message.Renderer
+	return model, nil
 }
