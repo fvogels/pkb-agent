@@ -107,11 +107,6 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 
 func (model Model) View() string {
 	return model.layout.LayoutView(&model)
-	// return lipgloss.JoinVertical(
-	// 	0,
-	// 	model.linksView.View(),
-	// 	model.backlinksView.View(),
-	// )
 }
 
 func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
@@ -123,20 +118,6 @@ func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	command := model.layout.LayoutResize(&model, model.size)
 
 	return model, command
-
-	// commands := []tea.Cmd{}
-
-	// util.UpdateChild(&model.linksView, tea.WindowSizeMsg{
-	// 	Width:  model.size.Width,
-	// 	Height: message.Height / 2,
-	// }, &commands)
-
-	// util.UpdateChild(&model.backlinksView, tea.WindowSizeMsg{
-	// 	Width:  model.size.Width,
-	// 	Height: message.Height - message.Height/2,
-	// }, &commands)
-
-	// return model, tea.Batch(commands...)
 }
 
 func wrapLinksViewMessage(message tea.Msg) tea.Msg {
