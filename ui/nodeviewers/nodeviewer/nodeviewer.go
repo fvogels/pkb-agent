@@ -78,12 +78,12 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 
 	util.UpdateChild(&model.linksView, tea.WindowSizeMsg{
 		Width:  message.Width,
-		Height: 20,
+		Height: 10,
 	}, &commands)
 
 	util.UpdateUntypedChild(&model.viewer, tea.WindowSizeMsg{
 		Width:  message.Width,
-		Height: message.Height - 20,
+		Height: message.Height - 10,
 	}, &commands)
 
 	return model, tea.Batch(commands...)
