@@ -62,7 +62,8 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 }
 
 func (model Model) View() string {
-	return lipgloss.JoinVertical(0,
+	return lipgloss.JoinVertical(
+		0,
 		model.linksView.View(),
 		model.viewer.View(),
 	)
