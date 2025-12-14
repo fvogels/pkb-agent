@@ -6,6 +6,7 @@ import (
 	"pkb-agent/graph/nodes/backblaze"
 	"pkb-agent/graph/nodes/bookmark"
 	"pkb-agent/graph/nodes/snippet"
+	"pkb-agent/ui/components/linksview"
 	"pkb-agent/ui/debug"
 	"pkb-agent/ui/nodeviewers/bbviewer"
 	"pkb-agent/ui/nodeviewers/bookmarkviewer"
@@ -15,21 +16,27 @@ import (
 	"reflect"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
-	size   util.Size
-	viewer tea.Model
+	size      util.Size
+	viewer    tea.Model
+	linksView linksview.Model
 }
 
 func New() Model {
 	return Model{
-		viewer: nullviewer.New(),
+		viewer:    nullviewer.New(),
+		linksView: linksview.New(),
 	}
 }
 
 func (model Model) Init() tea.Cmd {
-	return model.viewer.Init()
+	return tea.Batch(
+		model.viewer.Init(),
+		model.linksView.Init(),
+	)
 }
 
 func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
@@ -47,12 +54,18 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		return model.onSetNode(message)
 
 	default:
-		return util.UpdateSingleUntypedChild(&model, &model.viewer, message)
+		commands := []tea.Cmd{}
+		util.UpdateUntypedChild(&model.viewer, message, &commands)
+		util.UpdateChild(&model.linksView, message, &commands)
+		return model, tea.Batch(commands...)
 	}
 }
 
 func (model Model) View() string {
-	return model.viewer.View()
+	return lipgloss.JoinVertical(0,
+		model.linksView.View(),
+		model.viewer.View(),
+	)
 }
 
 func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
@@ -61,15 +74,32 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: message.Height,
 	}
 
-	updatedViewer, command := model.viewer.Update(message)
-	model.viewer = updatedViewer
+	commands := []tea.Cmd{}
 
-	return model, command
+	util.UpdateChild(&model.linksView, tea.WindowSizeMsg{
+		Width:  message.Width,
+		Height: 20,
+	}, &commands)
+
+	util.UpdateUntypedChild(&model.viewer, tea.WindowSizeMsg{
+		Width:  message.Width,
+		Height: message.Height - 20,
+	}, &commands)
+
+	return model, tea.Batch(commands...)
 }
 
 func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 	node := message.Node
+	commands := []tea.Cmd{}
 
+	// Update links and backlinks
+	util.UpdateChild(&model.linksView, linksview.MsgSetLinks{
+		Links:     NewSliceAdapter(node.Links),
+		Backlinks: NewSliceAdapter(node.Backlinks),
+	}, &commands)
+
+	// Select correct viewer appropriate for node type
 	switch nodeData := node.Extra.(type) {
 	case *atom.Extra:
 		model.viewer = nullviewer.New()
@@ -92,8 +122,6 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 		model.viewer = nullviewer.New()
 	}
 
-	commands := []tea.Cmd{}
-
 	commands = append(commands, model.viewer.Init())
 	util.UpdateUntypedChild(&model.viewer, tea.WindowSizeMsg{
 		Width:  model.size.Width,
@@ -101,4 +129,22 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 	}, &commands)
 
 	return model, tea.Batch(commands...)
+}
+
+type SliceAdapter[T any] struct {
+	slice []T
+}
+
+func NewSliceAdapter[T any](slice []T) *SliceAdapter[T] {
+	return &SliceAdapter[T]{
+		slice: slice,
+	}
+}
+
+func (adapter *SliceAdapter[T]) Length() int {
+	return len(adapter.slice)
+}
+
+func (adapter *SliceAdapter[T]) At(index int) T {
+	return adapter.slice[index]
 }
