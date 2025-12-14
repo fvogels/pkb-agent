@@ -42,12 +42,12 @@ func New() Model {
 		return link
 	}
 
-	hlayout := horizontal.New[Model]()
-	hlayout.Add(
+	layoutRoot := horizontal.New[Model]()
+	layoutRoot.Add(
 		func(size util.Size) int { return size.Width - size.Width/2 },
 		layout.Wrap(func(m *Model) *listview.Model[string] { return &m.linksView }),
 	)
-	hlayout.Add(
+	layoutRoot.Add(
 		func(size util.Size) int { return size.Width / 2 },
 		layout.Wrap(func(m *Model) *listview.Model[string] { return &m.backlinksView }),
 	)
@@ -62,7 +62,7 @@ func New() Model {
 		backlinks:     &emptyList{},
 		linksView:     linksView,
 		backlinksView: backlinksView,
-		layout:        &hlayout,
+		layout:        &layoutRoot,
 	}
 }
 
