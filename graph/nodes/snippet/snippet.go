@@ -1,9 +1,13 @@
 package snippet
 
 import (
+	"bufio"
+	"bytes"
 	"os"
 	pathlib "pkb-agent/util/pathlib"
 	"strings"
+
+	"github.com/alecthomas/chroma/v2/quick"
 )
 
 type Extra struct {
@@ -34,4 +38,19 @@ func (data *Extra) GetSource() (string, error) {
 	})
 
 	return strings.Join(lines, "\n"), nil
+}
+
+func (data *Extra) GetHighlightedSource() (string, error) {
+	rawSource, err := data.GetSource()
+	if err != nil {
+		return "", err
+	}
+
+	var buffer bytes.Buffer
+	writer := bufio.NewWriter(&buffer)
+	if err := quick.Highlight(writer, rawSource, "go", "terminal16m", "monokai"); err != nil {
+		return "", err
+	}
+
+	return buffer.String(), nil
 }
