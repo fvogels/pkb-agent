@@ -10,6 +10,7 @@ import (
 
 type Layout[T any] struct {
 	children []child[T]
+	size     util.Size
 }
 
 type child[T any] struct {
@@ -25,6 +26,7 @@ func New[T any]() Layout[T] {
 }
 
 func (layout *Layout[T]) LayoutResize(parent *T, size util.Size) tea.Cmd {
+	layout.size = size
 	commands := []tea.Cmd{}
 
 	for index := range layout.children {
@@ -46,7 +48,7 @@ func (layout *Layout[T]) LayoutView(model *T) string {
 	parts := []string{}
 
 	for _, child := range layout.children {
-		style := lipgloss.NewStyle().Height(child.computedHeight)
+		style := lipgloss.NewStyle().Width(layout.size.Width).Height(child.computedHeight)
 		part := style.Render(child.component.LayoutView(model))
 		parts = append(parts, part)
 	}
