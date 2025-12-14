@@ -160,7 +160,9 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 	selectedNodes := model.selectedNodes
 
 	return func() tea.Msg {
-		nameSet := util.NewSet[string]()
+		// nameSet is used to prevent duplicates
+		// Adding the selected nodes ensures that already selected nodes do not appear as remaining choices
+		nameSet := util.NewSetFromSlice(util.Map(selectedNodes, func(node *graph.Node) string { return node.Name }))
 		remaining := []*graph.Node{}
 
 		for iterator.Current() != nil {
