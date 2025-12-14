@@ -7,6 +7,7 @@ import (
 	"pkb-agent/ui/screens/mainscreen"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"golang.design/x/clipboard"
 )
 
 func Start(verbose bool) error {
@@ -19,6 +20,12 @@ func Start(verbose bool) error {
 
 		logger := slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug}))
 		slog.SetDefault(logger)
+	}
+
+	err := clipboard.Init()
+	if err != nil {
+		slog.Error("Failed to initialize clipboard")
+		return fmt.Errorf("failed to initialize clipboard: %v", err)
 	}
 
 	model := mainscreen.New()
