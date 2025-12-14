@@ -44,10 +44,10 @@ func (data *Extra) GetSource() (string, error) {
 	return strings.Join(lines, "\n"), nil
 }
 
-func (data *Extra) GetHighlightedSource() (string, error) {
+func (data *Extra) GetHighlightedSource() (string, string, error) {
 	rawSource, err := data.GetSource()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	if !slices.Contains(lexers.Names(true), data.LanguageForHighlighting) {
@@ -60,9 +60,9 @@ func (data *Extra) GetHighlightedSource() (string, error) {
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
 	if err := quick.Highlight(writer, rawSource, data.LanguageForHighlighting, "terminal16m", "monokai"); err != nil {
-		return "", err
+		return "", "", err
 	}
 	writer.Flush()
 
-	return buffer.String(), nil
+	return rawSource, buffer.String(), nil
 }

@@ -1,5 +1,6 @@
 package snippetviewer
 
 type msgSnippetLoaded struct {
-	source string
+	rawSource       string
+	formattedSource string
 }

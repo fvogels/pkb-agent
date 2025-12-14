@@ -9,15 +9,16 @@ import (
 )
 
 type Model struct {
-	size     util.Size
-	nodeData *snippet.Extra
-	source   string
+	size            util.Size
+	nodeData        *snippet.Extra
+	rawSource       string
+	formattedSource string
 }
 
 func New(nodeData *snippet.Extra) Model {
 	return Model{
-		nodeData: nodeData,
-		source:   "loading",
+		nodeData:        nodeData,
+		formattedSource: "loading",
 	}
 }
 
@@ -40,7 +41,7 @@ func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (model Model) View() string {
-	return model.source
+	return model.formattedSource
 }
 
 func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
@@ -56,18 +57,22 @@ func (model *Model) signalLoadSnippet() tea.Cmd {
 	data := model.nodeData
 
 	return func() tea.Msg {
-		source, err := data.GetHighlightedSource()
+		rawSource, formattedSource, err := data.GetHighlightedSource()
 		if err != nil {
 			panic("failed to get snippet source")
 		}
 
 		return msgSnippetLoaded{
-			source: source,
+			rawSource:       rawSource,
+			formattedSource: formattedSource,
 		}
 	}
 }
 
 func (model Model) onSnippetLoaded(message msgSnippetLoaded) (Model, tea.Cmd) {
-	model.source = message.source
+	model.rawSource = message.rawSource
+	model.formattedSource = message.formattedSource
+	return model, nil
+}
 	return model, nil
 }
