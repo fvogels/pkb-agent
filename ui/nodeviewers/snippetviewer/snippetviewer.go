@@ -28,6 +28,10 @@ func (model Model) Init() tea.Cmd {
 }
 
 func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
+	return model.TypedUpdate(message)
+}
+
+func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	debug.ShowBubbleTeaMessage(message)
 
 	switch message := message.(type) {
