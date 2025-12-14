@@ -37,13 +37,9 @@ func (emptyList *emptyList) Length() int {
 }
 
 func New() Model {
-	renderer := func(node *graph.Node) string {
-		return node.Name
-	}
+	remainingNodesView := listview.New(renderNode, true, wrapRemainingNodesViewMessage)
 
-	remainingNodesView := listview.New(renderer, true, wrapRemainingNodesViewMessage)
-
-	selectedNodesView := listview.New(renderer, false, wrapSelectedNodesViewMessage)
+	selectedNodesView := listview.New(renderNode, false, wrapSelectedNodesViewMessage)
 	selectedNodesView.SetNonselectedStyle(lipgloss.NewStyle().Background(lipgloss.Color("#AAFFAA")))
 
 	return Model{
@@ -187,4 +183,8 @@ func wrapRemainingNodesViewMessage(message tea.Msg) tea.Msg {
 	return msgRemainingNodesWrapper{
 		wrapped: message,
 	}
+}
+
+func renderNode(node *graph.Node) string {
+	return node.Name
 }
