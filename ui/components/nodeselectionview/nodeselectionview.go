@@ -185,7 +185,29 @@ func (model Model) signalRemainingNodeHighlighted(node *graph.Node) tea.Cmd {
 
 func (model Model) createRenderer() func(*graph.Node) string {
 	return func(node *graph.Node) string {
-		return node.Name
+		isLeaf := len(node.Backlinks) == 0
+		leafSymbol := "*"
+		treeSymbol := " "
+
+		var symbol string
+		if isLeaf {
+			symbol = leafSymbol
+		} else {
+			symbol = treeSymbol
+		}
+
+		return lipgloss.JoinHorizontal(
+			0,
+			lipgloss.NewStyle().Width(model.size.Width-10).Render(
+				lipgloss.JoinHorizontal(
+					0,
+					symbol,
+					" ",
+					node.Name,
+				),
+			),
+			node.Type,
+		)
 	}
 }
 
