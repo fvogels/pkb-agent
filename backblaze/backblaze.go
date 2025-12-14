@@ -69,6 +69,7 @@ func (client *BackblazeClient) DownloadToBuffer(ctx context.Context, bucketName 
 		return nil, err
 	}
 
+	writer.Flush()
 	return buffer.Bytes(), nil
 }
 

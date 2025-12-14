@@ -62,6 +62,7 @@ func (data *Extra) GetHighlightedSource() (string, error) {
 	if err := quick.Highlight(writer, rawSource, data.LanguageForHighlighting, "terminal16m", "monokai"); err != nil {
 		return "", err
 	}
+	writer.Flush()
 
 	return buffer.String(), nil
 }
