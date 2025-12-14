@@ -50,11 +50,6 @@ func (data *Extra) GetHighlightedSource() (string, error) {
 		return "", err
 	}
 
-	// text indicates no highlighting is required
-	if data.LanguageForHighlighting == "text" {
-		return rawSource, nil
-	}
-
 	if !slices.Contains(lexers.Names(true), data.LanguageForHighlighting) {
 		slog.Error(
 			"Unsupported language for highlighting",
