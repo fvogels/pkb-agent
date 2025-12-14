@@ -179,14 +179,9 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 				continue
 			}
 
-			if bestMatch == nil {
-				bestMatch = &name
-			} else {
-				slog.Debug("!!!")
-				if strings.HasPrefix(strings.ToLower(name), input) {
-					if len(name) < len(*bestMatch) {
-						*bestMatch = name
-					}
+			if len(input) > 0 && strings.HasPrefix(strings.ToLower(name), input) {
+				if bestMatch == nil || len(name) < len(*bestMatch) {
+					bestMatch = &name
 				}
 			}
 
