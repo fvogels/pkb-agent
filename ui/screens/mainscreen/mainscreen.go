@@ -37,7 +37,7 @@ type Model struct {
 
 func New() Model {
 	layoutConfiguration := layoutConfiguration{
-		nodeSelectionViewHeight: 10,
+		nodeSelectionViewHeight: 20,
 	}
 	viewMode := NewViewMode(&layoutConfiguration)
 	inputMode := NewInputMode(&layoutConfiguration)
