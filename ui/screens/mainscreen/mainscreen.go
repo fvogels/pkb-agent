@@ -12,6 +12,7 @@ import (
 	"pkb-agent/util/pathlib"
 	"slices"
 	"sort"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -89,6 +90,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 			RemainingNodes: &SliceAdapter[*graph.Node]{
 				slice: model.remainingNodes,
 			},
+			SelectionIndex: message.selectionIndex,
 		})
 
 	case nodeselectionview.MsgRemainingNodeHighlighted:
@@ -165,6 +167,9 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 		nameSet := util.NewSetFromSlice(util.Map(selectedNodes, func(node *graph.Node) string { return node.Name }))
 		remaining := []*graph.Node{}
 
+		// We need to keep track of it so that we can have it selected in the list
+		var bestMatch *string = nil
+
 		for iterator.Current() != nil {
 			// The same node can occur more than once during iteration
 			// Ensure that we add each node only once to remainingNodes
@@ -172,6 +177,17 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 			if nameSet.Contains(name) {
 				iterator.Next()
 				continue
+			}
+
+			if bestMatch == nil {
+				bestMatch = &name
+			} else {
+				slog.Debug("!!!")
+				if strings.HasPrefix(strings.ToLower(name), input) {
+					if len(name) < len(*bestMatch) {
+						*bestMatch = name
+					}
+				}
 			}
 
 			if !util.All(selectedNodes, func(selectedNode *graph.Node) bool {
@@ -200,10 +216,39 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 		}
 
 		sort.Slice(remaining, func(i, j int) bool {
-			return remaining[i].Name < remaining[j].Name
+			return strings.ToLower(remaining[i].Name) < strings.ToLower(remaining[j].Name)
 		})
+
+		if bestMatch != nil {
+			slog.Debug("best match", "value", *bestMatch)
+		}
+
+		bestMatchIndex := 0
+		if bestMatch != nil {
+			var found bool
+			bestMatchIndex, found = slices.BinarySearchFunc(
+				remaining,
+				*bestMatch,
+				func(node *graph.Node, target string) int {
+					if node.Name < target {
+						return -1
+					}
+					if node.Name > target {
+						return 1
+					}
+					return 0
+				},
+			)
+
+			if !found {
+				bestMatchIndex = 0
+			}
+		}
+
+		slog.Debug("updating remaining nodes", slog.Int("bestMatchIndex", bestMatchIndex))
 		return msgRemainingNodesUpdated{
 			remainingNodes: remaining,
+			selectionIndex: bestMatchIndex,
 		}
 	}
 }

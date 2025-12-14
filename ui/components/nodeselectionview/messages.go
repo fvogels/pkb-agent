@@ -8,6 +8,7 @@ import (
 
 type MsgSetRemainingNodes struct {
 	RemainingNodes List
+	SelectionIndex int
 }
 
 type MsgSetSelectedNodes struct {

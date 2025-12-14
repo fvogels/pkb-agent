@@ -161,8 +161,9 @@ func (model Model[T]) onSetItems(message MsgSetItems[T]) (Model[T], tea.Cmd) {
 		return model, nil
 	}
 
-	model.selectedIndex = 0
-	model.firstVisibleIndex = 0
+	model.selectedIndex = message.SelectionIndex
+	model.firstVisibleIndex = util.MaxInt(0, message.SelectionIndex-2)
+	model.ensureSelectedIsVisible()
 
 	if model.items.Length() > 0 {
 		return model, model.signalItemSelected()

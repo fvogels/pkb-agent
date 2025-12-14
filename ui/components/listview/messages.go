@@ -1,7 +1,8 @@
 package listview
 
 type MsgSetItems[T any] struct {
-	Items List[T]
+	Items          List[T]
+	SelectionIndex int
 }
 
 type MsgSelectPrevious struct{}

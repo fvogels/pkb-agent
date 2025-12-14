@@ -76,7 +76,8 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		model.remainingNodes = message.RemainingNodes
 
 		return util.UpdateSingleChild(&model, &model.remainingNodesView, listview.MsgSetItems[*graph.Node]{
-			Items: message.RemainingNodes,
+			Items:          message.RemainingNodes,
+			SelectionIndex: message.SelectionIndex,
 		})
 
 	case MsgSetSelectedNodes:

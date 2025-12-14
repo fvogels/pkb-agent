@@ -22,4 +22,5 @@ type msgToSelectedNodeView struct {
 
 type msgRemainingNodesUpdated struct {
 	remainingNodes []*graph.Node
+	selectionIndex int
 }
