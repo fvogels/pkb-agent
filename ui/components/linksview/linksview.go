@@ -4,10 +4,11 @@ import (
 	"log/slog"
 	"pkb-agent/ui/components/listview"
 	"pkb-agent/ui/debug"
+	"pkb-agent/ui/layout"
+	"pkb-agent/ui/layout/horizontal"
 	"pkb-agent/util"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
@@ -18,6 +19,7 @@ type Model struct {
 
 	linksView     listview.Model[string]
 	backlinksView listview.Model[string]
+	layout        layout.Layout[Model]
 }
 
 type List interface {
@@ -40,6 +42,16 @@ func New() Model {
 		return link
 	}
 
+	hlayout := horizontal.New[Model]()
+	hlayout.Add(
+		func(size util.Size) int { return size.Width - size.Width/2 },
+		layout.Wrap(func(m *Model) *listview.Model[string] { return &m.linksView }),
+	)
+	hlayout.Add(
+		func(size util.Size) int { return size.Width / 2 },
+		layout.Wrap(func(m *Model) *listview.Model[string] { return &m.backlinksView }),
+	)
+
 	linksView := listview.New(renderer, false, wrapLinksViewMessage)
 	linksView.SetEmptyListMessage("no links")
 	backlinksView := listview.New(renderer, false, wrapBacklinksViewMessage)
@@ -50,6 +62,7 @@ func New() Model {
 		backlinks:     &emptyList{},
 		linksView:     linksView,
 		backlinksView: backlinksView,
+		layout:        &hlayout,
 	}
 }
 
@@ -93,11 +106,12 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 }
 
 func (model Model) View() string {
-	return lipgloss.JoinVertical(
-		0,
-		model.linksView.View(),
-		model.backlinksView.View(),
-	)
+	return model.layout.LayoutView(&model)
+	// return lipgloss.JoinVertical(
+	// 	0,
+	// 	model.linksView.View(),
+	// 	model.backlinksView.View(),
+	// )
 }
 
 func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
@@ -106,19 +120,23 @@ func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: message.Height,
 	}
 
-	commands := []tea.Cmd{}
+	command := model.layout.LayoutResize(&model, model.size)
 
-	util.UpdateChild(&model.linksView, tea.WindowSizeMsg{
-		Width:  model.size.Width,
-		Height: message.Height / 2,
-	}, &commands)
+	return model, command
 
-	util.UpdateChild(&model.backlinksView, tea.WindowSizeMsg{
-		Width:  model.size.Width,
-		Height: message.Height - message.Height/2,
-	}, &commands)
+	// commands := []tea.Cmd{}
 
-	return model, tea.Batch(commands...)
+	// util.UpdateChild(&model.linksView, tea.WindowSizeMsg{
+	// 	Width:  model.size.Width,
+	// 	Height: message.Height / 2,
+	// }, &commands)
+
+	// util.UpdateChild(&model.backlinksView, tea.WindowSizeMsg{
+	// 	Width:  model.size.Width,
+	// 	Height: message.Height - message.Height/2,
+	// }, &commands)
+
+	// return model, tea.Batch(commands...)
 }
 
 func wrapLinksViewMessage(message tea.Msg) tea.Msg {
