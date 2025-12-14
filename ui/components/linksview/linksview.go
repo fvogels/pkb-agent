@@ -5,10 +5,12 @@ import (
 	"pkb-agent/ui/components/listview"
 	"pkb-agent/ui/debug"
 	"pkb-agent/ui/layout"
+	"pkb-agent/ui/layout/header"
 	"pkb-agent/ui/layout/horizontal"
 	"pkb-agent/util"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
@@ -45,7 +47,10 @@ func New() Model {
 	layoutRoot := horizontal.New[Model]()
 	layoutRoot.Add(
 		func(size util.Size) int { return size.Width - size.Width/2 },
-		layout.Wrap(func(m *Model) *listview.Model[string] { return &m.linksView }),
+		header.New(
+			lipgloss.NewStyle().Background(lipgloss.Color("#FFAAAA")).Render("Links"),
+			layout.Wrap(func(m *Model) *listview.Model[string] { return &m.linksView }),
+		),
 	)
 	layoutRoot.Add(
 		func(size util.Size) int { return size.Width / 2 },

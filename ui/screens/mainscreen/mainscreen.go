@@ -157,7 +157,7 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 }
 
 func (model Model) signalUpdateRemainingNodes() tea.Cmd {
-	input := model.textInput.GetInput()
+	input := strings.ToLower(model.textInput.GetInput())
 	iterator := model.graph.FindMatchingNodes(input)
 	selectedNodes := model.selectedNodes
 
