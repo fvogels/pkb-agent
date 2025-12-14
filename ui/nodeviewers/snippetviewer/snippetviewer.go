@@ -6,6 +6,7 @@ import (
 	"pkb-agent/util"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"golang.design/x/clipboard"
 )
 
 type Model struct {
@@ -35,6 +36,9 @@ func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 
 	case msgSnippetLoaded:
 		return model.onSnippetLoaded(message)
+
+	case tea.KeyMsg:
+		return model.onKeyPressed(message)
 	}
 
 	return model, nil
@@ -74,5 +78,19 @@ func (model Model) onSnippetLoaded(message msgSnippetLoaded) (Model, tea.Cmd) {
 	model.formattedSource = message.formattedSource
 	return model, nil
 }
+
+func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
+	switch message.String() {
+	case "c":
+		return model.onCopyToClipboard()
+
+	default:
+		return model, nil
+	}
+}
+
+func (model Model) onCopyToClipboard() (Model, tea.Cmd) {
+	clipboard.Write(clipboard.FmtText, []byte(model.rawSource))
+
 	return model, nil
 }
