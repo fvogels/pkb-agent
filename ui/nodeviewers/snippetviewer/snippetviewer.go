@@ -56,7 +56,7 @@ func (model *Model) signalLoadSnippet() tea.Cmd {
 	data := model.nodeData
 
 	return func() tea.Msg {
-		source, err := data.GetSource()
+		source, err := data.GetHighlightedSource()
 		if err != nil {
 			panic("failed to get snippet source")
 		}
