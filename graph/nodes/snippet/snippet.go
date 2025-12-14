@@ -26,11 +26,12 @@ func (data *Extra) GetSource() (string, error) {
 				foundMetadataSeparator = true
 			}
 		} else {
-			lines = append(lines, line)
+			trimmedLine := strings.TrimRight(line, "\n\r ")
+			lines = append(lines, trimmedLine)
 		}
 
 		return true
 	})
 
-	return strings.Join(lines, ""), nil
+	return strings.Join(lines, "\n"), nil
 }
