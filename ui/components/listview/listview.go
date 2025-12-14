@@ -212,3 +212,7 @@ func (model *Model[T]) SetSelectedStyle(style lipgloss.Style) {
 func (model *Model[T]) SetNonselectedStyle(style lipgloss.Style) {
 	model.nonselectedItemStyle = style
 }
+
+func (model *Model[T]) SetEmptyListMessage(message string) {
+	model.emptyListMessage = message
+}
