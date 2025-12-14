@@ -10,6 +10,7 @@ import (
 	"pkb-agent/ui/nodeviewers/nodeviewer"
 	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
+	"pkb-agent/util/set"
 	"slices"
 	"sort"
 	"strings"
@@ -164,7 +165,7 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 	return func() tea.Msg {
 		// nameSet is used to prevent duplicates
 		// Adding the selected nodes ensures that already selected nodes do not appear as remaining choices
-		nameSet := util.NewSetFromSlice(util.Map(selectedNodes, func(node *graph.Node) string { return node.Name }))
+		nameSet := set.FromSlice(util.Map(selectedNodes, func(node *graph.Node) string { return node.Name }))
 		remaining := []*graph.Node{}
 
 		// We need to keep track of it so that we can have it selected in the list

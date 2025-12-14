@@ -1,17 +1,17 @@
-package util
+package set
 
 type Set[T comparable] struct {
 	items map[T]bool
 }
 
-func NewSet[T comparable]() Set[T] {
+func New[T comparable]() Set[T] {
 	return Set[T]{
 		items: make(map[T]bool),
 	}
 }
 
-func NewSetFromSlice[T comparable](items []T) Set[T] {
-	set := NewSet[T]()
+func FromSlice[T comparable](items []T) Set[T] {
+	set := New[T]()
 
 	for _, item := range items {
 		set.Add(item)
@@ -87,5 +87,5 @@ func (set Set[T]) IsSupersetOf(other Set[T]) bool {
 }
 
 func (set Set[T]) Copy() Set[T] {
-	return NewSetFromSlice(set.ToSlice())
+	return FromSlice(set.ToSlice())
 }
