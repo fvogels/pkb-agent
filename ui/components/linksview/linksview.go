@@ -48,13 +48,18 @@ func New() Model {
 	layoutRoot.Add(
 		func(size util.Size) int { return size.Width - size.Width/2 },
 		header.New(
-			lipgloss.NewStyle().Background(lipgloss.Color("#FFAAAA")).Render("Links"),
+			"Links",
+			lipgloss.NewStyle().Background(lipgloss.Color("#AAFFAA")),
 			layout.Wrap(func(m *Model) *listview.Model[string] { return &m.linksView }),
 		),
 	)
 	layoutRoot.Add(
 		func(size util.Size) int { return size.Width / 2 },
-		layout.Wrap(func(m *Model) *listview.Model[string] { return &m.backlinksView }),
+		header.New(
+			"Backlinks",
+			lipgloss.NewStyle().Background(lipgloss.Color("#FFAAAA")),
+			layout.Wrap(func(m *Model) *listview.Model[string] { return &m.backlinksView }),
+		),
 	)
 
 	linksView := listview.New(renderer, false, wrapLinksViewMessage)

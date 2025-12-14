@@ -9,15 +9,17 @@ import (
 )
 
 type Layout[T any] struct {
-	header string
-	child  layout.Layout[T]
-	size   util.Size
+	header      string
+	headerStyle lipgloss.Style
+	child       layout.Layout[T]
+	size        util.Size
 }
 
-func New[T any](header string, child layout.Layout[T]) *Layout[T] {
+func New[T any](header string, headerStyle lipgloss.Style, child layout.Layout[T]) *Layout[T] {
 	return &Layout[T]{
-		header: header,
-		child:  child,
+		header:      header,
+		headerStyle: headerStyle,
+		child:       child,
 	}
 }
 
@@ -36,7 +38,7 @@ func (layout *Layout[T]) LayoutResize(parent *T, size util.Size) tea.Cmd {
 }
 
 func (layout *Layout[T]) LayoutView(model *T) string {
-	header := lipgloss.NewStyle().Width(layout.size.Width).Render(layout.header)
+	header := layout.headerStyle.Width(layout.size.Width).Render(layout.header)
 	child := layout.child.LayoutView(model)
 
 	return lipgloss.JoinVertical(0, header, child)
