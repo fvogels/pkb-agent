@@ -51,6 +51,7 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 
 		node := graph.Node{
 			Name:      entry.Name,
+			Type:      "bookmark",
 			Links:     append(entry.Links, "Bookmark"),
 			Backlinks: nil,
 			Extra:     &Extra{URL: entry.URL},

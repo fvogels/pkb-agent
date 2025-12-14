@@ -55,6 +55,7 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 
 	node := graph.Node{
 		Name:      metadata.Name,
+		Type:      "snippet",
 		Links:     append(metadata.Links, "Snippet", metadata.Language),
 		Backlinks: nil,
 		Extra: &Extra{

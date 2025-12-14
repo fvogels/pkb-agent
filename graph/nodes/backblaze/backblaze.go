@@ -62,6 +62,7 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 
 			node := graph.Node{
 				Name:      file.Name,
+				Type:      "file",
 				Links:     append(file.Links, "File"),
 				Backlinks: nil,
 				Extra: &Extra{
