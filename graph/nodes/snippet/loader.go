@@ -1,6 +1,7 @@
 package snippet
 
 import (
+	"fmt"
 	"log/slog"
 	"pkb-agent/graph"
 	pathlib "pkb-agent/util/pathlib"
@@ -16,10 +17,11 @@ func NewLoader() *Loader {
 }
 
 type metadata struct {
-	Name       string
-	Identifier string
-	Links      []string
-	Path       pathlib.Path
+	Name              string       `yaml:"name"`      // Name of the snippet.
+	Language          string       `yaml:"language"`  // Language of the snippet.
+	HighlightLanguage string       `yaml:"highlight"` // Optional: language identifier used for syntax highlighting. If missing, a lowercase version of language will be used.
+	Links             []string     `yaml:"links"`     // Links to other nodes.
+	Path              pathlib.Path `yaml:"path"`      // Absolute path of the file containing the snippet
 }
 
 func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) error) error {
@@ -31,24 +33,33 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 
 	unparsedMetadata, err := loader.extractMetadata(path)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to extract metadata from %s: %v", path.String(), err)
 	}
 
 	metadata, err := loader.parseMetadata(unparsedMetadata)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to parse metadata from %s: %v", path.String(), err)
 	}
 
 	if len(metadata.Name) == 0 {
+		slog.Error("Snippet node is missing name", slog.String("path", path.String()))
 		return &ErrMissingName{path: path}
+	}
+
+	var highlightLanguage string
+	if len(metadata.HighlightLanguage) == 0 {
+		highlightLanguage = strings.ToLower(metadata.Language)
+	} else {
+		highlightLanguage = metadata.HighlightLanguage
 	}
 
 	node := graph.Node{
 		Name:      metadata.Name,
-		Links:     append(metadata.Links, "Snippet"),
+		Links:     append(metadata.Links, "Snippet", metadata.Language),
 		Backlinks: nil,
 		Extra: &Extra{
-			Path: path,
+			Path:                    path,
+			LanguageForHighlighting: highlightLanguage,
 		},
 	}
 

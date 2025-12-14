@@ -3,15 +3,19 @@ package snippet
 import (
 	"bufio"
 	"bytes"
+	"log/slog"
 	"os"
 	pathlib "pkb-agent/util/pathlib"
+	"slices"
 	"strings"
 
+	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/quick"
 )
 
 type Extra struct {
-	Path pathlib.Path
+	Path                    pathlib.Path
+	LanguageForHighlighting string
 }
 
 func (data *Extra) GetSource() (string, error) {
@@ -46,9 +50,21 @@ func (data *Extra) GetHighlightedSource() (string, error) {
 		return "", err
 	}
 
+	// text indicates no highlighting is required
+	if data.LanguageForHighlighting == "text" {
+		return rawSource, nil
+	}
+
+	if !slices.Contains(lexers.Names(true), data.LanguageForHighlighting) {
+		slog.Error(
+			"Unsupported language for highlighting",
+			slog.String("language", data.LanguageForHighlighting),
+		)
+	}
+
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
-	if err := quick.Highlight(writer, rawSource, "go", "terminal16m", "monokai"); err != nil {
+	if err := quick.Highlight(writer, rawSource, data.LanguageForHighlighting, "terminal16m", "monokai"); err != nil {
 		return "", err
 	}
 
