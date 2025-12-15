@@ -27,6 +27,8 @@ func TestLinks(t *testing.T) {
 		{"a", "b", "cf", "bx", "c"},
 		{"a", "ab", "b", "ba"},
 		{"b", "ba", "bb", "bc", "bd"},
+		{"b", "baaaaa", "bo"},
+		{"bash", "bookmark", "bubble"},
 	}
 
 	for _, testCase := range testCases {
