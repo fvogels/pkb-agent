@@ -71,11 +71,11 @@ func (iterator *MatchIterator) Next() {
 	iterator.index++
 
 	if iterator.index == len(iterator.current.Terminals) {
-		iterator.current = iterator.current.NextTerminal
-		iterator.index = 0
-
-		if iterator.current != nil && iterator.current.NextTerminalDepth <= iterator.minimalDepth {
+		if iterator.current != nil && iterator.current.NextTerminalDepth < iterator.minimalDepth {
 			iterator.current = nil
+		} else {
+			iterator.current = iterator.current.NextTerminal
+			iterator.index = 0
 		}
 	}
 }
