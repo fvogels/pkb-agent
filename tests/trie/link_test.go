@@ -4,6 +4,7 @@ package trie
 
 import (
 	"pkb-agent/trie"
+	"slices"
 	"strings"
 	"testing"
 
@@ -14,12 +15,17 @@ func TestLinks(t *testing.T) {
 	testCases := [][]string{
 		{"a", "b"},
 		{"aaa", "aab"},
+		{"aab", "aaa"},
 		{"aaa", "aab"},
 		{"aaa", "aba"},
 		{"aaa", "baa"},
 		{"aa", "aaa"},
+		{"aaa", "aa"},
 		{"aa", "aaa", "aaaa"},
 		{"aa", "aaa", "aaaab"},
+		{"a", "b", "bx", "c"},
+		{"a", "b", "cf", "bx", "c"},
+		{"a", "ab", "b", "ba"},
 	}
 
 	for _, testCase := range testCases {
@@ -36,6 +42,8 @@ func testLinks(t *testing.T, nodes []string) {
 		builder.Add(node, node)
 	}
 	root := builder.Finish()
+
+	slices.Sort(nodes)
 
 	for i := range len(nodes) - 1 {
 		n1 := root.Descend(nodes[i])
