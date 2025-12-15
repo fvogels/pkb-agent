@@ -1,7 +1,6 @@
 package mdviewer
 
 import (
-	"log/slog"
 	"pkb-agent/graph/nodes/markdown"
 	"pkb-agent/ui/components/markdownview"
 	"pkb-agent/ui/debug"
@@ -74,7 +73,6 @@ func (model *Model) signalLoadMarkdown() tea.Cmd {
 }
 
 func (model Model) onMarkdownLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) {
-	slog.Debug("markdown loaded", "source", message.source)
 	return util.UpdateSingleChild(&model, &model.viewer, markdownview.MsgSetSource{
 		Source: message.source,
 	})
