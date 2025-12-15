@@ -62,10 +62,6 @@ func (loader *Loader) extractMetadata(path pathlib.Path) (string, error) {
 		return "", err
 	}
 
-	slog.Debug("!!!", "x", len(file.Sections[0].Lines))
-	slog.Debug("!!!", "x", len(file.Sections[1].Lines))
-	slog.Debug("!!!", "x", len(file.Sections[2].Lines))
-
 	if len(file.Sections) < 2 {
 		return "", &ErrMalformed{path: path}
 	}
