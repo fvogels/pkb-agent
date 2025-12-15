@@ -29,6 +29,8 @@ func LoadSectionedFile(path pathlib.Path, delimiterPredicate func(string) bool) 
 		if delimiterPredicate(line) {
 			sections = append(sections, Section{Lines: currentSection})
 			currentSection = []string{}
+		} else {
+			currentSection = append(currentSection, line)
 		}
 
 		return true
