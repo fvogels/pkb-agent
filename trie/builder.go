@@ -47,12 +47,12 @@ func (builder *Builder[T]) addLinks() {
 	minDepth := 0
 
 	walker := func(node *Node[T]) {
+		node.NextTerminal = lastTerminal
+		node.NextTerminalDepth = minDepth - 1
+
 		if node.Depth < minDepth {
 			minDepth = node.Depth
 		}
-
-		node.NextTerminal = lastTerminal
-		node.NextTerminalDepth = minDepth
 
 		if len(node.Terminals) > 0 {
 			lastTerminal = node
