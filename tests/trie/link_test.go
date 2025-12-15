@@ -24,12 +24,12 @@ func TestLinks(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(strings.Join(testCase, "-"), func(t *testing.T) {
-			testLinks(t, testCase...)
+			testLinks(t, testCase)
 		})
 	}
 }
 
-func testLinks(t *testing.T, nodes ...string) {
+func testLinks(t *testing.T, nodes []string) {
 	builder := trie.NewBuilder[string]()
 
 	for _, node := range nodes {
