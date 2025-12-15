@@ -175,6 +175,7 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 			// The same node can occur more than once during iteration
 			// Ensure that we add each node only once to remainingNodes
 			name := iterator.Current().Name
+			slog.Debug(name)
 			if nameSet.Contains(name) {
 				iterator.Next()
 				continue
