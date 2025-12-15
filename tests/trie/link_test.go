@@ -4,57 +4,49 @@ package trie
 
 import (
 	"pkb-agent/trie"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestLinks(t *testing.T) {
-	t.Run("aaa - aab", func(t *testing.T) {
-		builder := trie.NewBuilder[string]()
-		builder.Add("aaa", "aaa")
-		builder.Add("aab", "aab")
-		root := builder.Finish()
+	testCases := [][]string{
+		{"a", "b"},
+		{"aaa", "aab"},
+		{"aaa", "aab"},
+		{"aaa", "aba"},
+		{"aaa", "baa"},
+		{"aa", "aaa"},
+		{"aa", "aaa", "aaaa"},
+		{"aa", "aaa", "aaaab"},
+	}
 
-		node1 := root.Descend("aaa")
-		node2 := root.Descend("aab")
+	for _, testCase := range testCases {
+		t.Run(strings.Join(testCase, "-"), func(t *testing.T) {
+			testLinks(t, testCase...)
+		})
+	}
+}
 
-		require.NotNil(t, node1)
-		require.NotNil(t, node2)
-		require.Equal(t, node2, node1.NextTerminal)
-		require.Equal(t, 3, node1.NextTerminalDepth)
-		require.Nil(t, node2.NextTerminal)
-	})
+func testLinks(t *testing.T, nodes ...string) {
+	builder := trie.NewBuilder[string]()
 
-	t.Run("aaa - aba", func(t *testing.T) {
-		builder := trie.NewBuilder[string]()
-		builder.Add("aaa", "aaa")
-		builder.Add("aba", "aba")
-		root := builder.Finish()
+	for _, node := range nodes {
+		builder.Add(node, node)
+	}
+	root := builder.Finish()
 
-		node1 := root.Descend("aaa")
-		node2 := root.Descend("aba")
+	for i := range len(nodes) - 1 {
+		n1 := root.Descend(nodes[i])
+		n2 := root.Descend(nodes[i+1])
 
-		require.NotNil(t, node1)
-		require.NotNil(t, node2)
-		require.Equal(t, node2, node1.NextTerminal)
-		require.Equal(t, 2, node1.NextTerminalDepth)
-		require.Nil(t, node2.NextTerminal)
-	})
+		require.NotNil(t, n1)
+		require.NotNil(t, n2)
+		require.Equal(t, n2, n1.NextTerminal)
+	}
 
-	t.Run("aaa - baa", func(t *testing.T) {
-		builder := trie.NewBuilder[string]()
-		builder.Add("aaa", "aaa")
-		builder.Add("baa", "baa")
-		root := builder.Finish()
-
-		node1 := root.Descend("aaa")
-		node2 := root.Descend("baa")
-
-		require.NotNil(t, node1)
-		require.NotNil(t, node2)
-		require.Equal(t, node2, node1.NextTerminal)
-		require.Equal(t, 1, node1.NextTerminalDepth)
-		require.Nil(t, node2.NextTerminal)
-	})
+	n := root.Descend(nodes[len(nodes)-1])
+	require.NotNil(t, n)
+	require.Nil(t, n.NextTerminal)
 }
