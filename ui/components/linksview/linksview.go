@@ -160,3 +160,10 @@ func (model Model) onSetLinks(message MsgSetLinks) (Model, tea.Cmd) {
 
 	return model, tea.Batch(commands...)
 }
+
+func (model *Model) GetDesiredHeight() int {
+	return 1 + util.MaxInt(
+		model.links.Length(),
+		model.backlinks.Length(),
+	)
+}

@@ -22,9 +22,10 @@ import (
 )
 
 type Model struct {
-	size      util.Size
-	viewer    tea.Model
-	linksView linksview.Model
+	size            util.Size       // Size of the component
+	viewer          tea.Model       // Viewer specialized in node type
+	linksView       linksview.Model // Links and backlinks view
+	linksViewHeight int             // Height is dependent on number of items shown
 }
 
 func New() Model {
@@ -81,12 +82,12 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 
 	util.UpdateChild(&model.linksView, tea.WindowSizeMsg{
 		Width:  message.Width,
-		Height: 10,
+		Height: model.linksViewHeight,
 	}, &commands)
 
 	util.UpdateUntypedChild(&model.viewer, tea.WindowSizeMsg{
 		Width:  message.Width,
-		Height: message.Height - 10,
+		Height: message.Height - model.linksViewHeight,
 	}, &commands)
 
 	return model, tea.Batch(commands...)
@@ -100,6 +101,13 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 	util.UpdateChild(&model.linksView, linksview.MsgSetLinks{
 		Links:     NewSliceAdapter(node.Links),
 		Backlinks: NewSliceAdapter(node.Backlinks),
+	}, &commands)
+
+	// Get desired height and resize
+	model.linksViewHeight = model.linksView.GetDesiredHeight()
+	util.UpdateChild(&model.linksView, tea.WindowSizeMsg{
+		Width:  model.size.Width,
+		Height: model.linksViewHeight,
 	}, &commands)
 
 	// Select correct viewer appropriate for node type
