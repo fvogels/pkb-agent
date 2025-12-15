@@ -18,9 +18,10 @@ import (
 )
 
 type Model struct {
-	graph *graph.Graph
-	size  util.Size
-	mode  mode
+	graph              *graph.Graph
+	size               util.Size
+	mode               mode
+	includeLinkedNodes bool
 
 	remainingNodes []*graph.Node
 	selectedNodes  []*graph.Node
@@ -44,6 +45,7 @@ func New() Model {
 
 	model := Model{
 		mode:                viewMode,
+		includeLinkedNodes:  true,
 		nodeSelectionView:   nodeselectionview.New(),
 		textInput:           textinput.New(),
 		nodeViewer:          nodeviewer.New(),
@@ -165,6 +167,7 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 			input,
 			model.graph,
 			selectedNodes,
+			model.includeLinkedNodes,
 		)
 
 		sort.Slice(remainingNodes, func(i, j int) bool {
@@ -286,4 +289,10 @@ func (model Model) updateLayoutConfiguration(update func(*layoutConfiguration)) 
 	update(model.layoutConfiguration)
 	command := model.mode.resize(&model, model.size)
 	return model, command
+}
+
+func (model Model) toggleIncludeLinkedNodes() (Model, tea.Cmd) {
+	model.includeLinkedNodes = !model.includeLinkedNodes
+
+	return model, model.signalUpdateRemainingNodes()
 }

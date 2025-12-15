@@ -21,6 +21,7 @@ var viewModeKeyMap = struct {
 	UnselectLast            key.Binding
 	GrowNodeSelectionView   key.Binding
 	ShrinkNodeSelectionView key.Binding
+	ToggleIncludedLinked    key.Binding
 }{
 	Quit: key.NewBinding(
 		key.WithKeys("q"),
@@ -53,6 +54,10 @@ var viewModeKeyMap = struct {
 	ShrinkNodeSelectionView: key.NewBinding(
 		key.WithKeys("-"),
 		key.WithHelp("-", "shrink node list"),
+	),
+	ToggleIncludedLinked: key.NewBinding(
+		key.WithKeys("*"),
+		key.WithHelp("*", "toggle linked"),
 	),
 }
 
@@ -103,6 +108,9 @@ func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.C
 		return model.updateLayoutConfiguration(func(c *layoutConfiguration) {
 			c.nodeSelectionViewHeight++
 		})
+
+	case key.Matches(message, viewModeKeyMap.ToggleIncludedLinked):
+		return model.toggleIncludeLinkedNodes()
 
 	case key.Matches(message, viewModeKeyMap.ShrinkNodeSelectionView):
 		return model.updateLayoutConfiguration(func(c *layoutConfiguration) {

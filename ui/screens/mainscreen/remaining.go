@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*graph.Node) []*graph.Node {
+func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*graph.Node, includeLinked bool) []*graph.Node {
 	iterator := g.FindMatchingNodes(input)
 
 	// nameSet is used to prevent duplicates
@@ -38,15 +38,17 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 		iterator.Next()
 	}
 
-	imax := len(remaining)
-	for i := 0; i != imax; i++ {
-		node := remaining[i]
+	if includeLinked {
+		imax := len(remaining)
+		for i := 0; i != imax; i++ {
+			node := remaining[i]
 
-		for _, linkedNodeName := range node.Links {
-			if !nameSet.Contains(linkedNodeName) {
-				nameSet.Add(linkedNodeName)
-				linkedNode := g.FindNode(linkedNodeName)
-				remaining = append(remaining, linkedNode)
+			for _, linkedNodeName := range node.Links {
+				if !nameSet.Contains(linkedNodeName) {
+					nameSet.Add(linkedNodeName)
+					linkedNode := g.FindNode(linkedNodeName)
+					remaining = append(remaining, linkedNode)
+				}
 			}
 		}
 	}
