@@ -17,11 +17,10 @@ func NewLoader() *Loader {
 }
 
 type metadata struct {
-	Name              string       `yaml:"name"`      // Name of the snippet.
-	Language          string       `yaml:"language"`  // Language of the snippet.
-	HighlightLanguage string       `yaml:"highlight"` // Optional: language identifier used for syntax highlighting. If missing, a lowercase version of language will be used.
-	Links             []string     `yaml:"links"`     // Links to other nodes.
-	Path              pathlib.Path `yaml:"path"`      // Absolute path of the file containing the snippet
+	Name              string   `yaml:"name"`      // Name of the snippet.
+	Language          string   `yaml:"language"`  // Language of the snippet.
+	HighlightLanguage string   `yaml:"highlight"` // Optional: language identifier used for syntax highlighting. If missing, a lowercase version of language will be used.
+	Links             []string `yaml:"links"`     // Links to other nodes.
 }
 
 func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) error) error {
