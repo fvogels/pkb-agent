@@ -3,7 +3,6 @@
 package trie
 
 import (
-	"pkb-agent/trie"
 	"slices"
 	"strings"
 	"testing"
@@ -39,12 +38,7 @@ func TestLinks(t *testing.T) {
 }
 
 func testLinks(t *testing.T, nodes []string) {
-	builder := trie.NewBuilder[string]()
-
-	for _, node := range nodes {
-		builder.Add(node, node)
-	}
-	root := builder.Finish()
+	root := createTrie(nodes...)
 
 	slices.Sort(nodes)
 
