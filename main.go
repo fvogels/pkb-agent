@@ -12,6 +12,4 @@ func main() {
 	}
 
 	cli.RunCLI()
-
-	// ui.Start(true)
 }
