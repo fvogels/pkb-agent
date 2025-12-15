@@ -10,7 +10,6 @@ import (
 	"pkb-agent/ui/nodeviewers/nodeviewer"
 	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
-	"pkb-agent/util/set"
 	"slices"
 	"sort"
 	"strings"
@@ -159,86 +158,39 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 
 func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 	input := strings.ToLower(model.textInput.GetInput())
-	iterator := model.graph.FindMatchingNodes(input)
 	selectedNodes := model.selectedNodes
 
 	return func() tea.Msg {
-		// nameSet is used to prevent duplicates
-		// Adding the selected nodes ensures that already selected nodes do not appear as remaining choices
-		nameSet := set.FromSlice(util.Map(selectedNodes, func(node *graph.Node) string { return node.Name }))
-		remaining := []*graph.Node{}
+		remainingNodes := determineRemainingNodes(
+			input,
+			model.graph,
+			selectedNodes,
+		)
 
-		// We need to keep track of it so that we can have it selected in the list
-		var bestMatch *string = nil
-
-		for iterator.Current() != nil {
-			// The same node can occur more than once during iteration
-			// Ensure that we add each node only once to remainingNodes
-			name := iterator.Current().Name
-			if nameSet.Contains(name) {
-				iterator.Next()
-				continue
-			}
-
-			if len(input) > 0 && strings.HasPrefix(strings.ToLower(name), input) {
-				if bestMatch == nil || len(name) < len(*bestMatch) {
-					bestMatch = &name
-				}
-			}
-
-			if !util.All(selectedNodes, func(selectedNode *graph.Node) bool {
-				return slices.Contains(iterator.Current().Links, selectedNode.Name)
-			}) {
-				iterator.Next()
-				continue
-			}
-
-			nameSet.Add(name)
-			remaining = append(remaining, iterator.Current())
-			iterator.Next()
-		}
-
-		imax := len(remaining)
-		for i := 0; i != imax; i++ {
-			node := remaining[i]
-
-			for _, linkedNodeName := range node.Links {
-				if !nameSet.Contains(linkedNodeName) {
-					nameSet.Add(linkedNodeName)
-					linkedNode := model.graph.FindNode(linkedNodeName)
-					remaining = append(remaining, linkedNode)
-				}
-			}
-		}
-
-		sort.Slice(remaining, func(i, j int) bool {
-			return strings.ToLower(remaining[i].Name) < strings.ToLower(remaining[j].Name)
+		sort.Slice(remainingNodes, func(i, j int) bool {
+			return strings.ToLower(remainingNodes[i].Name) < strings.ToLower(remainingNodes[j].Name)
 		})
 
-		bestMatchIndex := 0
-		if bestMatch != nil {
-			var found bool
-			bestMatchIndex, found = slices.BinarySearchFunc(
-				remaining,
-				*bestMatch,
-				func(node *graph.Node, target string) int {
-					if node.Name < target {
-						return -1
-					}
-					if node.Name > target {
-						return 1
-					}
+		bestMatchIndex, found := slices.BinarySearchFunc(
+			remainingNodes,
+			input,
+			func(node *graph.Node, target string) int {
+				if strings.HasPrefix(strings.ToLower(node.Name), target) {
 					return 0
-				},
-			)
+				}
+				if node.Name < target {
+					return -1
+				}
+				return 1
+			},
+		)
 
-			if !found {
-				bestMatchIndex = 0
-			}
+		if !found {
+			bestMatchIndex = 0
 		}
 
 		return msgRemainingNodesUpdated{
-			remainingNodes: remaining,
+			remainingNodes: remainingNodes,
 			selectionIndex: bestMatchIndex,
 		}
 	}
