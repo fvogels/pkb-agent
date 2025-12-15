@@ -5,11 +5,13 @@ import (
 	"pkb-agent/graph/nodes/atom"
 	"pkb-agent/graph/nodes/backblaze"
 	"pkb-agent/graph/nodes/bookmark"
+	"pkb-agent/graph/nodes/markdown"
 	"pkb-agent/graph/nodes/snippet"
 	"pkb-agent/ui/components/linksview"
 	"pkb-agent/ui/debug"
 	"pkb-agent/ui/nodeviewers/bbviewer"
 	"pkb-agent/ui/nodeviewers/bookmarkviewer"
+	"pkb-agent/ui/nodeviewers/mdviewer"
 	"pkb-agent/ui/nodeviewers/nullviewer"
 	"pkb-agent/ui/nodeviewers/snippetviewer"
 	"pkb-agent/util"
@@ -113,6 +115,9 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 
 	case *backblaze.Extra:
 		model.viewer = bbviewer.New(nodeData)
+
+	case *markdown.Extra:
+		model.viewer = mdviewer.New(nodeData)
 
 	default:
 		slog.Debug(
