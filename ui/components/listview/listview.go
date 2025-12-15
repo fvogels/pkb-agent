@@ -205,8 +205,13 @@ func (model *Model[T]) GetSelectedIndex() int {
 	return model.selectedIndex
 }
 
-func (model *Model[T]) GetSelectedItem() T {
-	return model.items.At(model.selectedIndex)
+func (model *Model[T]) GetSelectedItem() (T, bool) {
+	if model.selectedIndex < model.items.Length() {
+		return model.items.At(model.selectedIndex), true
+	} else {
+		var t T
+		return t, false
+	}
 }
 
 func (model *Model[T]) SetSelectedStyle(style lipgloss.Style) {

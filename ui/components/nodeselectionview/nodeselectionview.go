@@ -148,7 +148,13 @@ func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 }
 
 func (model Model) GetSelectedRemainingNode() *graph.Node {
-	return model.remainingNodesView.GetSelectedItem()
+	selected, ok := model.remainingNodesView.GetSelectedItem()
+
+	if !ok {
+		return nil
+	} else {
+		return selected
+	}
 }
 
 func (model Model) updateChildSizes() (Model, tea.Cmd) {
