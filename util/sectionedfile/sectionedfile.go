@@ -30,7 +30,8 @@ func LoadSectionedFile(path pathlib.Path, delimiterPredicate func(string) bool) 
 			sections = append(sections, Section{Lines: currentSection})
 			currentSection = []string{}
 		} else {
-			currentSection = append(currentSection, line)
+			trimmedLine := strings.TrimRight(line, "\t\n\r ")
+			currentSection = append(currentSection, trimmedLine)
 		}
 
 		return true

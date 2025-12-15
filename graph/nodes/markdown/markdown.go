@@ -24,5 +24,5 @@ func (data *Extra) GetSource() (string, error) {
 		return "", &ErrMalformed{path: data.Path}
 	}
 
-	return strings.Join(file.Sections[1].Lines, "\n"), nil
+	return strings.Join(file.Sections[2].Lines, "\n"), nil
 }

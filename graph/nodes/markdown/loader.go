@@ -66,7 +66,7 @@ func (loader *Loader) extractMetadata(path pathlib.Path) (string, error) {
 		return "", &ErrMalformed{path: path}
 	}
 
-	return strings.Join(file.Sections[1].Lines, ""), nil
+	return strings.Join(file.Sections[1].Lines, "\n"), nil
 }
 
 func (loader *Loader) parseMetadata(unparsedMetadata string) (metadata, error) {
