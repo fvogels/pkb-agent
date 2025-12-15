@@ -99,4 +99,27 @@ func TestTrie(t *testing.T) {
 		require.Equal(t, 1, nodeB.Depth)
 		require.Nil(t, nodeB.NextTerminal)
 	})
+
+	t.Run("a - b - c", func(t *testing.T) {
+		root := createTrie(
+			"a",
+			"b",
+			"c",
+		)
+
+		nodeA := root.Descend("a")
+		nodeB := root.Descend("b")
+		nodeC := root.Descend("c")
+
+		require.Equal(t, 1, nodeA.Depth)
+		require.Equal(t, nodeB, nodeA.NextTerminal)
+		require.Equal(t, 0, nodeA.NextTerminalDepth)
+
+		require.Equal(t, 1, nodeB.Depth)
+		require.Equal(t, nodeC, nodeB.NextTerminal)
+		require.Equal(t, 0, nodeB.NextTerminalDepth)
+
+		require.Equal(t, 1, nodeC.Depth)
+		require.Nil(t, nodeC.NextTerminal)
+	})
 }
