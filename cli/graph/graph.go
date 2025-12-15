@@ -9,6 +9,7 @@ func NewGraphCommand() *cobra.Command {
 	}
 
 	command.AddCommand(NewListNodesCommand())
+	command.AddCommand(NewSearchGraphCommand())
 
 	return &command
 }
