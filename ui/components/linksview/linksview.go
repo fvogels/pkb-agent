@@ -63,9 +63,13 @@ func New() Model {
 	)
 
 	linksView := listview.New(renderer, false, wrapLinksViewMessage)
-	linksView.SetEmptyListMessage("no links")
+	linksView.SetEmptyListMessage(
+		lipgloss.NewStyle().Italic(true).Render("no links"),
+	)
 	backlinksView := listview.New(renderer, false, wrapBacklinksViewMessage)
-	backlinksView.SetEmptyListMessage("no backlinks")
+	backlinksView.SetEmptyListMessage(
+		lipgloss.NewStyle().Italic(true).Render("no backlinks"),
+	)
 
 	return Model{
 		links:         &emptyList{},
