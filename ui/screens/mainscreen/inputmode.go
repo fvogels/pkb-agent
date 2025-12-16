@@ -65,9 +65,12 @@ func NewInputMode(layoutConfiguration *layoutConfiguration) *inputMode {
 func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.Cmd) {
 	switch {
 	case key.Matches(message, inputModeKeyMap.Cancel):
+		var command tea.Cmd
+		model, command = util.UpdateSingleChild(&model, &model.textInput, textinput.MsgClear{})
+
 		model.mode = model.viewMode
 		model.viewMode.activate(&model)
-		return model, nil
+		return model, command
 
 	case key.Matches(message, viewModeKeyMap.Next):
 		return model.onSelectNextRemainingNode()

@@ -66,7 +66,9 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 func (model Model) View() string {
 	return lipgloss.JoinVertical(
 		0,
-		model.linksView.View(),
+		lipgloss.NewStyle().Border(lipgloss.ASCIIBorder(), false, false, true, false).Render(
+			model.linksView.View(),
+		),
 		model.viewer.View(),
 	)
 }
@@ -88,7 +90,7 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 
 	util.UpdateUntypedChild(&model.viewer, tea.WindowSizeMsg{
 		Width:  message.Width,
-		Height: message.Height - linksViewHeight,
+		Height: message.Height - linksViewHeight - 1, // -1 needed for border
 	}, &commands)
 
 	return model, tea.Batch(commands...)
@@ -149,7 +151,7 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 // but still keeps some room for the node viewer
 func (model *Model) determineLinksViewHeight() int {
 	desiredHeight := model.linksView.GetDesiredHeight()
-	return util.MinInt(model.size.Height-10, desiredHeight)
+	return util.MinInt(model.size.Height-11, desiredHeight)
 }
 
 type SliceAdapter[T any] struct {
