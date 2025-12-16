@@ -163,6 +163,10 @@ func (model Model) signalRefreshRemainingNodes(keepSameNodeHighlighted bool) tea
 	selectedNodes := model.selectedNodes
 	highlighedNode := model.nodeSelectionView.GetSelectedRemainingNode()
 
+	if len(input) == 0 {
+		keepSameNodeHighlighted = true
+	}
+
 	return func() tea.Msg {
 		remainingNodes := determineRemainingNodes(
 			input,
