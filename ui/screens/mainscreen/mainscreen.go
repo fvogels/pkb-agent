@@ -85,7 +85,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	case textinput.MsgInputUpdated:
 		return model.onInputUpdated(message)
 
-	case msgRemainingNodesUpdated:
+	case msgRemainingNodesDetermined:
 		model.remainingNodes = message.remainingNodes
 
 		return util.UpdateSingleChild(&model, &model.nodeSelectionView, nodeselectionview.MsgSetRemainingNodes{
@@ -110,7 +110,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 }
 
 func (model Model) onInputUpdated(_ textinput.MsgInputUpdated) (Model, tea.Cmd) {
-	return model, model.signalUpdateRemainingNodes(false)
+	return model, model.signalRefreshRemainingNodes(false)
 }
 
 func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
@@ -123,7 +123,7 @@ func (model Model) View() string {
 
 func (model Model) onGraphLoaded(message MsgGraphLoaded) (Model, tea.Cmd) {
 	model.graph = message.graph
-	return model, model.signalUpdateRemainingNodes(false)
+	return model, model.signalRefreshRemainingNodes(false)
 }
 
 func (model *Model) signalLoadGraph() tea.Cmd {
@@ -158,7 +158,7 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	return model, command
 }
 
-func (model Model) signalUpdateRemainingNodes(keepSameNodeHighlighted bool) tea.Cmd {
+func (model Model) signalRefreshRemainingNodes(keepSameNodeHighlighted bool) tea.Cmd {
 	input := strings.ToLower(model.textInput.GetInput())
 	selectedNodes := model.selectedNodes
 	highlighedNode := model.nodeSelectionView.GetSelectedRemainingNode()
@@ -204,7 +204,7 @@ func (model Model) signalUpdateRemainingNodes(keepSameNodeHighlighted bool) tea.
 
 		highlightIndex = bestMatchIndex
 
-		return msgRemainingNodesUpdated{
+		return msgRemainingNodesDetermined{
 			remainingNodes: remainingNodes,
 			selectionIndex: highlightIndex,
 		}
@@ -252,7 +252,7 @@ func (model Model) onNodeSelected() (Model, tea.Cmd) {
 			SelectedNodes: NewSliceAdapter(updatedSelectedNodes),
 		}, &commands)
 
-		commands = append(commands, model.signalUpdateRemainingNodes(false))
+		commands = append(commands, model.signalRefreshRemainingNodes(false))
 
 		return model, tea.Batch(
 			commands...,
@@ -280,7 +280,7 @@ func (model Model) setSelectedNodes(selectedNodes []*graph.Node) (Model, tea.Cmd
 		SelectedNodes: NewSliceAdapter(model.selectedNodes),
 	}, &commands)
 
-	commands = append(commands, model.signalUpdateRemainingNodes(false))
+	commands = append(commands, model.signalRefreshRemainingNodes(false))
 
 	return model, tea.Batch(commands...)
 }
@@ -306,5 +306,5 @@ func (model Model) updateLayoutConfiguration(update func(*layoutConfiguration)) 
 func (model Model) toggleIncludeLinkedNodes() (Model, tea.Cmd) {
 	model.includeLinkedNodes = !model.includeLinkedNodes
 
-	return model, model.signalUpdateRemainingNodes(true)
+	return model, model.signalRefreshRemainingNodes(true)
 }

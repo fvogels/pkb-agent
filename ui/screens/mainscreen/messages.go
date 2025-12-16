@@ -20,7 +20,7 @@ type msgToSelectedNodeView struct {
 	wrapped tea.Msg
 }
 
-type msgRemainingNodesUpdated struct {
+type msgRemainingNodesDetermined struct {
 	remainingNodes []*graph.Node
 	selectionIndex int
 }
