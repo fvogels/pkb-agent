@@ -59,12 +59,6 @@ func (model Model[T]) TypedUpdate(message tea.Msg) (Model[T], tea.Cmd) {
 	case MsgSetItems[T]:
 		return model.onSetItems(message)
 
-	case MsgSelectPrevious:
-		return model.onSelectPrevious()
-
-	case MsgSelectNext:
-		return model.onSelectNext()
-
 	case MsgSelectItem:
 		return model.onSelectItem(message)
 
@@ -175,32 +169,6 @@ func (model Model[T]) onSetItems(message MsgSetItems[T]) (Model[T], tea.Cmd) {
 		return model, model.signalItemSelected()
 	} else {
 		return model, model.signalNoItemsSelected()
-	}
-}
-
-func (model Model[T]) onSelectPrevious() (Model[T], tea.Cmd) {
-	if model.allowSelection && model.items.Length() > 0 {
-		if model.selectedIndex > 0 {
-			model.selectedIndex--
-		}
-		model.ensureSelectedIsVisible()
-
-		return model, model.signalItemSelected()
-	} else {
-		return model, nil
-	}
-}
-
-func (model Model[T]) onSelectNext() (Model[T], tea.Cmd) {
-	if model.allowSelection && model.items.Length() > 0 {
-		if model.selectedIndex+1 < model.items.Length() {
-			model.selectedIndex++
-		}
-		model.ensureSelectedIsVisible()
-
-		return model, model.signalItemSelected()
-	} else {
-		return model, nil
 	}
 }
 

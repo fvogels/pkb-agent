@@ -5,10 +5,6 @@ type MsgSetItems[T any] struct {
 	SelectionIndex int
 }
 
-type MsgSelectPrevious struct{}
-
-type MsgSelectNext struct{}
-
 type MsgSelectItem struct {
 	Index int
 }
