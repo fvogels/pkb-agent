@@ -15,9 +15,9 @@ type MsgSetSelectedNodes struct {
 	SelectedNodes List
 }
 
-type MsgSelectNext struct{}
+type MsgHighlightNext struct{}
 
-type MsgSelectPrevious struct{}
+type MsgHighlightPrevious struct{}
 
 type msgRemainingNodesWrapper struct {
 	wrapped tea.Msg
@@ -31,6 +31,6 @@ type MsgRemainingNodeHighlighted struct {
 	Node *graph.Node
 }
 
-type MsgSelectRemainingNode struct {
+type MsgHighlightRemainingNode struct {
 	Index int
 }

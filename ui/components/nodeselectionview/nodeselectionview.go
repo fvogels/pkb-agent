@@ -93,13 +93,13 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 
 		return updatedModel, tea.Batch(commands...)
 
-	case MsgSelectPrevious:
+	case MsgHighlightPrevious:
 		return util.UpdateSingleChild(&model, &model.remainingNodesView, listview.MsgSelectPrevious{})
 
-	case MsgSelectNext:
+	case MsgHighlightNext:
 		return util.UpdateSingleChild(&model, &model.remainingNodesView, listview.MsgSelectNext{})
 
-	case MsgSelectRemainingNode:
+	case MsgHighlightRemainingNode:
 		return util.UpdateSingleChild(&model, &model.remainingNodesView, listview.MsgSelectItem{Index: message.Index})
 
 	case msgRemainingNodesWrapper:
