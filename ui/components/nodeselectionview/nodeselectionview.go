@@ -99,6 +99,9 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	case MsgSelectNext:
 		return util.UpdateSingleChild(&model, &model.remainingNodesView, listview.MsgSelectNext{})
 
+	case MsgSelectRemainingNode:
+		return util.UpdateSingleChild(&model, &model.remainingNodesView, listview.MsgSelectItem{Index: message.Index})
+
 	case msgRemainingNodesWrapper:
 		switch message := message.wrapped.(type) {
 		case listview.MsgItemSelected[*graph.Node]:
@@ -147,7 +150,7 @@ func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	return model.updateChildSizes()
 }
 
-func (model Model) GetSelectedRemainingNode() *graph.Node {
+func (model *Model) GetSelectedRemainingNode() *graph.Node {
 	selected, ok := model.remainingNodesView.GetSelectedItem()
 
 	if !ok {
@@ -155,6 +158,10 @@ func (model Model) GetSelectedRemainingNode() *graph.Node {
 	} else {
 		return selected
 	}
+}
+
+func (model *Model) GetRemainingNodes() List {
+	return model.remainingNodes
 }
 
 func (model Model) updateChildSizes() (Model, tea.Cmd) {

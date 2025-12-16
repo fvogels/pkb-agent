@@ -30,3 +30,7 @@ type msgSelectedNodesWrapper struct {
 type MsgRemainingNodeHighlighted struct {
 	Node *graph.Node
 }
+
+type MsgSelectRemainingNode struct {
+	Index int
+}
