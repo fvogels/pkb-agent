@@ -12,7 +12,8 @@ import (
 type Loader struct{}
 
 type Extra struct {
-	URL string
+	URL         string
+	Description string
 }
 
 func NewLoader() *Loader {
@@ -20,9 +21,10 @@ func NewLoader() *Loader {
 }
 
 type entry struct {
-	Name  string   `yaml:"name"`
-	Links []string `yaml:"links"`
-	URL   string   `yaml:"url"`
+	Name        string   `yaml:"name"`
+	Links       []string `yaml:"links"`
+	URL         string   `yaml:"url"`
+	Description string   `yaml:"description"`
 }
 
 func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) error) error {
@@ -45,7 +47,23 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 	var errs []error
 	for index, entry := range entries {
 		if len(entry.Name) == 0 {
+			slog.Debug(
+				"Missing name",
+				slog.String("path", path.String()),
+				slog.Int("index", index),
+			)
 			errs = append(errs, &ErrMissingName{path: path, index: index})
+			continue
+		}
+
+		if len(entry.Description) == 0 {
+			slog.Debug(
+				"Missing description",
+				slog.String("path", path.String()),
+				slog.Int("index", index),
+			)
+
+			errs = append(errs, &ErrMissingDescription{path: path, index: index})
 			continue
 		}
 
@@ -54,7 +72,10 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 			Type:      "bookmark",
 			Links:     append(entry.Links, "Bookmark"),
 			Backlinks: nil,
-			Extra:     &Extra{URL: entry.URL},
+			Extra: &Extra{
+				URL:         entry.URL,
+				Description: entry.Description,
+			},
 		}
 
 		if err := callback(&node); err != nil {
