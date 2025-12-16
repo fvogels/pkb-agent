@@ -110,7 +110,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 }
 
 func (model Model) onInputUpdated(_ textinput.MsgInputUpdated) (Model, tea.Cmd) {
-	return model, model.signalUpdateRemainingNodes()
+	return model, model.signalUpdateRemainingNodes(false)
 }
 
 func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
@@ -123,7 +123,7 @@ func (model Model) View() string {
 
 func (model Model) onGraphLoaded(message MsgGraphLoaded) (Model, tea.Cmd) {
 	model.graph = message.graph
-	return model, model.signalUpdateRemainingNodes()
+	return model, model.signalUpdateRemainingNodes(false)
 }
 
 func (model *Model) signalLoadGraph() tea.Cmd {
@@ -158,9 +158,10 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	return model, command
 }
 
-func (model Model) signalUpdateRemainingNodes() tea.Cmd {
+func (model Model) signalUpdateRemainingNodes(keepSameNodeHighlighted bool) tea.Cmd {
 	input := strings.ToLower(model.textInput.GetInput())
 	selectedNodes := model.selectedNodes
+	highlighedNode := model.nodeSelectionView.GetSelectedRemainingNode()
 
 	return func() tea.Msg {
 		remainingNodes := determineRemainingNodes(
@@ -174,14 +175,23 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 			return strings.ToLower(remainingNodes[i].Name) < strings.ToLower(remainingNodes[j].Name)
 		})
 
+		highlightIndex := 0
+		var target string
+		if !keepSameNodeHighlighted || highlighedNode == nil {
+			target = input
+		} else {
+			target = strings.ToLower(highlighedNode.Name)
+		}
+
 		bestMatchIndex, found := slices.BinarySearchFunc(
 			remainingNodes,
-			input,
+			target,
 			func(node *graph.Node, target string) int {
-				if strings.HasPrefix(strings.ToLower(node.Name), target) {
+				nodeName := strings.ToLower(node.Name)
+				if strings.HasPrefix(nodeName, target) {
 					return 0
 				}
-				if node.Name < target {
+				if nodeName < target {
 					return -1
 				}
 				return 1
@@ -192,9 +202,11 @@ func (model Model) signalUpdateRemainingNodes() tea.Cmd {
 			bestMatchIndex = 0
 		}
 
+		highlightIndex = bestMatchIndex
+
 		return msgRemainingNodesUpdated{
 			remainingNodes: remainingNodes,
-			selectionIndex: bestMatchIndex,
+			selectionIndex: highlightIndex,
 		}
 	}
 }
@@ -240,7 +252,7 @@ func (model Model) onNodeSelected() (Model, tea.Cmd) {
 			SelectedNodes: NewSliceAdapter(updatedSelectedNodes),
 		}, &commands)
 
-		commands = append(commands, model.signalUpdateRemainingNodes())
+		commands = append(commands, model.signalUpdateRemainingNodes(false))
 
 		return model, tea.Batch(
 			commands...,
@@ -268,7 +280,7 @@ func (model Model) setSelectedNodes(selectedNodes []*graph.Node) (Model, tea.Cmd
 		SelectedNodes: NewSliceAdapter(model.selectedNodes),
 	}, &commands)
 
-	commands = append(commands, model.signalUpdateRemainingNodes())
+	commands = append(commands, model.signalUpdateRemainingNodes(false))
 
 	return model, tea.Batch(commands...)
 }
@@ -294,5 +306,5 @@ func (model Model) updateLayoutConfiguration(update func(*layoutConfiguration)) 
 func (model Model) toggleIncludeLinkedNodes() (Model, tea.Cmd) {
 	model.includeLinkedNodes = !model.includeLinkedNodes
 
-	return model, model.signalUpdateRemainingNodes()
+	return model, model.signalUpdateRemainingNodes(true)
 }
