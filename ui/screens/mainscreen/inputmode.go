@@ -14,20 +14,20 @@ import (
 )
 
 var inputModeKeyMap = struct {
-	Cancel   key.Binding
-	Next     key.Binding
-	Previous key.Binding
-	Select   key.Binding
+	Cancel            key.Binding
+	HighlightNext     key.Binding
+	HighlightPrevious key.Binding
+	Select            key.Binding
 }{
 	Cancel: key.NewBinding(
 		key.WithKeys("esc"),
 		key.WithHelp("esc", "cancel"),
 	),
-	Next: key.NewBinding(
+	HighlightNext: key.NewBinding(
 		key.WithKeys("down"),
 		key.WithHelp("↓", "next"),
 	),
-	Previous: key.NewBinding(
+	HighlightPrevious: key.NewBinding(
 		key.WithKeys("up"),
 		key.WithHelp("↑", "next"),
 	),
@@ -72,13 +72,13 @@ func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.
 		model.viewMode.activate(&model)
 		return model, command
 
-	case key.Matches(message, viewModeKeyMap.Next):
+	case key.Matches(message, inputModeKeyMap.HighlightNext):
 		return model.onSelectNextRemainingNode()
 
-	case key.Matches(message, viewModeKeyMap.Previous):
+	case key.Matches(message, inputModeKeyMap.HighlightPrevious):
 		return model.onSelectPreviousRemainingNode()
 
-	case key.Matches(message, viewModeKeyMap.Select):
+	case key.Matches(message, inputModeKeyMap.Select):
 		model.mode = model.viewMode
 		model.mode.activate(&model)
 		return model.onNodeSelected()
