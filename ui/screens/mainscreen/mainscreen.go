@@ -253,6 +253,27 @@ func (model Model) onHighlightNextRemainingNode() (Model, tea.Cmd) {
 	)
 }
 
+func (model Model) onHighlightRemainingNodePageDown() (Model, tea.Cmd) {
+	slog.Debug("!!!!")
+	return util.UpdateSingleChild(
+		&model,
+		&model.nodeSelectionView,
+		nodeselectionview.MsgHighlightRemainingNode{
+			Index: model.nodeSelectionView.GetSelectedRemainingNodeIndex() + model.nodeSelectionView.GetRemaingNodesPageSize(),
+		},
+	)
+}
+
+func (model Model) onHighlightRemainingNodePageUp() (Model, tea.Cmd) {
+	return util.UpdateSingleChild(
+		&model,
+		&model.nodeSelectionView,
+		nodeselectionview.MsgHighlightRemainingNode{
+			Index: model.nodeSelectionView.GetSelectedRemainingNodeIndex() - model.nodeSelectionView.GetRemaingNodesPageSize(),
+		},
+	)
+}
+
 func (model Model) onSelectFirstRemainingNode() (Model, tea.Cmd) {
 	return util.UpdateSingleChild(&model, &model.nodeSelectionView, nodeselectionview.MsgHighlightRemainingNode{Index: 0})
 }

@@ -19,6 +19,8 @@ var viewModeKeyMap = struct {
 	HighlightLast           key.Binding
 	HighlightNext           key.Binding
 	HighlightPrevious       key.Binding
+	HighlightPageDown       key.Binding
+	HighlightPageUp         key.Binding
 	Select                  key.Binding
 	UnselectLast            key.Binding
 	GrowNodeSelectionView   key.Binding
@@ -48,6 +50,14 @@ var viewModeKeyMap = struct {
 	HighlightPrevious: key.NewBinding(
 		key.WithKeys("up"),
 		key.WithHelp("↑", "next"),
+	),
+	HighlightPageDown: key.NewBinding(
+		key.WithKeys("pgdown"),
+		key.WithHelp("pgdown", "pgdown"),
+	),
+	HighlightPageUp: key.NewBinding(
+		key.WithKeys("pgup"),
+		key.WithHelp("pgup", "pgup"),
 	),
 	Select: key.NewBinding(
 		key.WithKeys("enter"),
@@ -113,6 +123,12 @@ func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.C
 
 	case key.Matches(message, viewModeKeyMap.HighlightPrevious):
 		return model.onHighlightPreviousRemainingNode()
+
+	case key.Matches(message, inputModeKeyMap.HighlightPageDown):
+		return model.onHighlightRemainingNodePageDown()
+
+	case key.Matches(message, inputModeKeyMap.HighlightPageUp):
+		return model.onHighlightRemainingNodePageUp()
 
 	case key.Matches(message, viewModeKeyMap.Select):
 		return model.onNodeSelected()

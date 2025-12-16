@@ -218,3 +218,7 @@ func (model Model[T]) onSelectItem(message MsgSelectItem) (Model[T], tea.Cmd) {
 
 	return model, nil
 }
+
+func (model *Model[T]) GetSize() util.Size {
+	return model.size
+}

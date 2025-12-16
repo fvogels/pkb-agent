@@ -17,8 +17,10 @@ var inputModeKeyMap = struct {
 	Cancel            key.Binding
 	HighlightFirst    key.Binding
 	HighlightLast     key.Binding
-	HighlightNext     key.Binding
 	HighlightPrevious key.Binding
+	HighlightNext     key.Binding
+	HighlightPageDown key.Binding
+	HighlightPageUp   key.Binding
 	Select            key.Binding
 }{
 	Cancel: key.NewBinding(
@@ -39,7 +41,15 @@ var inputModeKeyMap = struct {
 	),
 	HighlightPrevious: key.NewBinding(
 		key.WithKeys("up"),
-		key.WithHelp("↑", "next"),
+		key.WithHelp("↑", "previous"),
+	),
+	HighlightPageDown: key.NewBinding(
+		key.WithKeys("pgdown"),
+		key.WithHelp("pgdown", "pgdown"),
+	),
+	HighlightPageUp: key.NewBinding(
+		key.WithKeys("pgup"),
+		key.WithHelp("pgup", "pgup"),
 	),
 	Select: key.NewBinding(
 		key.WithKeys("enter"),
@@ -93,6 +103,12 @@ func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.
 
 	case key.Matches(message, inputModeKeyMap.HighlightPrevious):
 		return model.onHighlightPreviousRemainingNode()
+
+	case key.Matches(message, inputModeKeyMap.HighlightPageDown):
+		return model.onHighlightRemainingNodePageDown()
+
+	case key.Matches(message, inputModeKeyMap.HighlightPageUp):
+		return model.onHighlightRemainingNodePageUp()
 
 	case key.Matches(message, inputModeKeyMap.Select):
 		model.mode = model.viewMode

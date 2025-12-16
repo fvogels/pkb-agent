@@ -239,3 +239,9 @@ func wrapRemainingNodesViewMessage(message tea.Msg) tea.Msg {
 		wrapped: message,
 	}
 }
+
+// GetPageSize returns the number of visible nodes in the remaining node list.
+// This value is used to implement page up/page down.
+func (model *Model) GetRemaingNodesPageSize() int {
+	return model.remainingNodesView.GetSize().Height
+}
