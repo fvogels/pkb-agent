@@ -245,6 +245,16 @@ func (model Model) onSelectFirstRemainingNode() (Model, tea.Cmd) {
 	return util.UpdateSingleChild(&model, &model.nodeSelectionView, nodeselectionview.MsgHighlightRemainingNode{Index: 0})
 }
 
+func (model Model) onSelectLastRemainingNode() (Model, tea.Cmd) {
+	return util.UpdateSingleChild(
+		&model,
+		&model.nodeSelectionView,
+		nodeselectionview.MsgHighlightRemainingNode{
+			Index: len(model.remainingNodes) - 1,
+		},
+	)
+}
+
 func (model Model) onNodeSelected() (Model, tea.Cmd) {
 	selectedNode := model.nodeSelectionView.GetSelectedRemainingNode()
 	if selectedNode != nil {

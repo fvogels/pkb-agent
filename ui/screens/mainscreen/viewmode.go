@@ -16,6 +16,7 @@ var viewModeKeyMap = struct {
 	Quit                    key.Binding
 	SwitchToInputMode       key.Binding
 	HighlightFirst          key.Binding
+	HighlightLast           key.Binding
 	HighlightNext           key.Binding
 	HighlightPrevious       key.Binding
 	Select                  key.Binding
@@ -35,6 +36,10 @@ var viewModeKeyMap = struct {
 	HighlightFirst: key.NewBinding(
 		key.WithKeys("home"),
 		key.WithHelp("home", "first"),
+	),
+	HighlightLast: key.NewBinding(
+		key.WithKeys("end"),
+		key.WithHelp("end", "last"),
 	),
 	HighlightNext: key.NewBinding(
 		key.WithKeys("down"),
@@ -99,6 +104,9 @@ func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.C
 
 	case key.Matches(message, viewModeKeyMap.HighlightFirst):
 		return model.onSelectFirstRemainingNode()
+
+	case key.Matches(message, viewModeKeyMap.HighlightLast):
+		return model.onSelectLastRemainingNode()
 
 	case key.Matches(message, viewModeKeyMap.HighlightNext):
 		return model.onHighlightNextRemainingNode()
