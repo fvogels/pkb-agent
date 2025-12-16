@@ -93,26 +93,14 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 
 		return updatedModel, tea.Batch(commands...)
 
-	case MsgHighlightPrevious:
-		return util.UpdateSingleChild(
-			&model,
-			&model.remainingNodesView,
-			listview.MsgSelectItem{
-				Index: model.remainingNodesView.GetSelectedIndex() - 1,
-			},
-		)
-
-	case MsgHighlightNext:
-		return util.UpdateSingleChild(
-			&model,
-			&model.remainingNodesView,
-			listview.MsgSelectItem{
-				Index: model.remainingNodesView.GetSelectedIndex() + 1,
-			},
-		)
-
 	case MsgHighlightRemainingNode:
-		return util.UpdateSingleChild(&model, &model.remainingNodesView, listview.MsgSelectItem{Index: message.Index})
+		return util.UpdateSingleChild(
+			&model,
+			&model.remainingNodesView,
+			listview.MsgSelectItem{
+				Index: message.Index,
+			},
+		)
 
 	case msgRemainingNodesWrapper:
 		switch message := message.wrapped.(type) {
@@ -160,6 +148,10 @@ func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	}
 
 	return model.updateChildSizes()
+}
+
+func (model *Model) GetSelectedRemainingNodeIndex() int {
+	return model.remainingNodesView.GetSelectedIndex()
 }
 
 func (model *Model) GetSelectedRemainingNode() *graph.Node {

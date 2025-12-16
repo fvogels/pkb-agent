@@ -234,11 +234,23 @@ func (adapter *SliceAdapter[T]) At(index int) T {
 }
 
 func (model Model) onHighlightPreviousRemainingNode() (Model, tea.Cmd) {
-	return util.UpdateSingleChild(&model, &model.nodeSelectionView, nodeselectionview.MsgHighlightPrevious{})
+	return util.UpdateSingleChild(
+		&model,
+		&model.nodeSelectionView,
+		nodeselectionview.MsgHighlightRemainingNode{
+			Index: model.nodeSelectionView.GetSelectedRemainingNodeIndex() - 1,
+		},
+	)
 }
 
 func (model Model) onHighlightNextRemainingNode() (Model, tea.Cmd) {
-	return util.UpdateSingleChild(&model, &model.nodeSelectionView, nodeselectionview.MsgHighlightNext{})
+	return util.UpdateSingleChild(
+		&model,
+		&model.nodeSelectionView,
+		nodeselectionview.MsgHighlightRemainingNode{
+			Index: model.nodeSelectionView.GetSelectedRemainingNodeIndex() + 1,
+		},
+	)
 }
 
 func (model Model) onSelectFirstRemainingNode() (Model, tea.Cmd) {

@@ -15,10 +15,6 @@ type MsgSetSelectedNodes struct {
 	SelectedNodes List
 }
 
-type MsgHighlightNext struct{}
-
-type MsgHighlightPrevious struct{}
-
 type msgRemainingNodesWrapper struct {
 	wrapped tea.Msg
 }
