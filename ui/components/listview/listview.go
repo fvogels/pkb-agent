@@ -65,6 +65,9 @@ func (model Model[T]) TypedUpdate(message tea.Msg) (Model[T], tea.Cmd) {
 	case MsgSelectNext:
 		return model.onSelectNext()
 
+	case MsgSelectItem:
+		return model.onSelectItem(message)
+
 	case MsgSetItemRenderer[T]:
 		return model.onSetItemRenderer(message)
 
@@ -228,5 +231,22 @@ func (model *Model[T]) SetEmptyListMessage(message string) {
 
 func (model Model[T]) onSetItemRenderer(message MsgSetItemRenderer[T]) (Model[T], tea.Cmd) {
 	model.itemRenderer = message.Renderer
+	return model, nil
+}
+
+func (model Model[T]) onSelectItem(message MsgSelectItem) (Model[T], tea.Cmd) {
+	index := message.Index
+
+	if index < 0 {
+		index = 0
+	}
+
+	if index >= model.items.Length() {
+		index = model.items.Length() - 1
+	}
+
+	model.selectedIndex = index
+	model.ensureSelectedIsVisible()
+
 	return model, nil
 }

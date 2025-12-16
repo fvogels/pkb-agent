@@ -9,6 +9,10 @@ type MsgSelectPrevious struct{}
 
 type MsgSelectNext struct{}
 
+type MsgSelectItem struct {
+	Index int
+}
+
 type MsgItemSelected[T any] struct {
 	Index int
 	Item  T
