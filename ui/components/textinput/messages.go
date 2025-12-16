@@ -5,3 +5,7 @@ type MsgInputUpdated struct {
 }
 
 type MsgClear struct{}
+
+type MsgSetInput struct {
+	Input string
+}

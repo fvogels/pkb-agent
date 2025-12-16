@@ -48,6 +48,10 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		model.input = ""
 		return model, model.signalUpdate()
 
+	case MsgSetInput:
+		model.input = message.Input
+		return model, model.signalUpdate()
+
 	case tea.WindowSizeMsg:
 		return model.onResize(message)
 

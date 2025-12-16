@@ -326,3 +326,13 @@ func (model Model) toggleIncludeLinkedNodes() (Model, tea.Cmd) {
 
 	return model, model.signalRefreshRemainingNodes(true)
 }
+
+func (model Model) setInput(input string) (Model, tea.Cmd) {
+	return util.UpdateSingleChild(
+		&model,
+		&model.textInput,
+		textinput.MsgSetInput{
+			Input: input,
+		},
+	)
+}
