@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type DownloadCommand struct {
+type downloadCommand struct {
 	cobra.Command
 	bucketName          string
 	remoteFilename      string
@@ -18,9 +18,9 @@ type DownloadCommand struct {
 }
 
 func NewDownloadCommand() *cobra.Command {
-	var command *DownloadCommand
+	var command *downloadCommand
 
-	command = &DownloadCommand{
+	command = &downloadCommand{
 		Command: cobra.Command{
 			Use:   "download",
 			Short: "Download file from bucket",
@@ -44,7 +44,7 @@ func NewDownloadCommand() *cobra.Command {
 	return &command.Command
 }
 
-func (c *DownloadCommand) execute() error {
+func (c *downloadCommand) execute() error {
 	ctx := context.Background()
 	application_key := os.Getenv("APPLICATION_KEY")
 	application_key_id := os.Getenv("APPLICATION_KEY_ID")

@@ -8,8 +8,8 @@ func NewGraphCommand() *cobra.Command {
 		Short: "Graph related commands",
 	}
 
-	command.AddCommand(NewListNodesCommand())
-	command.AddCommand(NewSearchGraphCommand())
+	command.AddCommand(newListNodesCommand())
+	command.AddCommand(newSearchGraphCommand())
 
 	return &command
 }

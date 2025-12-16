@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type RenameCommand struct {
+type renameCommand struct {
 	cobra.Command
 	bucketName  string
 	oldFilename string
@@ -16,9 +16,9 @@ type RenameCommand struct {
 }
 
 func NewRenameCommand() *cobra.Command {
-	var command *RenameCommand
+	var command *renameCommand
 
-	command = &RenameCommand{
+	command = &renameCommand{
 		Command: cobra.Command{
 			Use:   "rename",
 			Short: "Renames remote file",
@@ -36,7 +36,7 @@ func NewRenameCommand() *cobra.Command {
 	return &command.Command
 }
 
-func (c *RenameCommand) execute() error {
+func (c *renameCommand) execute() error {
 	ctx := context.Background()
 
 	client, err := backblaze.NewClient(ctx)

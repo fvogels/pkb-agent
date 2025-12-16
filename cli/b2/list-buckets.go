@@ -9,14 +9,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type ListBucketsCommand struct {
+type listBucketsCommand struct {
 	cobra.Command
 }
 
 func NewListBucketsCommand() *cobra.Command {
-	var command *ListBucketsCommand
+	var command *listBucketsCommand
 
-	command = &ListBucketsCommand{
+	command = &listBucketsCommand{
 		Command: cobra.Command{
 			Use:   "list-buckets",
 			Short: "List buckets",
@@ -29,7 +29,7 @@ func NewListBucketsCommand() *cobra.Command {
 	return &command.Command
 }
 
-func (c *ListBucketsCommand) execute() error {
+func (c *listBucketsCommand) execute() error {
 	ctx := context.Background()
 	application_key := os.Getenv("APPLICATION_KEY")
 	application_key_id := os.Getenv("APPLICATION_KEY_ID")

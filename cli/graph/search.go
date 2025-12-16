@@ -9,14 +9,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type SearchGraphCommand struct {
+type searchGraphCommand struct {
 	cobra.Command
 }
 
-func NewSearchGraphCommand() *cobra.Command {
-	var command *SearchGraphCommand
+func newSearchGraphCommand() *cobra.Command {
+	var command *searchGraphCommand
 
-	command = &SearchGraphCommand{
+	command = &searchGraphCommand{
 		Command: cobra.Command{
 			Use:   "search",
 			Short: "Searches nodes matching a string",
@@ -31,7 +31,7 @@ func NewSearchGraphCommand() *cobra.Command {
 	return &command.Command
 }
 
-func (c *SearchGraphCommand) execute(str string) error {
+func (c *searchGraphCommand) execute(str string) error {
 	loader := metaloader.New()
 	path := pathlib.New(`F:\repos\pkb\pkb-data\root.yaml`)
 

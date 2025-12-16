@@ -8,15 +8,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type ListFilesCommand struct {
+type listFilesCommand struct {
 	cobra.Command
 	bucketName string
 }
 
 func NewListFilesCommand() *cobra.Command {
-	var command *ListFilesCommand
+	var command *listFilesCommand
 
-	command = &ListFilesCommand{
+	command = &listFilesCommand{
 		Command: cobra.Command{
 			Use:   "list-files",
 			Short: "List files",
@@ -32,7 +32,7 @@ func NewListFilesCommand() *cobra.Command {
 	return &command.Command
 }
 
-func (c *ListFilesCommand) execute() error {
+func (c *listFilesCommand) execute() error {
 	ctx := context.Background()
 
 	client, err := backblaze.NewClient(ctx)

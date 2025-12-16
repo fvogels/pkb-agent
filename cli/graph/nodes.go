@@ -13,7 +13,7 @@ type ListNodesCommand struct {
 	cobra.Command
 }
 
-func NewListNodesCommand() *cobra.Command {
+func newListNodesCommand() *cobra.Command {
 	var command *ListNodesCommand
 
 	command = &ListNodesCommand{
