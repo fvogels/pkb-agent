@@ -101,10 +101,10 @@ func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.C
 		return model.onSelectFirstRemainingNode()
 
 	case key.Matches(message, viewModeKeyMap.HighlightNext):
-		return model.onSelectNextRemainingNode()
+		return model.onHighlightNextRemainingNode()
 
 	case key.Matches(message, viewModeKeyMap.HighlightPrevious):
-		return model.onSelectPreviousRemainingNode()
+		return model.onHighlightPreviousRemainingNode()
 
 	case key.Matches(message, viewModeKeyMap.Select):
 		return model.onNodeSelected()

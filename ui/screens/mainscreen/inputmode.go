@@ -73,10 +73,10 @@ func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.
 		return model, command
 
 	case key.Matches(message, inputModeKeyMap.HighlightNext):
-		return model.onSelectNextRemainingNode()
+		return model.onHighlightNextRemainingNode()
 
 	case key.Matches(message, inputModeKeyMap.HighlightPrevious):
-		return model.onSelectPreviousRemainingNode()
+		return model.onHighlightPreviousRemainingNode()
 
 	case key.Matches(message, inputModeKeyMap.Select):
 		model.mode = model.viewMode
