@@ -1,7 +1,6 @@
 package mainscreen
 
 import (
-	"log/slog"
 	"pkb-agent/ui/components/helpbar"
 	"pkb-agent/ui/components/nodeselectionview"
 	"pkb-agent/ui/layout"
@@ -167,8 +166,6 @@ func (mode viewMode) render(model *Model) string {
 }
 
 func (mode viewMode) activate(model *Model) tea.Cmd {
-	slog.Debug("view mode activation")
-
 	var command1 tea.Cmd
 	model.helpBar, command1 = model.helpBar.TypedUpdate(helpbar.MsgSetKeyBindings{
 		KeyBindings: []key.Binding{

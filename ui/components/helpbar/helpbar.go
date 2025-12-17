@@ -2,7 +2,6 @@ package helpbar
 
 import (
 	"log/slog"
-	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -18,8 +17,8 @@ type Model struct {
 func New() Model {
 	return Model{
 		keyBindings:      nil,
-		keyStyle:         lipgloss.NewStyle().Background(lipgloss.Color("FAA")).Foreground(lipgloss.Color("FFF")),
-		descriptionStyle: lipgloss.NewStyle().Background(lipgloss.Color("F55")).Foreground(lipgloss.Color("FFF")),
+		keyStyle:         lipgloss.NewStyle().Background(lipgloss.Color("#AAAAAA")).Foreground(lipgloss.Color("#FFFFFF")),
+		descriptionStyle: lipgloss.NewStyle().Background(lipgloss.Color("#555555")).Foreground(lipgloss.Color("#FFFFFF")),
 	}
 }
 
@@ -48,15 +47,14 @@ func (model Model) View() string {
 	for _, keyBinding := range model.keyBindings {
 		part := lipgloss.JoinHorizontal(
 			0,
-			model.keyStyle.Render(keyBinding.Help().Key),
-			" ",
-			model.descriptionStyle.Render(keyBinding.Help().Desc),
+			model.keyStyle.Render(" "+keyBinding.Help().Key+" "),
+			model.descriptionStyle.Render(" "+keyBinding.Help().Desc+" "),
 		)
 
 		parts = append(parts, part)
 	}
 
-	return strings.Join(parts, " ")
+	return lipgloss.JoinHorizontal(0, parts...)
 }
 
 func (model Model) setKeyBindings(message MsgSetKeyBindings) (Model, tea.Cmd) {
