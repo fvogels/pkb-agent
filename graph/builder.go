@@ -4,6 +4,8 @@ import (
 	"log/slog"
 	"pkb-agent/trie"
 	"pkb-agent/util"
+	"strings"
+	"unicode"
 )
 
 type Builder struct {
@@ -88,12 +90,30 @@ func (builder *Builder) createTrie() *trie.Node[*Node] {
 	trieBuilder := trie.NewBuilder[*Node]()
 
 	for name, node := range nodes {
-		words := util.LowercaseWords(name)
+		searchPrefixes := builder.deriveSearchPrefixes(name)
 
-		for _, word := range words {
-			trieBuilder.Add(word, node)
+		for _, searchPrefix := range searchPrefixes {
+			trieBuilder.Add(searchPrefix, node)
 		}
 	}
 
 	return trieBuilder.Finish()
+}
+
+func (builder *Builder) deriveSearchPrefixes(nodeName string) []string {
+	s := nodeName
+	s = strings.TrimSpace(s)
+	s = util.RemoveAccents(s)
+	s = strings.ToLower(s)
+	s = util.KeepOnlyLettersAndSpaces(s)
+
+	prefixes := []string{nodeName}
+
+	for index, rune := range s {
+		if unicode.IsSpace(rune) {
+			prefixes = append(prefixes, s[index+1:])
+		}
+	}
+
+	return prefixes
 }

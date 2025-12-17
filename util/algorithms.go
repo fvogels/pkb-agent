@@ -1,6 +1,12 @@
 package util
 
-import "strings"
+import (
+	"strings"
+	"unicode"
+
+	"golang.org/x/text/runes"
+	"golang.org/x/text/unicode/norm"
+)
 
 func Map[T any, R any](xs []T, transformer func(t T) R) []R {
 	result := make([]R, len(xs))
@@ -56,31 +62,36 @@ func Curry2[T1, T2, R any](f func(T1, T2) R, x T1) func(T2) R {
 	}
 }
 
-func IsLowercaseLetter(char byte) bool {
-	return 'a' <= char && char <= 'z'
+func RemoveAccents(s string) string {
+	t := norm.NFD.String(s)
+	t = runes.Remove(runes.In(unicode.Mn)).String(t)
+	return t
 }
 
-func IsDigit(char byte) bool {
-	return '0' <= char && char <= '9'
-}
+func KeepOnlyLettersAndSpaces(s string) string {
+	var builder strings.Builder
+	lastWasSpace := true
 
-func LowercaseWords(str string) []string {
-	str = strings.ToLower(str)
-	words := []string{}
-	i := 0
-
-	for i < len(str) {
-		j := i
-		for j != len(str) && IsLowercaseLetter(str[j]) {
-			j++
+	for _, r := range s {
+		if unicode.IsLetter(r) {
+			// Returns error, but documentation says it will be nil, so we ignore it
+			builder.WriteRune(r)
+			lastWasSpace = false
+		} else if unicode.IsSpace(r) {
+			if !lastWasSpace {
+				// Returns error, but documentation says it will be nil, so we ignore it
+				builder.WriteRune(r)
+				lastWasSpace = true
+			}
+		} else {
+			if !lastWasSpace {
+				builder.WriteRune(' ')
+				lastWasSpace = true
+			}
 		}
-
-		word := str[i:j]
-		words = append(words, word)
-		i = j + 1
 	}
 
-	return words
+	return builder.String()
 }
 
 func CollectTo[T any](receiver *[]T) func(T) bool {
