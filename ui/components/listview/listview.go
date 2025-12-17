@@ -214,9 +214,14 @@ func (model Model[T]) onSelectItem(message MsgSelectItem) (Model[T], tea.Cmd) {
 	}
 
 	model.selectedIndex = index
-	model.ensureSelectedIsVisible()
 
-	return model, model.signalItemSelected()
+	if index >= 0 {
+		model.ensureSelectedIsVisible()
+		return model, model.signalItemSelected()
+	} else {
+		model.selectedIndex = 0
+		return model, nil
+	}
 }
 
 func (model *Model[T]) GetSize() util.Size {
