@@ -8,6 +8,7 @@ import (
 	"pkb-agent/extern"
 	"pkb-agent/graph/nodes/backblaze"
 	"pkb-agent/ui/debug"
+	"pkb-agent/ui/nodeviewers"
 	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
 	"pkb-agent/zipfile"
@@ -42,7 +43,15 @@ func (model Model) Init() tea.Cmd {
 	return nil
 }
 
+func (model Model) UpdateViewer(message tea.Msg) (nodeviewers.Viewer, tea.Cmd) {
+	return model.TypedUpdate(message)
+}
+
 func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
+	return model.TypedUpdate(message)
+}
+
+func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	debug.ShowBubbleTeaMessage(message)
 
 	switch message := message.(type) {

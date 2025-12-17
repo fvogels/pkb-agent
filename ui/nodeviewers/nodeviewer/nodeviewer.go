@@ -9,6 +9,7 @@ import (
 	"pkb-agent/graph/nodes/snippet"
 	"pkb-agent/ui/components/linksview"
 	"pkb-agent/ui/debug"
+	"pkb-agent/ui/nodeviewers"
 	"pkb-agent/ui/nodeviewers/bbviewer"
 	"pkb-agent/ui/nodeviewers/bookmarkviewer"
 	"pkb-agent/ui/nodeviewers/mdviewer"
@@ -17,14 +18,15 @@ import (
 	"pkb-agent/util"
 	"reflect"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
-	size      util.Size       // Size of the component
-	viewer    tea.Model       // Viewer specialized in node type
-	linksView linksview.Model // Links and backlinks view
+	size      util.Size          // Size of the component
+	viewer    nodeviewers.Viewer // Viewer specialized in node type
+	linksView linksview.Model    // Links and backlinks view
 }
 
 func New() Model {
@@ -45,6 +47,10 @@ func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 	return model.TypedUpdate(message)
 }
 
+func (model Model) UpdateViewer(message tea.Msg) (nodeviewers.Viewer, tea.Cmd) {
+	return model.TypedUpdate(message)
+}
+
 func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	debug.ShowBubbleTeaMessage(message)
 
@@ -57,7 +63,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 
 	default:
 		commands := []tea.Cmd{}
-		util.UpdateUntypedChild(&model.viewer, message, &commands)
+		nodeviewers.UpdateViewerChild(&model.viewer, message, &commands)
 		util.UpdateChild(&model.linksView, message, &commands)
 		return model, tea.Batch(commands...)
 	}
@@ -88,7 +94,7 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: linksViewHeight,
 	}, &commands)
 
-	util.UpdateUntypedChild(&model.viewer, tea.WindowSizeMsg{
+	nodeviewers.UpdateViewerChild(&model.viewer, tea.WindowSizeMsg{
 		Width:  message.Width,
 		Height: message.Height - linksViewHeight - 1, // -1 needed for border
 	}, &commands)
@@ -139,7 +145,7 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 	}
 
 	commands = append(commands, model.viewer.Init())
-	util.UpdateUntypedChild(&model.viewer, tea.WindowSizeMsg{
+	nodeviewers.UpdateViewerChild(&model.viewer, tea.WindowSizeMsg{
 		Width:  model.size.Width,
 		Height: model.size.Height,
 	}, &commands)
@@ -152,6 +158,12 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 func (model *Model) determineLinksViewHeight() int {
 	desiredHeight := model.linksView.GetDesiredHeight()
 	return util.MinInt(model.size.Height-11, desiredHeight)
+}
+
+func (model *Model) GetKeyBindings() []key.Binding {
+	result := []key.Binding{}
+
+	return result
 }
 
 type SliceAdapter[T any] struct {

@@ -4,6 +4,7 @@ import (
 	"pkb-agent/extern"
 	"pkb-agent/graph/nodes/bookmark"
 	"pkb-agent/ui/debug"
+	"pkb-agent/ui/nodeviewers"
 	"pkb-agent/util"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -35,6 +36,10 @@ func (model Model) Init() tea.Cmd {
 }
 
 func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
+	return model.TypedUpdate(message)
+}
+
+func (model Model) UpdateViewer(message tea.Msg) (nodeviewers.Viewer, tea.Cmd) {
 	return model.TypedUpdate(message)
 }
 

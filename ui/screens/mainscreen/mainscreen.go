@@ -356,7 +356,14 @@ func (model Model) onNodeHighlighted(message nodeselectionview.MsgRemainingNodeH
 }
 
 func (model Model) showNode(node *graph.Node) (Model, tea.Cmd) {
-	return util.UpdateSingleChild(&model, &model.nodeViewer, nodeviewer.MsgSetNode{Node: node})
+	commands := []tea.Cmd{}
+
+	util.UpdateChild(&model.nodeViewer, nodeviewer.MsgSetNode{Node: node}, &commands)
+	util.UpdateChild(&model.helpBar, helpbar.MsgSetKeyBindings{
+		KeyBindings: model.nodeViewer.GetKeyBindings(),
+	}, &commands)
+
+	return model, tea.Batch(commands...)
 }
 
 func (model Model) updateLayoutConfiguration(update func(*layoutConfiguration)) (Model, tea.Cmd) {

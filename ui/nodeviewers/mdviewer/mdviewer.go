@@ -4,6 +4,7 @@ import (
 	"pkb-agent/graph/nodes/markdown"
 	"pkb-agent/ui/components/markdownview"
 	"pkb-agent/ui/debug"
+	"pkb-agent/ui/nodeviewers"
 	"pkb-agent/util"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -26,6 +27,10 @@ func (model Model) Init() tea.Cmd {
 }
 
 func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
+	return model.TypedUpdate(message)
+}
+
+func (model Model) UpdateViewer(message tea.Msg) (nodeviewers.Viewer, tea.Cmd) {
 	return model.TypedUpdate(message)
 }
 
