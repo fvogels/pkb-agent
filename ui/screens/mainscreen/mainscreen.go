@@ -262,7 +262,6 @@ func (model Model) onHighlightNextRemainingNode() (Model, tea.Cmd) {
 }
 
 func (model Model) onHighlightRemainingNodePageDown() (Model, tea.Cmd) {
-	slog.Debug("!!!!")
 	return util.UpdateSingleChild(
 		&model,
 		&model.nodeSelectionView,
