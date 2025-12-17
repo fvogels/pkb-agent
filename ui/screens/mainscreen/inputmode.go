@@ -116,10 +116,12 @@ func (mode inputMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.
 		return model.onNodeSelected()
 
 	default:
-		updatedTextInput, command := model.textInput.TypedUpdate(message)
-		model.textInput = updatedTextInput
+		commands := []tea.Cmd{}
 
-		return model, command
+		util.UpdateChild(&model.textInput, message, &commands)
+		// util.UpdateChild(&model.nodeViewer, message, &commands)
+
+		return model, tea.Batch(commands...)
 	}
 }
 
