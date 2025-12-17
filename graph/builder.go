@@ -107,7 +107,7 @@ func (builder *Builder) deriveSearchPrefixes(nodeName string) []string {
 	s = strings.ToLower(s)
 	s = util.KeepOnlyLettersAndSpaces(s)
 
-	prefixes := []string{nodeName}
+	prefixes := []string{s}
 
 	for index, rune := range s {
 		if unicode.IsSpace(rune) {
