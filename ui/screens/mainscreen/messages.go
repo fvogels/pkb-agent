@@ -24,3 +24,5 @@ type msgRemainingNodesDetermined struct {
 	remainingNodes []*graph.Node
 	selectionIndex int
 }
+
+type msgActivateMode struct{}

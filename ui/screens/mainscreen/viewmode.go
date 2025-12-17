@@ -1,6 +1,8 @@
 package mainscreen
 
 import (
+	"log/slog"
+	"pkb-agent/ui/components/helpbar"
 	"pkb-agent/ui/components/nodeselectionview"
 	"pkb-agent/ui/layout"
 	"pkb-agent/ui/layout/border"
@@ -93,8 +95,12 @@ func NewViewMode(layoutConfiguration *layoutConfiguration) *viewMode {
 		border.New(layout.Wrap(func(m *Model) *nodeselectionview.Model { return &m.nodeSelectionView })),
 	)
 	vlayout.Add(
-		func(size util.Size) int { return size.Height - layoutConfiguration.nodeSelectionViewHeight },
+		func(size util.Size) int { return size.Height - layoutConfiguration.nodeSelectionViewHeight - 1 },
 		border.New(layout.Wrap(func(m *Model) *nodeviewer.Model { return &m.nodeViewer })),
+	)
+	vlayout.Add(
+		func(size util.Size) int { return 1 },
+		layout.Wrap(func(m *Model) *helpbar.Model { return &m.helpBar }),
 	)
 
 	return &viewMode{
@@ -161,7 +167,18 @@ func (mode viewMode) render(model *Model) string {
 }
 
 func (mode viewMode) activate(model *Model) tea.Cmd {
-	return mode.layout.LayoutResize(model, model.size)
+	slog.Debug("view mode activation")
+
+	var command1 tea.Cmd
+	model.helpBar, command1 = model.helpBar.TypedUpdate(helpbar.MsgSetKeyBindings{
+		KeyBindings: []key.Binding{
+			viewModeKeyMap.Quit,
+		},
+	})
+
+	command2 := mode.layout.LayoutResize(model, model.size)
+
+	return tea.Batch(command1, command2)
 }
 
 func (mode viewMode) resize(model *Model, size util.Size) tea.Cmd {

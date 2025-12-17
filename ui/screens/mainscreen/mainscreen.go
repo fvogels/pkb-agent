@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"pkb-agent/graph"
 	"pkb-agent/graph/metaloader"
+	"pkb-agent/ui/components/helpbar"
 	"pkb-agent/ui/components/nodeselectionview"
 	"pkb-agent/ui/components/textinput"
 	"pkb-agent/ui/debug"
@@ -29,6 +30,7 @@ type Model struct {
 	nodeSelectionView nodeselectionview.Model
 	nodeViewer        nodeviewer.Model
 	textInput         textinput.Model
+	helpBar           helpbar.Model
 
 	layoutConfiguration *layoutConfiguration
 
@@ -48,6 +50,7 @@ func New() Model {
 		includeLinkedNodes:  true,
 		nodeSelectionView:   nodeselectionview.New(),
 		textInput:           textinput.New(),
+		helpBar:             helpbar.New(),
 		nodeViewer:          nodeviewer.New(),
 		layoutConfiguration: &layoutConfiguration,
 		viewMode:            viewMode,
@@ -62,6 +65,7 @@ func (model Model) Init() tea.Cmd {
 		model.nodeSelectionView.Init(),
 		model.textInput.Init(),
 		model.signalLoadGraph(),
+		model.signalActivateMode(),
 	)
 }
 
@@ -97,6 +101,10 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 
 	case nodeselectionview.MsgRemainingNodeHighlighted:
 		return model.onNodeHighlighted(message)
+
+	case msgActivateMode:
+		command := model.mode.activate(&model)
+		return model, command
 
 	default:
 		commands := []tea.Cmd{}
@@ -368,4 +376,10 @@ func (model Model) setInput(input string) (Model, tea.Cmd) {
 			Input: input,
 		},
 	)
+}
+
+func (model Model) signalActivateMode() tea.Cmd {
+	return func() tea.Msg {
+		return msgActivateMode{}
+	}
 }
