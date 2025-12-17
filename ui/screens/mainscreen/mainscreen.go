@@ -351,8 +351,12 @@ func (model Model) onNodeHighlighted(message nodeselectionview.MsgRemainingNodeH
 		// No node was highlighted
 		return model, nil
 	} else {
-		return util.UpdateSingleChild(&model, &model.nodeViewer, nodeviewer.MsgSetNode{Node: highlighedNode})
+		return model.showNode(highlighedNode)
 	}
+}
+
+func (model Model) showNode(node *graph.Node) (Model, tea.Cmd) {
+	return util.UpdateSingleChild(&model, &model.nodeViewer, nodeviewer.MsgSetNode{Node: node})
 }
 
 func (model Model) updateLayoutConfiguration(update func(*layoutConfiguration)) (Model, tea.Cmd) {
