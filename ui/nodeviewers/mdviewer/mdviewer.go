@@ -7,6 +7,7 @@ import (
 	"pkb-agent/ui/nodeviewers"
 	"pkb-agent/util"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -81,4 +82,8 @@ func (model Model) onMarkdownLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) 
 	return util.UpdateSingleChild(&model, &model.viewer, markdownview.MsgSetSource{
 		Source: message.source,
 	})
+}
+
+func (model Model) GetKeyBindings() []key.Binding {
+	return []key.Binding{}
 }

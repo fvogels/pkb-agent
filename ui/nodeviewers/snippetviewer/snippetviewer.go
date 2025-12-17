@@ -6,6 +6,7 @@ import (
 	"pkb-agent/ui/nodeviewers"
 	"pkb-agent/util"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.design/x/clipboard"
 )
@@ -15,6 +16,15 @@ type Model struct {
 	nodeData        *snippet.Extra
 	rawSource       string
 	formattedSource string
+}
+
+var keyMap = struct {
+	CopyToClipboard key.Binding
+}{
+	CopyToClipboard: key.NewBinding(
+		key.WithKeys("c"),
+		key.WithHelp("c", "copy"),
+	),
 }
 
 func New(nodeData *snippet.Extra) Model {
@@ -89,8 +99,8 @@ func (model Model) onSnippetLoaded(message msgSnippetLoaded) (Model, tea.Cmd) {
 }
 
 func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
-	switch message.String() {
-	case "c":
+	switch {
+	case key.Matches(message, keyMap.CopyToClipboard):
 		return model.onCopyToClipboard()
 
 	default:
@@ -102,4 +112,10 @@ func (model Model) onCopyToClipboard() (Model, tea.Cmd) {
 	clipboard.Write(clipboard.FmtText, []byte(model.rawSource))
 
 	return model, nil
+}
+
+func (model Model) GetKeyBindings() []key.Binding {
+	return []key.Binding{
+		keyMap.CopyToClipboard,
+	}
 }

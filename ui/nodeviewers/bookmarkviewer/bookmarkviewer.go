@@ -87,3 +87,9 @@ func (model Model) onOpenInBrowser() (Model, tea.Cmd) {
 
 	return model, nil
 }
+
+func (model Model) GetKeyBindings() []key.Binding {
+	return []key.Binding{
+		keyMap.OpenInBrowser,
+	}
+}

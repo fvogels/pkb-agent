@@ -19,11 +19,11 @@ import (
 )
 
 var keyMap = struct {
-	OpenInBrowser key.Binding
+	Download key.Binding
 }{
-	OpenInBrowser: key.NewBinding(
-		key.WithKeys("o"),
-		key.WithHelp("o", "open"),
+	Download: key.NewBinding(
+		key.WithKeys("d"),
+		key.WithHelp("d", "download"),
 	),
 }
 
@@ -91,7 +91,7 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 
 func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 	switch {
-	case key.Matches(message, keyMap.OpenInBrowser):
+	case key.Matches(message, keyMap.Download):
 		return model.openFile()
 
 	default:
@@ -172,5 +172,11 @@ func (model Model) signalListen(channel chan status) tea.Cmd {
 		}
 	} else {
 		return nil
+	}
+}
+
+func (model Model) GetKeyBindings() []key.Binding {
+	return []key.Binding{
+		keyMap.Download,
 	}
 }

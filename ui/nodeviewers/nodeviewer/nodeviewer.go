@@ -47,10 +47,6 @@ func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 	return model.TypedUpdate(message)
 }
 
-func (model Model) UpdateViewer(message tea.Msg) (nodeviewers.Viewer, tea.Cmd) {
-	return model.TypedUpdate(message)
-}
-
 func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	debug.ShowBubbleTeaMessage(message)
 
@@ -161,9 +157,7 @@ func (model *Model) determineLinksViewHeight() int {
 }
 
 func (model *Model) GetKeyBindings() []key.Binding {
-	result := []key.Binding{}
-
-	return result
+	return model.viewer.GetKeyBindings()
 }
 
 type SliceAdapter[T any] struct {
