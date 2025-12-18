@@ -372,7 +372,7 @@ func (model Model) refreshHelpBar() (Model, tea.Cmd) {
 	commands := []tea.Cmd{}
 
 	util.UpdateChild(&model.helpBar, helpbar.MsgSetKeyBindings{
-		KeyBindings: model.nodeViewer.GetKeyBindings(),
+		KeyBindings: append(model.mode.getKeyBindings(), model.nodeViewer.GetKeyBindings()...),
 	}, &commands)
 
 	return model, tea.Batch(commands...)
