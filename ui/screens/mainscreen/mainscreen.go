@@ -106,6 +106,13 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		command := model.mode.activate(&model)
 		return model, command
 
+	case msgSwitchMode:
+		model.mode = message.mode
+		command1 := model.mode.activate(&model)
+		var command2 tea.Cmd
+		model, command2 = model.refreshHelpBar()
+		return model, tea.Batch(command1, command2)
+
 	default:
 		commands := []tea.Cmd{}
 

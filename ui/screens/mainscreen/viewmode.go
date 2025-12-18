@@ -113,9 +113,10 @@ func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.C
 		return model, tea.Quit
 
 	case key.Matches(message, viewModeKeyMap.SwitchToInputMode):
-		model.mode = model.inputMode
-		command := model.mode.activate(&model)
-		return model, command
+		// model.mode = model.inputMode
+		// command := model.mode.activate(&model)
+		// return model, command
+		return model, func() tea.Msg { return msgSwitchMode{mode: model.inputMode} }
 
 	case key.Matches(message, viewModeKeyMap.HighlightFirst):
 		return model.onSelectFirstRemainingNode()

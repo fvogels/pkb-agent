@@ -26,3 +26,7 @@ type msgRemainingNodesDetermined struct {
 }
 
 type msgActivateMode struct{}
+
+type msgSwitchMode struct {
+	mode mode
+}
