@@ -1,8 +1,6 @@
 package helpbar
 
 import (
-	"log/slog"
-
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -41,7 +39,6 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 }
 
 func (model Model) View() string {
-	slog.Debug("viewing help bar", "n", len(model.keyBindings))
 	parts := []string{}
 
 	for _, keyBinding := range model.keyBindings {
