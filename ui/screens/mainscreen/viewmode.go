@@ -181,3 +181,9 @@ func (mode viewMode) activate(model *Model) tea.Cmd {
 func (mode viewMode) resize(model *Model, size util.Size) tea.Cmd {
 	return mode.layout.LayoutResize(model, model.size)
 }
+
+func (mode viewMode) getKeyBindings() []key.Binding {
+	return []key.Binding{
+		viewModeKeyMap.Quit,
+	}
+}

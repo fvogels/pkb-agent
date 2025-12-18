@@ -345,13 +345,18 @@ func (model Model) setSelectedNodes(selectedNodes []*graph.Node) (Model, tea.Cmd
 
 // onNodeHighlighted is called whenever a new node is being highlighted in the list of remaining nodes.
 func (model Model) onNodeHighlighted(message nodeselectionview.MsgRemainingNodeHighlighted) (Model, tea.Cmd) {
-	highlighedNode := message.Node
+	highlightedNode := message.Node
 
-	if highlighedNode == nil {
+	if highlightedNode == nil {
 		// No node was highlighted
 		return model, nil
 	} else {
-		return model.showNode(highlighedNode)
+		var command1 tea.Cmd
+		var command2 tea.Cmd
+		model, command1 = model.showNode(highlightedNode)
+		model, command2 = model.refreshHelpBar()
+
+		return model, tea.Batch(command1, command2)
 	}
 }
 
@@ -359,6 +364,13 @@ func (model Model) showNode(node *graph.Node) (Model, tea.Cmd) {
 	commands := []tea.Cmd{}
 
 	util.UpdateChild(&model.nodeViewer, nodeviewer.MsgSetNode{Node: node}, &commands)
+
+	return model, tea.Batch(commands...)
+}
+
+func (model Model) refreshHelpBar() (Model, tea.Cmd) {
+	commands := []tea.Cmd{}
+
 	util.UpdateChild(&model.helpBar, helpbar.MsgSetKeyBindings{
 		KeyBindings: model.nodeViewer.GetKeyBindings(),
 	}, &commands)

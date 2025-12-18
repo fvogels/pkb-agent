@@ -136,3 +136,7 @@ func (mode inputMode) activate(model *Model) tea.Cmd {
 func (mode inputMode) resize(model *Model, size util.Size) tea.Cmd {
 	return mode.layout.LayoutResize(model, model.size)
 }
+
+func (mode inputMode) getKeyBindings() []key.Binding {
+	return []key.Binding{}
+}

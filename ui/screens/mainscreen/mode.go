@@ -3,6 +3,7 @@ package mainscreen
 import (
 	"pkb-agent/util"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -12,4 +13,6 @@ type mode interface {
 	activate(model *Model) tea.Cmd
 	resize(model *Model, size util.Size) tea.Cmd
 	render(model *Model) string
+
+	getKeyBindings() []key.Binding
 }
