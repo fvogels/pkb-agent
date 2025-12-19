@@ -4,7 +4,6 @@ import (
 	"pkb-agent/ui/nodeviewers"
 	"pkb-agent/util"
 
-	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -48,8 +47,4 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	}
 
 	return model, nil
-}
-
-func (model Model) GetKeyBindings() []key.Binding {
-	return []key.Binding{}
 }

@@ -15,14 +15,16 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Model struct {
-	graph              *graph.Graph
-	size               util.Size
-	mode               mode
-	includeLinkedNodes bool
+	graph                 *graph.Graph
+	size                  util.Size
+	mode                  mode
+	includeLinkedNodes    bool
+	nodeViewerKeyBindings []key.Binding
 
 	remainingNodes []*graph.Node
 	selectedNodes  []*graph.Node
@@ -45,13 +47,19 @@ func New() Model {
 	viewMode := NewViewMode(&layoutConfiguration)
 	inputMode := NewInputMode(&layoutConfiguration)
 
+	createUpdateKeyBindingsMessage := func(keyBindings []key.Binding) tea.Msg {
+		return MsgUpdateNodeViewerBindings{
+			KeyBindings: keyBindings,
+		}
+	}
+
 	model := Model{
 		mode:                viewMode,
 		includeLinkedNodes:  true,
 		nodeSelectionView:   nodeselectionview.New(),
 		textInput:           textinput.New(),
 		helpBar:             helpbar.New(),
-		nodeViewer:          nodeviewer.New(),
+		nodeViewer:          nodeviewer.New(createUpdateKeyBindingsMessage),
 		layoutConfiguration: &layoutConfiguration,
 		viewMode:            viewMode,
 		inputMode:           inputMode,
@@ -105,6 +113,10 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	case msgActivateMode:
 		command := model.mode.activate(&model)
 		return model, command
+
+	case MsgUpdateNodeViewerBindings:
+		model.nodeViewerKeyBindings = message.KeyBindings
+		return model.refreshHelpBar()
 
 	case msgSwitchMode:
 		model.mode = message.mode
@@ -354,6 +366,9 @@ func (model Model) setSelectedNodes(selectedNodes []*graph.Node) (Model, tea.Cmd
 func (model Model) onNodeHighlighted(message nodeselectionview.MsgRemainingNodeHighlighted) (Model, tea.Cmd) {
 	highlightedNode := message.Node
 
+	// Reset key bindings, the specialized node viewer will update it again later
+	model.nodeViewerKeyBindings = nil
+
 	if highlightedNode == nil {
 		// No node was highlighted
 		return model, nil
@@ -379,7 +394,7 @@ func (model Model) refreshHelpBar() (Model, tea.Cmd) {
 	commands := []tea.Cmd{}
 
 	util.UpdateChild(&model.helpBar, helpbar.MsgSetKeyBindings{
-		KeyBindings: append(model.mode.getKeyBindings(), model.nodeViewer.GetKeyBindings()...),
+		KeyBindings: append(model.mode.getKeyBindings(), model.nodeViewerKeyBindings...),
 	}, &commands)
 
 	return model, tea.Batch(commands...)

@@ -12,10 +12,11 @@ import (
 )
 
 type Model struct {
-	size            util.Size
-	nodeData        *snippet.Extra
-	rawSource       string
-	formattedSource string
+	size                           util.Size
+	nodeData                       *snippet.Extra
+	rawSource                      string
+	formattedSource                string
+	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
 }
 
 var keyMap = struct {
@@ -27,15 +28,19 @@ var keyMap = struct {
 	),
 }
 
-func New(nodeData *snippet.Extra) Model {
+func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *snippet.Extra) Model {
 	return Model{
-		nodeData:        nodeData,
-		formattedSource: "loading",
+		nodeData:                       nodeData,
+		formattedSource:                "loading",
+		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,
 	}
 }
 
 func (model Model) Init() tea.Cmd {
-	return model.signalLoadSnippet()
+	return tea.Batch(
+		model.signalLoadSnippet(),
+		model.signalUpdateKeyBindings(),
+	)
 }
 
 func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
@@ -114,8 +119,10 @@ func (model Model) onCopyToClipboard() (Model, tea.Cmd) {
 	return model, nil
 }
 
-func (model Model) GetKeyBindings() []key.Binding {
-	return []key.Binding{
-		keyMap.CopyToClipboard,
+func (model Model) signalUpdateKeyBindings() tea.Cmd {
+	return func() tea.Msg {
+		return model.createUpdateKeyBindingsMessage([]key.Binding{
+			keyMap.CopyToClipboard,
+		})
 	}
 }

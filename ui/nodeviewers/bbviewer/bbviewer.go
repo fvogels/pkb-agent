@@ -28,19 +28,25 @@ var keyMap = struct {
 }
 
 type Model struct {
-	size     util.Size
-	nodeData *backblaze.Extra
-	status   status
+	size                           util.Size
+	nodeData                       *backblaze.Extra
+	status                         status
+	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
 }
 
-func New(nodeData *backblaze.Extra) Model {
+func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *backblaze.Extra) Model {
 	return Model{
-		nodeData: nodeData,
+		nodeData:                       nodeData,
+		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,
 	}
 }
 
 func (model Model) Init() tea.Cmd {
-	return nil
+	return func() tea.Msg {
+		return model.createUpdateKeyBindingsMessage([]key.Binding{
+			keyMap.Download,
+		})
+	}
 }
 
 func (model Model) UpdateViewer(message tea.Msg) (nodeviewers.Viewer, tea.Cmd) {
@@ -172,11 +178,5 @@ func (model Model) signalListen(channel chan status) tea.Cmd {
 		}
 	} else {
 		return nil
-	}
-}
-
-func (model Model) GetKeyBindings() []key.Binding {
-	return []key.Binding{
-		keyMap.Download,
 	}
 }

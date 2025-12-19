@@ -13,16 +13,27 @@ import (
 )
 
 type Model struct {
-	size      util.Size
-	nodeExtra *hybrid.Extra
-	nodeData  *hybrid.Data
-	viewer    markdownview.Model
+	size                           util.Size
+	nodeExtra                      *hybrid.Extra
+	nodeData                       *hybrid.Data
+	viewer                         markdownview.Model
+	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
 }
 
-func New(nodeData *hybrid.Extra) Model {
+var keyMap = struct {
+	CopyToClipboard key.Binding
+}{
+	CopyToClipboard: key.NewBinding(
+		key.WithKeys("c"),
+		key.WithHelp("c", "copy"),
+	),
+}
+
+func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *hybrid.Extra) Model {
 	return Model{
-		nodeExtra: nodeData,
-		viewer:    markdownview.New(),
+		nodeExtra:                      nodeData,
+		viewer:                         markdownview.New(),
+		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,
 	}
 }
 
@@ -85,7 +96,8 @@ func (model *Model) signalLoadNodeData() tea.Cmd {
 func (model Model) onMarkdownLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) {
 	model.nodeData = message.data
 
-	commands := []tea.Cmd{}
+	commands := []tea.Cmd{model.signalUpdatedKeyBindings()}
+
 	if len(model.nodeData.MarkdownSource) > 0 {
 		util.UpdateChild(&model.viewer, markdownview.MsgSetSource{
 			Source: model.nodeData.MarkdownSource,
@@ -95,6 +107,14 @@ func (model Model) onMarkdownLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) 
 	return model, tea.Batch(commands...)
 }
 
-func (model Model) GetKeyBindings() []key.Binding {
-	return []key.Binding{}
+func (model Model) signalUpdatedKeyBindings() tea.Cmd {
+	return func() tea.Msg {
+		return model.createUpdateKeyBindingsMessage(model.determineKeyBindings())
+	}
+}
+
+func (model Model) determineKeyBindings() []key.Binding {
+	return []key.Binding{
+		keyMap.CopyToClipboard,
+	}
 }

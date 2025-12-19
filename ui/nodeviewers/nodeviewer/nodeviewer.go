@@ -5,6 +5,7 @@ import (
 	"pkb-agent/graph/nodes/atom"
 	"pkb-agent/graph/nodes/backblaze"
 	"pkb-agent/graph/nodes/bookmark"
+	"pkb-agent/graph/nodes/hybrid"
 	"pkb-agent/graph/nodes/markdown"
 	"pkb-agent/graph/nodes/snippet"
 	"pkb-agent/ui/components/linksview"
@@ -12,6 +13,7 @@ import (
 	"pkb-agent/ui/nodeviewers"
 	"pkb-agent/ui/nodeviewers/bbviewer"
 	"pkb-agent/ui/nodeviewers/bookmarkviewer"
+	"pkb-agent/ui/nodeviewers/hybridviewer"
 	"pkb-agent/ui/nodeviewers/mdviewer"
 	"pkb-agent/ui/nodeviewers/nullviewer"
 	"pkb-agent/ui/nodeviewers/snippetviewer"
@@ -24,15 +26,17 @@ import (
 )
 
 type Model struct {
-	size      util.Size          // Size of the component
-	viewer    nodeviewers.Viewer // Viewer specialized in node type
-	linksView linksview.Model    // Links and backlinks view
+	size                           util.Size                   // Size of the component
+	viewer                         nodeviewers.Viewer          // Viewer specialized in node type
+	linksView                      linksview.Model             // Links and backlinks view
+	createUpdateKeyBindingsMessage func([]key.Binding) tea.Msg // Used by viewers to inform the main screen that key bindings need an update
 }
 
-func New() Model {
+func New(createUpdateKeyBindingsMessage func([]key.Binding) tea.Msg) Model {
 	return Model{
-		viewer:    nullviewer.New(),
-		linksView: linksview.New(),
+		viewer:                         nullviewer.New(),
+		linksView:                      linksview.New(),
+		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,
 	}
 }
 
@@ -120,16 +124,19 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 		model.viewer = nullviewer.New()
 
 	case *snippet.Extra:
-		model.viewer = snippetviewer.New(nodeData)
+		model.viewer = snippetviewer.New(model.createUpdateKeyBindingsMessage, nodeData)
 
 	case *bookmark.Extra:
-		model.viewer = bookmarkviewer.New(nodeData)
+		model.viewer = bookmarkviewer.New(model.createUpdateKeyBindingsMessage, nodeData)
 
 	case *backblaze.Extra:
-		model.viewer = bbviewer.New(nodeData)
+		model.viewer = bbviewer.New(model.createUpdateKeyBindingsMessage, nodeData)
 
 	case *markdown.Extra:
 		model.viewer = mdviewer.New(nodeData)
+
+	case *hybrid.Extra:
+		model.viewer = hybridviewer.New(model.createUpdateKeyBindingsMessage, nodeData)
 
 	default:
 		slog.Debug(
@@ -154,10 +161,6 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 func (model *Model) determineLinksViewHeight() int {
 	desiredHeight := model.linksView.GetDesiredHeight()
 	return util.MinInt(model.size.Height-11, desiredHeight)
-}
-
-func (model *Model) GetKeyBindings() []key.Binding {
-	return model.viewer.GetKeyBindings()
 }
 
 type SliceAdapter[T any] struct {

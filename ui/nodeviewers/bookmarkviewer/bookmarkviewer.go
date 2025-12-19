@@ -21,18 +21,24 @@ var keyMap = struct {
 }
 
 type Model struct {
-	size     util.Size
-	nodeData *bookmark.Extra
+	size                           util.Size
+	nodeData                       *bookmark.Extra
+	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
 }
 
-func New(nodeData *bookmark.Extra) Model {
+func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *bookmark.Extra) Model {
 	return Model{
-		nodeData: nodeData,
+		nodeData:                       nodeData,
+		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,
 	}
 }
 
 func (model Model) Init() tea.Cmd {
-	return nil
+	return func() tea.Msg {
+		return model.createUpdateKeyBindingsMessage([]key.Binding{
+			keyMap.OpenInBrowser,
+		})
+	}
 }
 
 func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
@@ -86,10 +92,4 @@ func (model Model) onOpenInBrowser() (Model, tea.Cmd) {
 	}
 
 	return model, nil
-}
-
-func (model Model) GetKeyBindings() []key.Binding {
-	return []key.Binding{
-		keyMap.OpenInBrowser,
-	}
 }
