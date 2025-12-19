@@ -8,6 +8,7 @@ import (
 	"pkb-agent/graph/nodes/atom"
 	"pkb-agent/graph/nodes/backblaze"
 	"pkb-agent/graph/nodes/bookmark"
+	"pkb-agent/graph/nodes/hybrid"
 	"pkb-agent/graph/nodes/markdown"
 	"pkb-agent/graph/nodes/snippet"
 	pathlib "pkb-agent/util/pathlib"
@@ -31,6 +32,7 @@ func New() *Loader {
 	loaders["bookmark"] = bookmark.NewLoader()
 	loaders["backblaze"] = backblaze.NewLoader()
 	loaders["markdown"] = markdown.NewLoader()
+	loaders["hybrid"] = hybrid.NewLoader()
 
 	loader := Loader{
 		loaders: loaders,
