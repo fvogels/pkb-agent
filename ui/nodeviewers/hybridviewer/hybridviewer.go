@@ -2,6 +2,7 @@ package hybridviewer
 
 import (
 	"log/slog"
+	"pkb-agent/extern"
 	"pkb-agent/graph/nodes/hybrid"
 	"pkb-agent/ui/components/markdownview"
 	"pkb-agent/ui/debug"
@@ -21,11 +22,11 @@ type Model struct {
 }
 
 var keyMap = struct {
-	CopyToClipboard key.Binding
+	OpenLink key.Binding
 }{
-	CopyToClipboard: key.NewBinding(
-		key.WithKeys("c"),
-		key.WithHelp("c", "copy"),
+	OpenLink: key.NewBinding(
+		key.WithKeys("w"),
+		key.WithHelp("w", "www"),
 	),
 }
 
@@ -57,7 +58,10 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		return model.onResized(message)
 
 	case msgMarkdownLoaded:
-		return model.onMarkdownLoaded(message)
+		return model.onDataLoaded(message)
+
+	case tea.KeyMsg:
+		return model.onKeyPressed(message)
 
 	default:
 		return util.UpdateSingleChild(&model, &model.viewer, message)
@@ -93,7 +97,7 @@ func (model *Model) signalLoadNodeData() tea.Cmd {
 	}
 }
 
-func (model Model) onMarkdownLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) {
+func (model Model) onDataLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) {
 	model.nodeData = message.data
 
 	commands := []tea.Cmd{model.signalUpdatedKeyBindings()}
@@ -103,6 +107,8 @@ func (model Model) onMarkdownLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) 
 			Source: model.nodeData.MarkdownSource,
 		}, &commands)
 	}
+
+	keyMap.OpenLink.SetEnabled(len(model.nodeData.URL) > 0)
 
 	return model, tea.Batch(commands...)
 }
@@ -114,7 +120,29 @@ func (model Model) signalUpdatedKeyBindings() tea.Cmd {
 }
 
 func (model Model) determineKeyBindings() []key.Binding {
-	return []key.Binding{
-		keyMap.CopyToClipboard,
+	bindings := []key.Binding{}
+
+	if keyMap.OpenLink.Enabled() {
+		bindings = append(bindings, keyMap.OpenLink)
 	}
+
+	return bindings
+}
+
+func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
+	switch {
+	case key.Matches(message, keyMap.OpenLink):
+		return model.onOpenURL()
+
+	default:
+		return model, nil
+	}
+}
+
+func (model Model) onOpenURL() (Model, tea.Cmd) {
+	if err := extern.OpenURLInBrowser(model.nodeData.URL); err != nil {
+		panic("failed to open browser")
+	}
+
+	return model, nil
 }
