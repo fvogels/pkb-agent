@@ -20,7 +20,7 @@ func NewLoader() *Loader {
 type metadata struct {
 	Name  string   `yaml:"name"`  // Name of the snippet.
 	Links []string `yaml:"links"` // Links to other nodes.
-	URLs  []string `yaml:"urls"`  // URLs
+	URL   string   `yaml:"url"`   // URL
 }
 
 func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) error) error {

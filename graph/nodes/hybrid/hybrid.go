@@ -13,7 +13,7 @@ type Extra struct {
 
 type Data struct {
 	MarkdownSource string
-	URLs           []string
+	URL            string
 }
 
 func (extra *Extra) GetData() (*Data, error) {
@@ -40,7 +40,7 @@ func (extra *Extra) GetData() (*Data, error) {
 		return nil, err
 	}
 
-	data.URLs = metadata.URLs
+	data.URL = metadata.URL
 
 	if len(sectionedFile.Sections) > 1 {
 		data.MarkdownSource = strings.Join(sectionedFile.Sections[1].Lines, "\n")
