@@ -116,3 +116,17 @@ func MinInt(a int, b int) int {
 		return b
 	}
 }
+
+func SplitInLines(str string) []string {
+	lines := []string{}
+	lineGenerator := strings.Lines(str)
+
+	lineGenerator(func(line string) bool {
+		trimmedLine := strings.TrimRight(line, "\t\n\r ")
+		lines = append(lines, trimmedLine)
+
+		return true
+	})
+
+	return lines
+}
