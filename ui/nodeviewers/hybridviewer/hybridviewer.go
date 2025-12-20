@@ -18,16 +18,13 @@ type Model struct {
 	nodeInfo                       *hybrid.Info
 	nodeData                       *hybrid.Data
 	viewer                         markdownview.Model
+	actions                        []action
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
 }
 
-var keyMap = struct {
-	OpenLink key.Binding
-}{
-	OpenLink: key.NewBinding(
-		key.WithKeys("w"),
-		key.WithHelp("w", "www"),
-	),
+type action struct {
+	keyBinding key.Binding
+	perform    func()
 }
 
 func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *hybrid.Info) Model {
@@ -99,7 +96,7 @@ func (model *Model) signalLoadNodeData() tea.Cmd {
 
 func (model Model) onDataLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) {
 	model.nodeData = message.data
-
+	model.actions = model.createCommands()
 	commands := []tea.Cmd{model.signalUpdatedKeyBindings()}
 
 	if len(model.nodeData.MarkdownSource) > 0 {
@@ -107,8 +104,6 @@ func (model Model) onDataLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) {
 			Source: model.nodeData.MarkdownSource,
 		}, &commands)
 	}
-
-	keyMap.OpenLink.SetEnabled(len(model.nodeData.URL) > 0)
 
 	return model, tea.Batch(commands...)
 }
@@ -119,30 +114,46 @@ func (model Model) signalUpdatedKeyBindings() tea.Cmd {
 	}
 }
 
-func (model Model) determineKeyBindings() []key.Binding {
-	bindings := []key.Binding{}
+func (model Model) createCommands() []action {
+	actions := []action{}
+	keys := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"}
+	keyBindingIndex := 0
 
-	if keyMap.OpenLink.Enabled() {
-		bindings = append(bindings, keyMap.OpenLink)
+	for _, externalLink := range model.nodeData.ExternalLinks {
+		binding := key.NewBinding(
+			key.WithKeys(keys[keyBindingIndex]),
+			key.WithHelp(keys[keyBindingIndex], externalLink.Description),
+		)
+		action := action{
+			keyBinding: binding,
+			perform:    func() { openURL(externalLink.URL) },
+		}
+		actions = append(actions, action)
+		keyBindingIndex++
 	}
 
-	return bindings
+	return actions
+}
+
+func (model Model) determineKeyBindings() []key.Binding {
+	return util.Map(model.actions, func(action action) key.Binding {
+		return action.keyBinding
+	})
 }
 
 func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
-	switch {
-	case key.Matches(message, keyMap.OpenLink):
-		return model.onOpenURL()
-
-	default:
-		return model, nil
-	}
-}
-
-func (model Model) onOpenURL() (Model, tea.Cmd) {
-	if err := extern.OpenURLInBrowser(model.nodeData.URL); err != nil {
-		panic("failed to open browser")
+	for _, action := range model.actions {
+		if key.Matches(message, action.keyBinding) {
+			action.perform()
+			return model, nil
+		}
 	}
 
 	return model, nil
+}
+
+func openURL(url string) {
+	if err := extern.OpenURLInBrowser(url); err != nil {
+		panic("failed to open browser")
+	}
 }
