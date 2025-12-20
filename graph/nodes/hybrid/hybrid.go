@@ -13,7 +13,12 @@ type Info struct {
 
 type Data struct {
 	MarkdownSource string
-	URL            string
+	ExternalLinks  []ExternalLink
+}
+
+type ExternalLink struct {
+	URL         string
+	Description string
 }
 
 func (info *Info) GetData() (*Data, error) {
@@ -38,7 +43,7 @@ func (info *Info) GetData() (*Data, error) {
 		return nil, err
 	}
 
-	data.URL = metadata.URL
+	data.ExternalLinks = metadata.ExternalLinks
 
 	if markdownSegment := sectionedFile.FindSegmentOfType("markdown"); markdownSegment != nil {
 		data.MarkdownSource = strings.Join(markdownSegment.Contents, "\n")
