@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"pkb-agent/util"
 	"strings"
 )
 
@@ -101,4 +102,13 @@ func (p Path) ReadFile() ([]byte, error) {
 
 func (p Path) String() string {
 	return p.path
+}
+
+func (p Path) ReadLines() ([]string, error) {
+	contents, err := p.ReadFile()
+	if err != nil {
+		return nil, err
+	}
+
+	return util.SplitInLines(string(contents)), nil
 }
