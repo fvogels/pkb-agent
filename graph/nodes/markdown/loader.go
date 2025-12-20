@@ -44,7 +44,7 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 		Type:      "markdown",
 		Links:     append(metadata.Links, "Markdown"),
 		Backlinks: nil,
-		Extra: &Extra{
+		Info: &Info{
 			Path: path,
 		},
 	}

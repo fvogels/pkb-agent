@@ -61,7 +61,7 @@ func (tc matchTestCase) test(t *testing.T) {
 			Name:  node,
 			Links: nil,
 			Type:  "atom",
-			Extra: atom.Extra{},
+			Info:  atom.Info{},
 		})
 	}
 

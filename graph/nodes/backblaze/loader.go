@@ -49,7 +49,7 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 				Type:      "file",
 				Links:     append(file.Links, "File"),
 				Backlinks: nil,
-				Extra: &Extra{
+				Info: &Info{
 					BucketName: bucket.Name,
 					Filename:   file.Filename,
 				},

@@ -13,12 +13,12 @@ import (
 	"github.com/alecthomas/chroma/v2/quick"
 )
 
-type Extra struct {
+type Info struct {
 	Path                    pathlib.Path
 	LanguageForHighlighting string
 }
 
-func (data *Extra) GetSource() (string, error) {
+func (data *Info) GetSource() (string, error) {
 	buffer, err := os.ReadFile(data.Path.String())
 
 	if err != nil {
@@ -44,7 +44,7 @@ func (data *Extra) GetSource() (string, error) {
 	return strings.Join(lines, "\n"), nil
 }
 
-func (data *Extra) GetHighlightedSource() (string, string, error) {
+func (data *Info) GetHighlightedSource() (string, string, error) {
 	rawSource, err := data.GetSource()
 	if err != nil {
 		return "", "", err

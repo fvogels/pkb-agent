@@ -45,7 +45,7 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 		Type:      "hybrid",
 		Links:     metadata.Links,
 		Backlinks: nil,
-		Extra: &Extra{
+		Info: &Info{
 			Path: path,
 		},
 	}

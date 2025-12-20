@@ -57,7 +57,7 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 		Type:      "snippet",
 		Links:     append(metadata.Links, "Snippet", metadata.Language),
 		Backlinks: nil,
-		Extra: &Extra{
+		Info: &Info{
 			Path:                    path,
 			LanguageForHighlighting: highlightLanguage,
 		},

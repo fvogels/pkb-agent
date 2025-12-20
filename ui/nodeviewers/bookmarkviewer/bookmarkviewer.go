@@ -22,11 +22,11 @@ var keyMap = struct {
 
 type Model struct {
 	size                           util.Size
-	nodeData                       *bookmark.Extra
+	nodeData                       *bookmark.Info
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
 }
 
-func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *bookmark.Extra) Model {
+func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *bookmark.Info) Model {
 	return Model{
 		nodeData:                       nodeData,
 		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,

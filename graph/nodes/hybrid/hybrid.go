@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type Extra struct {
+type Info struct {
 	Path pathlib.Path
 }
 
@@ -16,10 +16,10 @@ type Data struct {
 	URL            string
 }
 
-func (extra *Extra) GetData() (*Data, error) {
+func (info *Info) GetData() (*Data, error) {
 	var data Data
 
-	sectionedFile, err := sectionedfile.LoadSectionedFile(extra.Path, isDelimiter)
+	sectionedFile, err := sectionedfile.LoadSectionedFile(info.Path, isDelimiter)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func (extra *Extra) GetData() (*Data, error) {
 	if len(sectionedFile.Sections) == 0 {
 		slog.Debug(
 			"Failed to load sectioned file",
-			slog.String("path", extra.Path.String()),
+			slog.String("path", info.Path.String()),
 		)
 	}
 
@@ -35,7 +35,7 @@ func (extra *Extra) GetData() (*Data, error) {
 	if err != nil {
 		slog.Debug(
 			"Failed to parse node metadata",
-			slog.String("path", extra.Path.String()),
+			slog.String("path", info.Path.String()),
 		)
 		return nil, err
 	}

@@ -12,11 +12,11 @@ import (
 
 type Model struct {
 	size     util.Size
-	nodeData *markdown.Extra
+	nodeData *markdown.Info
 	viewer   markdownview.Model
 }
 
-func New(nodeData *markdown.Extra) Model {
+func New(nodeData *markdown.Info) Model {
 	return Model{
 		nodeData: nodeData,
 	}

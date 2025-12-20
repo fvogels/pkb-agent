@@ -1,6 +1,6 @@
 package backblaze
 
-type Extra struct {
+type Info struct {
 	BucketName string
 	Filename   string
 }

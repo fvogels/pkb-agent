@@ -5,5 +5,5 @@ type Node struct {
 	Type      string
 	Links     []string
 	Backlinks []string
-	Extra     any
+	Info      any
 }

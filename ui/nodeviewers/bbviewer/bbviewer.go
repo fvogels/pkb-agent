@@ -29,12 +29,12 @@ var keyMap = struct {
 
 type Model struct {
 	size                           util.Size
-	nodeData                       *backblaze.Extra
+	nodeData                       *backblaze.Info
 	status                         status
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
 }
 
-func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *backblaze.Extra) Model {
+func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *backblaze.Info) Model {
 	return Model{
 		nodeData:                       nodeData,
 		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,

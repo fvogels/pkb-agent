@@ -6,22 +6,22 @@ import (
 	"strings"
 )
 
-type Extra struct {
+type Info struct {
 	Path pathlib.Path
 }
 
-func (data *Extra) GetSource() (string, error) {
-	file, err := sectionedfile.LoadSectionedFile(data.Path, isDelimiter)
+func (info *Info) GetSource() (string, error) {
+	file, err := sectionedfile.LoadSectionedFile(info.Path, isDelimiter)
 	if err != nil {
 		return "", err
 	}
 
 	if len(file.Sections) < 3 {
-		return "", &ErrMalformed{path: data.Path}
+		return "", &ErrMalformed{path: info.Path}
 	}
 
 	if len(file.Sections[0].Lines) > 0 {
-		return "", &ErrMalformed{path: data.Path}
+		return "", &ErrMalformed{path: info.Path}
 	}
 
 	return strings.Join(file.Sections[2].Lines, "\n"), nil

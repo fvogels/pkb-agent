@@ -119,29 +119,29 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 	}, &commands)
 
 	// Select correct viewer appropriate for node type
-	switch nodeData := node.Extra.(type) {
-	case *atom.Extra:
+	switch nodeData := node.Info.(type) {
+	case *atom.Info:
 		model.viewer = nullviewer.New()
 
-	case *snippet.Extra:
+	case *snippet.Info:
 		model.viewer = snippetviewer.New(model.createUpdateKeyBindingsMessage, nodeData)
 
-	case *bookmark.Extra:
+	case *bookmark.Info:
 		model.viewer = bookmarkviewer.New(model.createUpdateKeyBindingsMessage, nodeData)
 
-	case *backblaze.Extra:
+	case *backblaze.Info:
 		model.viewer = bbviewer.New(model.createUpdateKeyBindingsMessage, nodeData)
 
-	case *markdown.Extra:
+	case *markdown.Info:
 		model.viewer = mdviewer.New(nodeData)
 
-	case *hybrid.Extra:
+	case *hybrid.Info:
 		model.viewer = hybridviewer.New(model.createUpdateKeyBindingsMessage, nodeData)
 
 	default:
 		slog.Debug(
 			"unrecognized node type",
-			slog.String("type", reflect.TypeOf(node.Extra).String()),
+			slog.String("type", reflect.TypeOf(node.Info).String()),
 		)
 
 		model.viewer = nullviewer.New()

@@ -15,7 +15,7 @@ import (
 
 type Model struct {
 	size                           util.Size
-	nodeExtra                      *hybrid.Extra
+	nodeExtra                      *hybrid.Info
 	nodeData                       *hybrid.Data
 	viewer                         markdownview.Model
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
@@ -30,7 +30,7 @@ var keyMap = struct {
 	),
 }
 
-func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *hybrid.Extra) Model {
+func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *hybrid.Info) Model {
 	return Model{
 		nodeExtra:                      nodeData,
 		viewer:                         markdownview.New(),

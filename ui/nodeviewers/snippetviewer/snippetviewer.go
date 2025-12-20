@@ -13,7 +13,7 @@ import (
 
 type Model struct {
 	size                           util.Size
-	nodeData                       *snippet.Extra
+	nodeData                       *snippet.Info
 	rawSource                      string
 	formattedSource                string
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
@@ -28,7 +28,7 @@ var keyMap = struct {
 	),
 }
 
-func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *snippet.Extra) Model {
+func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *snippet.Info) Model {
 	return Model{
 		nodeData:                       nodeData,
 		formattedSource:                "loading",
