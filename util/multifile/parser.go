@@ -30,6 +30,8 @@ type parser struct {
 }
 
 func (parser *parser) parse(lines []string) (*MultiFile, error) {
+	parser.startSegment()
+
 	for index, line := range lines {
 		if index == 0 {
 			if err := parser.parseFirstLine(line); err != nil {
@@ -37,6 +39,7 @@ func (parser *parser) parse(lines []string) (*MultiFile, error) {
 			}
 		} else if remainder, ok := parser.isDelimiterLine(line); ok {
 			parser.finishSegment()
+			parser.startSegment()
 
 			if err := parser.parseDelimiterLine(remainder); err != nil {
 				return nil, err
@@ -121,4 +124,10 @@ func (parser *parser) finishSegment() {
 	}
 
 	parser.segments = append(parser.segments, &segment)
+}
+
+func (parser *parser) startSegment() {
+	parser.currentContents = nil
+	parser.currentSegmentAttributes = make(map[string]string)
+	parser.currentSegmentType = ""
 }
