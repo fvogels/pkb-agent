@@ -2,6 +2,7 @@ package multifile
 
 import (
 	"fmt"
+	"pkb-agent/util/pathlib"
 	"strings"
 )
 
@@ -13,6 +14,15 @@ type Segment struct {
 	Type       string
 	Attributes map[string]string
 	Contents   []string
+}
+
+func Load(path pathlib.Path) (*MultiFile, error) {
+	lines, err := path.ReadLines()
+	if err != nil {
+		return nil, err
+	}
+
+	return Parse(lines)
 }
 
 func Parse(contents []string) (*MultiFile, error) {
