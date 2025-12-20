@@ -2,8 +2,8 @@ package hybrid
 
 import (
 	"log/slog"
+	"pkb-agent/util/multifile"
 	"pkb-agent/util/pathlib"
-	"pkb-agent/util/sectionedfile"
 	"strings"
 )
 
@@ -19,19 +19,17 @@ type Data struct {
 func (info *Info) GetData() (*Data, error) {
 	var data Data
 
-	sectionedFile, err := sectionedfile.LoadSectionedFile(info.Path, isDelimiter)
+	sectionedFile, err := multifile.Load(info.Path)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(sectionedFile.Sections) == 0 {
-		slog.Debug(
-			"Failed to load sectioned file",
-			slog.String("path", info.Path.String()),
-		)
+	metadataSegment := sectionedFile.FindSegmentOfType("metadata")
+	if metadataSegment == nil {
+		panic("should not occur; this should have been caught earlier")
 	}
 
-	metadata, err := parseMetadata(sectionedFile.Sections[0].Lines)
+	metadata, err := parseMetadata(metadataSegment.Contents)
 	if err != nil {
 		slog.Debug(
 			"Failed to parse node metadata",
@@ -42,8 +40,8 @@ func (info *Info) GetData() (*Data, error) {
 
 	data.URL = metadata.URL
 
-	if len(sectionedFile.Sections) > 1 {
-		data.MarkdownSource = strings.Join(sectionedFile.Sections[1].Lines, "\n")
+	if markdownSegment := sectionedFile.FindSegmentOfType("markdown"); markdownSegment != nil {
+		data.MarkdownSource = strings.Join(markdownSegment.Contents, "\n")
 	}
 
 	return &data, nil

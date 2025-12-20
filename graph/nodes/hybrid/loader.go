@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 	"pkb-agent/graph"
+	"pkb-agent/util/multifile"
 	pathlib "pkb-agent/util/pathlib"
-	"pkb-agent/util/sectionedfile"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -30,12 +30,17 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 		slog.String("path", path.String()),
 	)
 
-	sectionedFile, err := sectionedfile.LoadSectionedFile(path, isDelimiter)
+	multiFile, err := multifile.Load(path)
 	if err != nil {
 		return err
 	}
 
-	metadata, err := parseMetadata(sectionedFile.Sections[0].Lines)
+	metadataSegment := multiFile.FindSegmentOfType("metadata")
+	if metadataSegment == nil {
+		return fmt.Errorf("missing metadata segment in %s", path.String())
+	}
+
+	metadata, err := parseMetadata(metadataSegment.Contents)
 	if err != nil {
 		return fmt.Errorf("failed to parse metadata from %s: %v", path.String(), err)
 	}
@@ -71,8 +76,4 @@ func parseMetadata(lines []string) (metadata, error) {
 	}
 
 	return result, nil
-}
-
-func isDelimiter(line string) bool {
-	return strings.TrimSpace(line) == "---"
 }
