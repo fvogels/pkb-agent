@@ -15,7 +15,7 @@ import (
 
 type Model struct {
 	size                           util.Size
-	nodeExtra                      *hybrid.Info
+	nodeInfo                       *hybrid.Info
 	nodeData                       *hybrid.Data
 	viewer                         markdownview.Model
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
@@ -32,7 +32,7 @@ var keyMap = struct {
 
 func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *hybrid.Info) Model {
 	return Model{
-		nodeExtra:                      nodeData,
+		nodeInfo:                       nodeData,
 		viewer:                         markdownview.New(),
 		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,
 	}
@@ -82,10 +82,10 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 }
 
 func (model *Model) signalLoadNodeData() tea.Cmd {
-	extra := model.nodeExtra
+	info := model.nodeInfo
 
 	return func() tea.Msg {
-		data, err := extra.GetData()
+		data, err := info.GetData()
 		if err != nil {
 			slog.Debug("Error whlie reading node data", slog.String("error", err.Error()))
 			panic("failed to load node's data")

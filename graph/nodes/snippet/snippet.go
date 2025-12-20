@@ -18,8 +18,8 @@ type Info struct {
 	LanguageForHighlighting string
 }
 
-func (data *Info) GetSource() (string, error) {
-	buffer, err := os.ReadFile(data.Path.String())
+func (info *Info) GetSource() (string, error) {
+	buffer, err := os.ReadFile(info.Path.String())
 
 	if err != nil {
 		return "", err
@@ -44,22 +44,22 @@ func (data *Info) GetSource() (string, error) {
 	return strings.Join(lines, "\n"), nil
 }
 
-func (data *Info) GetHighlightedSource() (string, string, error) {
-	rawSource, err := data.GetSource()
+func (info *Info) GetHighlightedSource() (string, string, error) {
+	rawSource, err := info.GetSource()
 	if err != nil {
 		return "", "", err
 	}
 
-	if !slices.Contains(lexers.Names(true), data.LanguageForHighlighting) {
+	if !slices.Contains(lexers.Names(true), info.LanguageForHighlighting) {
 		slog.Error(
 			"Unsupported language for highlighting",
-			slog.String("language", data.LanguageForHighlighting),
+			slog.String("language", info.LanguageForHighlighting),
 		)
 	}
 
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
-	if err := quick.Highlight(writer, rawSource, data.LanguageForHighlighting, "terminal16m", "monokai"); err != nil {
+	if err := quick.Highlight(writer, rawSource, info.LanguageForHighlighting, "terminal16m", "monokai"); err != nil {
 		return "", "", err
 	}
 	writer.Flush()
