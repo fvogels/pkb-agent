@@ -24,6 +24,10 @@ func (set *Set[T]) Add(item T) {
 	set.items[item] = true
 }
 
+func (set *Set[T]) Remove(item T) {
+	delete(set.items, item)
+}
+
 func (set Set[T]) Contains(item T) bool {
 	_, ok := set.items[item]
 
