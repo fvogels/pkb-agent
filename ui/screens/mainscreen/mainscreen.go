@@ -157,23 +157,28 @@ func (model Model) onGraphLoaded(message MsgGraphLoaded) (Model, tea.Cmd) {
 
 func (model *Model) signalLoadGraph() tea.Cmd {
 	return func() tea.Msg {
+		g, err := loadGraph()
+		if err != nil {
+			panic("Failed to load graph")
+		}
+
 		return MsgGraphLoaded{
-			graph: loadGraph(),
+			graph: g,
 		}
 	}
 }
 
-func loadGraph() *graph.Graph {
+func loadGraph() (*graph.Graph, error) {
 	loader := metaloader.New()
 	path := pathlib.New(`F:\repos\pkb\pkb-data\root.yaml`)
 
 	g, err := graph.LoadGraph(path, loader)
 	if err != nil {
 		slog.Error("error loading graph", slog.String("error", err.Error()))
-		panic("failed to load graph!")
+		return nil, err
 	}
 
-	return g
+	return g, nil
 }
 
 func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
