@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*graph.Node, includeLinked bool) []*graph.Node {
+func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*graph.Node, includeLinked bool, includeIndirectAncestors bool) []*graph.Node {
 	if len(selectedNodes) == 0 {
 		// Deal with this case separately for efficiency reasons
 		iterator := g.FindMatchingNodes(input)
@@ -40,10 +40,10 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 	}
 
 	// Step 1: collect the intersection of the descendants of the selected nodes
-	remainingNodeSet := collectDescendants(g, selectedNodes[0])
+	remainingNodeSet := collectDescendants(g, selectedNodes[0], includeIndirectAncestors)
 
 	for _, selectedNode := range selectedNodes[1:] {
-		remainingNodeSet.Intersect(collectDescendants(g, selectedNode))
+		remainingNodeSet.Intersect(collectDescendants(g, selectedNode, includeIndirectAncestors))
 	}
 
 	// Step 2: optionally collect all ancestors of the remaining nodes
@@ -90,8 +90,8 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 	})
 }
 
-// collectDescendants collects the names of all backlinked nodes, both directly and indirectly
-func collectDescendants(g *graph.Graph, node *graph.Node) set.Set[string] {
+// collectDescendants collects the names of all backlinked nodes
+func collectDescendants(g *graph.Graph, node *graph.Node, includeIndirect bool) set.Set[string] {
 	result := set.New[string]()
 	queue := make([]*graph.Node, 1, 20)
 	queue[0] = node
@@ -102,8 +102,11 @@ func collectDescendants(g *graph.Graph, node *graph.Node) set.Set[string] {
 
 		for _, identifier := range current.Backlinks {
 			result.Add(identifier)
-			descendant := g.FindNode(identifier)
-			queue = append(queue, descendant)
+
+			if includeIndirect {
+				descendant := g.FindNode(identifier)
+				queue = append(queue, descendant)
+			}
 		}
 	}
 

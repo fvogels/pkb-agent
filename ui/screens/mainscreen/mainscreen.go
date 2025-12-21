@@ -20,11 +20,12 @@ import (
 )
 
 type Model struct {
-	graph                 *graph.Graph
-	size                  util.Size
-	mode                  mode
-	includeLinkedNodes    bool
-	nodeViewerKeyBindings []key.Binding
+	graph                    *graph.Graph
+	size                     util.Size
+	mode                     mode
+	includeLinkedNodes       bool
+	includeIndirectAncestors bool
+	nodeViewerKeyBindings    []key.Binding
 
 	remainingNodes []*graph.Node
 	selectedNodes  []*graph.Node
@@ -54,15 +55,16 @@ func New() Model {
 	}
 
 	model := Model{
-		mode:                viewMode,
-		includeLinkedNodes:  true,
-		nodeSelectionView:   nodeselectionview.New(),
-		textInput:           textinput.New(),
-		helpBar:             helpbar.New(),
-		nodeViewer:          nodeviewer.New(createUpdateKeyBindingsMessage),
-		layoutConfiguration: &layoutConfiguration,
-		viewMode:            viewMode,
-		inputMode:           inputMode,
+		mode:                     viewMode,
+		includeLinkedNodes:       true,
+		includeIndirectAncestors: false,
+		nodeSelectionView:        nodeselectionview.New(),
+		textInput:                textinput.New(),
+		helpBar:                  helpbar.New(),
+		nodeViewer:               nodeviewer.New(createUpdateKeyBindingsMessage),
+		layoutConfiguration:      &layoutConfiguration,
+		viewMode:                 viewMode,
+		inputMode:                inputMode,
 	}
 
 	return model
@@ -200,6 +202,7 @@ func (model Model) signalRefreshRemainingNodes(keepSameNodeHighlighted bool) tea
 			model.graph,
 			selectedNodes,
 			model.includeLinkedNodes,
+			model.includeIndirectAncestors,
 		)
 
 		sort.Slice(remainingNodes, func(i, j int) bool {
@@ -408,6 +411,12 @@ func (model Model) updateLayoutConfiguration(update func(*layoutConfiguration)) 
 
 func (model Model) toggleIncludeLinkedNodes() (Model, tea.Cmd) {
 	model.includeLinkedNodes = !model.includeLinkedNodes
+
+	return model, model.signalRefreshRemainingNodes(true)
+}
+
+func (model Model) toggleIncludeIndirectAncestors() (Model, tea.Cmd) {
+	model.includeIndirectAncestors = !model.includeIndirectAncestors
 
 	return model, model.signalRefreshRemainingNodes(true)
 }

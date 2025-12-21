@@ -14,19 +14,20 @@ import (
 )
 
 var viewModeKeyMap = struct {
-	Quit                    key.Binding
-	SwitchToInputMode       key.Binding
-	HighlightFirst          key.Binding
-	HighlightLast           key.Binding
-	HighlightNext           key.Binding
-	HighlightPrevious       key.Binding
-	HighlightPageDown       key.Binding
-	HighlightPageUp         key.Binding
-	Select                  key.Binding
-	UnselectLast            key.Binding
-	GrowNodeSelectionView   key.Binding
-	ShrinkNodeSelectionView key.Binding
-	ToggleIncludedLinked    key.Binding
+	Quit                           key.Binding
+	SwitchToInputMode              key.Binding
+	HighlightFirst                 key.Binding
+	HighlightLast                  key.Binding
+	HighlightNext                  key.Binding
+	HighlightPrevious              key.Binding
+	HighlightPageDown              key.Binding
+	HighlightPageUp                key.Binding
+	Select                         key.Binding
+	UnselectLast                   key.Binding
+	GrowNodeSelectionView          key.Binding
+	ShrinkNodeSelectionView        key.Binding
+	ToggleIncludedLinked           key.Binding
+	ToggleIncludeIndirectAncestors key.Binding
 }{
 	Quit: key.NewBinding(
 		key.WithKeys("q"),
@@ -79,6 +80,10 @@ var viewModeKeyMap = struct {
 	ToggleIncludedLinked: key.NewBinding(
 		key.WithKeys("*"),
 		key.WithHelp("*", "toggle linked"),
+	),
+	ToggleIncludeIndirectAncestors: key.NewBinding(
+		key.WithKeys("."),
+		key.WithHelp(".", "indirect"),
 	),
 }
 
@@ -146,6 +151,9 @@ func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.C
 
 	case key.Matches(message, viewModeKeyMap.ToggleIncludedLinked):
 		return model.toggleIncludeLinkedNodes()
+
+	case key.Matches(message, viewModeKeyMap.ToggleIncludeIndirectAncestors):
+		return model.toggleIncludeIndirectAncestors()
 
 	case key.Matches(message, viewModeKeyMap.ShrinkNodeSelectionView):
 		return model.updateLayoutConfiguration(func(c *layoutConfiguration) {
