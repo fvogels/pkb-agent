@@ -15,7 +15,7 @@ import (
 
 var viewModeKeyMap = struct {
 	Quit                           key.Binding
-	SwitchToInputMode              key.Binding
+	Search                         key.Binding
 	HighlightFirst                 key.Binding
 	HighlightLast                  key.Binding
 	HighlightNext                  key.Binding
@@ -33,7 +33,7 @@ var viewModeKeyMap = struct {
 		key.WithKeys("q"),
 		key.WithHelp("q", "quit"),
 	),
-	SwitchToInputMode: key.NewBinding(
+	Search: key.NewBinding(
 		key.WithKeys("/"),
 		key.WithHelp("/", "search"),
 	),
@@ -117,7 +117,7 @@ func (mode viewMode) onKeyPressed(model Model, message tea.KeyMsg) (Model, tea.C
 	case key.Matches(message, viewModeKeyMap.Quit):
 		return model, tea.Quit
 
-	case key.Matches(message, viewModeKeyMap.SwitchToInputMode):
+	case key.Matches(message, viewModeKeyMap.Search):
 		return model, func() tea.Msg { return msgSwitchMode{mode: model.inputMode} }
 
 	case key.Matches(message, viewModeKeyMap.HighlightFirst):
@@ -191,5 +191,7 @@ func (mode viewMode) resize(model *Model, size util.Size) tea.Cmd {
 func (mode viewMode) getKeyBindings() []key.Binding {
 	return []key.Binding{
 		viewModeKeyMap.Quit,
+		viewModeKeyMap.Search,
+		viewModeKeyMap.Select,
 	}
 }
