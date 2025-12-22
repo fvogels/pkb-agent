@@ -377,17 +377,27 @@ func (model Model) onNodeHighlighted(message nodeselectionview.MsgRemainingNodeH
 	// Reset key bindings, the specialized node viewer will update it again later
 	model.nodeViewerKeyBindings = nil
 
-	if highlightedNode == nil {
-		// No node was highlighted
-		return model, nil
-	} else {
-		var command1 tea.Cmd
-		var command2 tea.Cmd
-		model, command1 = model.showNode(highlightedNode)
-		model, command2 = model.refreshHelpBar()
+	var shownNode *graph.Node
 
-		return model, tea.Batch(command1, command2)
+	if highlightedNode == nil {
+		// No node was highlighted, so take the last selected node
+
+		if len(model.selectedNodes) == 0 {
+			// Should not occur, but handle gracefully
+			return model, nil
+		}
+
+		shownNode = model.selectedNodes[len(model.selectedNodes)-1]
+	} else {
+		shownNode = highlightedNode
 	}
+
+	var command1 tea.Cmd
+	var command2 tea.Cmd
+	model, command1 = model.showNode(shownNode)
+	model, command2 = model.refreshHelpBar()
+
+	return model, tea.Batch(command1, command2)
 }
 
 func (model Model) showNode(node *graph.Node) (Model, tea.Cmd) {

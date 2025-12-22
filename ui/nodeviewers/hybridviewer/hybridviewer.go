@@ -1,13 +1,18 @@
 package hybridviewer
 
 import (
+	"context"
 	"log/slog"
+	"os"
+	"pkb-agent/backblaze"
 	"pkb-agent/extern"
 	"pkb-agent/graph/nodes/hybrid"
 	"pkb-agent/ui/components/markdownview"
 	"pkb-agent/ui/debug"
 	"pkb-agent/ui/nodeviewers"
 	"pkb-agent/util"
+	"pkb-agent/util/pathlib"
+	"pkb-agent/zipfile"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -18,13 +23,13 @@ type Model struct {
 	nodeInfo                       *hybrid.Info
 	nodeData                       *hybrid.Data
 	viewer                         markdownview.Model
-	actions                        []action
+	commands                       []command
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
 }
 
-type action struct {
+type command struct {
 	keyBinding key.Binding
-	perform    func()
+	perform    func(*Model) tea.Cmd
 }
 
 func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *hybrid.Info) Model {
@@ -96,7 +101,7 @@ func (model *Model) signalLoadNodeData() tea.Cmd {
 
 func (model Model) onDataLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) {
 	model.nodeData = message.data
-	model.actions = model.createCommands()
+	model.commands = model.createCommands()
 	commands := []tea.Cmd{model.signalUpdatedKeyBindings()}
 
 	if len(model.nodeData.MarkdownSource) > 0 {
@@ -114,46 +119,118 @@ func (model Model) signalUpdatedKeyBindings() tea.Cmd {
 	}
 }
 
-func (model Model) createCommands() []action {
-	actions := []action{}
+func (model Model) createCommands() []command {
+	commands := []command{}
 	keys := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"}
-	keyBindingIndex := 0
 
-	for _, externalLink := range model.nodeData.ExternalLinks {
-		binding := key.NewBinding(
-			key.WithKeys(keys[keyBindingIndex]),
-			key.WithHelp(keys[keyBindingIndex], externalLink.Description),
-		)
-		action := action{
-			keyBinding: binding,
-			perform:    func() { openURL(externalLink.URL) },
-		}
-		actions = append(actions, action)
-		keyBindingIndex++
+	for actionIndex, action := range model.nodeData.Actions {
+		command := createCommand(keys[actionIndex], action)
+		commands = append(commands, command)
 	}
 
-	return actions
+	return commands
 }
 
 func (model Model) determineKeyBindings() []key.Binding {
-	return util.Map(model.actions, func(action action) key.Binding {
+	return util.Map(model.commands, func(action command) key.Binding {
 		return action.keyBinding
 	})
 }
 
 func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
-	for _, action := range model.actions {
+	for _, action := range model.commands {
 		if key.Matches(message, action.keyBinding) {
-			action.perform()
-			return model, nil
+			return model, action.perform(&model)
 		}
 	}
 
 	return model, nil
 }
 
+func createCommand(boundKey string, action hybrid.Action) command {
+	binding := key.NewBinding(
+		key.WithKeys(boundKey),
+		key.WithHelp(boundKey, action.GetDescription()),
+	)
+
+	switch action := action.(type) {
+	case *hybrid.BrowserAction:
+		return createBrowserCommand(binding, action)
+
+	case *hybrid.DownloadAction:
+		return createDownloadCommand(binding, action)
+
+	default:
+		panic("unrecognized action")
+	}
+}
+
+func createBrowserCommand(binding key.Binding, action *hybrid.BrowserAction) command {
+	return command{
+		keyBinding: binding,
+		perform: func(model *Model) tea.Cmd {
+			return func() tea.Msg {
+				openURL(action.URL)
+				return nil
+			}
+		},
+	}
+}
+
+func createDownloadCommand(binding key.Binding, action *hybrid.DownloadAction) command {
+	return command{
+		keyBinding: binding,
+		perform: func(model *Model) tea.Cmd {
+			return func() tea.Msg {
+				downloadAndOpenBackblazeFile(action.Bucket, action.Filename)
+				return nil
+			}
+		},
+	}
+}
+
 func openURL(url string) {
 	if err := extern.OpenURLInBrowser(url); err != nil {
 		panic("failed to open browser")
+	}
+}
+
+func downloadAndOpenBackblazeFile(bucket string, filename string) {
+	application_key := os.Getenv("APPLICATION_KEY")
+	application_key_id := os.Getenv("APPLICATION_KEY_ID")
+	ctx := context.Background()
+
+	client, err := backblaze.New(ctx, application_key, application_key_id)
+	if err != nil {
+		slog.Error("Failed to create backblaze client")
+		return
+	}
+
+	buffer, err := client.DownloadToBuffer(ctx, bucket, filename, 1, func(bytesDownloaded int) {})
+	if err != nil {
+		slog.Error(
+			"Failed to download file from Backblaze",
+			slog.String("bucket", bucket),
+			slog.String("filename", filename),
+		)
+		return
+	}
+
+	zippedFiles, err := zipfile.Unpack(buffer)
+	if err != nil {
+		slog.Error("Failed to unzip files")
+		return
+	}
+
+	zippedFile := zippedFiles[0]
+	path, err := zippedFile.SaveToDirectory(pathlib.New("."))
+	if err != nil {
+		slog.Error("Failed to save downloaded file")
+		return
+	}
+
+	if err := extern.OpenUsingDefaultViewer(path); err != nil {
+		slog.Error("Failed to open downloaded file using default viewer")
+		return
 	}
 }
