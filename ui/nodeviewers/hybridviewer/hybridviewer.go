@@ -13,6 +13,7 @@ import (
 	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
 	"pkb-agent/zipfile"
+	"reflect"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -89,7 +90,7 @@ func (model *Model) signalLoadNodeData() tea.Cmd {
 	return func() tea.Msg {
 		data, err := info.GetData()
 		if err != nil {
-			slog.Debug("Error whlie reading node data", slog.String("error", err.Error()))
+			slog.Error("Error whlie reading node data", slog.String("error", err.Error()))
 			panic("failed to load node's data")
 		}
 
@@ -161,6 +162,7 @@ func createCommand(boundKey string, action hybrid.Action) command {
 		return createDownloadCommand(binding, action)
 
 	default:
+		slog.Error("Unrecognized action", slog.String("actionType", reflect.TypeOf(action).String()))
 		panic("unrecognized action")
 	}
 }
@@ -191,6 +193,7 @@ func createDownloadCommand(binding key.Binding, action *hybrid.DownloadAction) c
 
 func openURL(url string) {
 	if err := extern.OpenURLInBrowser(url); err != nil {
+		slog.Error("Failed to open URL in browser", slog.String("url", url))
 		panic("failed to open browser")
 	}
 }
