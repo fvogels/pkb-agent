@@ -1,6 +1,7 @@
 package hybrid
 
 import (
+	"errors"
 	"fmt"
 	"pkb-agent/util/pathlib"
 )
@@ -21,3 +22,5 @@ func (err *ErrMissingName) Error() string {
 func (err *ErrInvalidAction) Error() string {
 	return "invalid node action"
 }
+
+var ErrUnknownSegment = errors.New("unknown segment")

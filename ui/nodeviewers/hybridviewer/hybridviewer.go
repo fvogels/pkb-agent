@@ -8,6 +8,7 @@ import (
 	"pkb-agent/extern"
 	"pkb-agent/graph/nodes/hybrid"
 	"pkb-agent/ui/components/markdownview"
+	"pkb-agent/ui/components/sourceviewer"
 	"pkb-agent/ui/debug"
 	"pkb-agent/ui/nodeviewers"
 	"pkb-agent/util"
@@ -23,9 +24,15 @@ type Model struct {
 	size                           util.Size
 	nodeInfo                       *hybrid.Info
 	nodeData                       *hybrid.Data
-	viewer                         markdownview.Model
+	pageViewers                    []tea.Model
+	activePage                     int
 	commands                       []command
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
+}
+
+type PageViewer interface {
+	PageViewerUpdate(tea.Msg) (PageViewer, tea.Cmd)
+	View() string
 }
 
 type command struct {
@@ -36,7 +43,8 @@ type command struct {
 func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg, nodeData *hybrid.Info) Model {
 	return Model{
 		nodeInfo:                       nodeData,
-		viewer:                         markdownview.New(),
+		pageViewers:                    nil,
+		activePage:                     -1,
 		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,
 	}
 }
@@ -67,12 +75,20 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		return model.onKeyPressed(message)
 
 	default:
-		return util.UpdateSingleChild(&model, &model.viewer, message)
+		if model.activePage != -1 {
+			return util.UpdateSingleUntypedChild(&model, &model.pageViewers[model.activePage], message)
+		} else {
+			return model, nil
+		}
 	}
 }
 
 func (model Model) View() string {
-	return model.viewer.View()
+	if model.activePage == -1 {
+		return ""
+	}
+
+	return model.pageViewers[model.activePage].View()
 }
 
 func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
@@ -81,7 +97,14 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: message.Height,
 	}
 
-	return util.UpdateSingleChild(&model, &model.viewer, message)
+	commands := []tea.Cmd{}
+
+	for index := range model.pageViewers {
+		util.UpdateUntypedChild(&model.pageViewers[index], message, &commands)
+	}
+
+	return model, tea.Batch(commands...)
+	// return util.UpdateSingleChild(&model, &model.viewer, message)
 }
 
 func (model *Model) signalLoadNodeData() tea.Cmd {
@@ -104,12 +127,44 @@ func (model Model) onDataLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) {
 	model.nodeData = message.data
 	model.commands = model.createCommands()
 	commands := []tea.Cmd{model.signalUpdatedKeyBindings()}
+	pageViewers := []tea.Model{}
 
-	if len(model.nodeData.MarkdownSource) > 0 {
-		util.UpdateChild(&model.viewer, markdownview.MsgSetSource{
-			Source: model.nodeData.MarkdownSource,
-		}, &commands)
+	for _, page := range model.nodeData.Pages {
+		model.activePage = 0
+
+		switch page := page.(type) {
+		case *hybrid.MarkdownPage:
+			viewer := markdownview.New()
+			command1 := viewer.Init()
+
+			var command2 tea.Cmd
+			viewer, command2 = viewer.TypedUpdate(markdownview.MsgSetSource{
+				Source: page.Source,
+			})
+
+			commands = append(commands, command1, command2)
+			pageViewers = append(pageViewers, viewer)
+
+		case *hybrid.SnippetPage:
+			viewer := sourceviewer.New()
+			command1 := viewer.Init()
+
+			var command2 tea.Cmd
+			viewer, command2 = viewer.TypedUpdate(sourceviewer.MsgSetSource{
+				Source:   page.Source,
+				Language: page.Language,
+			})
+
+			commands = append(commands, command1, command2)
+			pageViewers = append(pageViewers, viewer)
+
+		default:
+			slog.Error("Unknown page type", slog.String("pageType", reflect.TypeOf(page).String()))
+			panic("unknown page type")
+		}
 	}
+
+	model.pageViewers = pageViewers
 
 	return model, tea.Batch(commands...)
 }

@@ -14,8 +14,17 @@ type Info struct {
 }
 
 type Data struct {
-	MarkdownSource string
-	Actions        []Action
+	Pages   []any
+	Actions []Action
+}
+
+type MarkdownPage struct {
+	Source string
+}
+
+type SnippetPage struct {
+	Language string
+	Source   string
 }
 
 type Action interface {
@@ -33,12 +42,12 @@ func (action *ActionBase) GetDescription() string {
 func (info *Info) GetData() (*Data, error) {
 	var data Data
 
-	sectionedFile, err := multifile.Load(info.Path)
+	multiFile, err := multifile.Load(info.Path)
 	if err != nil {
 		return nil, err
 	}
 
-	metadataSegment := sectionedFile.FindSegmentOfType("metadata")
+	metadataSegment := multiFile.FindSegmentOfType("metadata")
 	if metadataSegment == nil {
 		panic("should not occur; this should have been caught earlier")
 	}
@@ -52,17 +61,74 @@ func (info *Info) GetData() (*Data, error) {
 		return nil, err
 	}
 
+	pages, err := collectPages(multiFile)
+	if err != nil {
+		return nil, err
+	}
+	data.Pages = pages
+
 	actions, err := parseActions(metadata.Actions)
 	if err != nil {
 		return nil, err
 	}
 	data.Actions = actions
 
-	if markdownSegment := sectionedFile.FindSegmentOfType("markdown"); markdownSegment != nil {
-		data.MarkdownSource = strings.Join(markdownSegment.Contents, "\n")
+	return &data, nil
+}
+
+func collectPages(multiFile *multifile.MultiFile) ([]any, error) {
+	pages := []any{}
+	errs := []error{}
+
+	for _, segment := range multiFile.Segments {
+		switch segment.Type {
+		case "metadata":
+			continue
+
+		case "markdown":
+			page := createMarkdownPage(segment)
+			pages = append(pages, page)
+
+		case "snippet":
+			page := createSnippetPage(segment)
+			pages = append(pages, page)
+
+		default:
+			slog.Error("Unknown section type", slog.String("segmentType", segment.Type))
+			errs = append(errs, fmt.Errorf("Unknown segment %s: %w", segment.Type, ErrUnknownSegment))
+		}
 	}
 
-	return &data, nil
+	if len(errs) > 0 {
+		return nil, errors.Join(errs...)
+	} else {
+		return pages, nil
+	}
+}
+
+func createMarkdownPage(segment *multifile.Segment) any {
+	source := strings.Join(segment.Contents, "\n")
+	page := MarkdownPage{
+		Source: source,
+	}
+
+	return &page
+}
+
+func createSnippetPage(segment *multifile.Segment) any {
+	source := strings.Join(segment.Contents, "\n")
+	language, found := segment.Attributes["language"]
+	if !found {
+		slog.Error("Missing language in snippet")
+		panic("missing language")
+	}
+
+	page := SnippetPage{
+		Language: language,
+		Source:   source,
+	}
+
+	return &page
 }
 
 func parseActions(metadata []map[string]string) ([]Action, error) {
