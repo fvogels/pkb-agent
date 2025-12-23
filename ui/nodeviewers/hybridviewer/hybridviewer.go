@@ -30,6 +30,15 @@ type Model struct {
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
 }
 
+var keyMap = struct {
+	SwitchToNextPage key.Binding
+}{
+	SwitchToNextPage: key.NewBinding(
+		key.WithKeys("tab"),
+		key.WithHelp("tab", "next page"),
+	),
+}
+
 type PageViewer interface {
 	PageViewerUpdate(tea.Msg) (PageViewer, tea.Cmd)
 	View() string
@@ -75,11 +84,13 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		return model.onKeyPressed(message)
 
 	default:
-		if model.activePage != -1 {
-			return util.UpdateSingleUntypedChild(&model, &model.pageViewers[model.activePage], message)
-		} else {
-			return model, nil
+		commands := []tea.Cmd{}
+
+		for pageViewerIndex := range model.pageViewers {
+			util.UpdateUntypedChild(&model.pageViewers[pageViewerIndex], message, &commands)
 		}
+
+		return model, tea.Batch(commands...)
 	}
 }
 
@@ -104,7 +115,6 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	}
 
 	return model, tea.Batch(commands...)
-	// return util.UpdateSingleChild(&model, &model.viewer, message)
 }
 
 func (model *Model) signalLoadNodeData() tea.Cmd {
@@ -194,11 +204,28 @@ func (model Model) determineKeyBindings() []key.Binding {
 }
 
 func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
-	for _, action := range model.commands {
-		if key.Matches(message, action.keyBinding) {
-			return model, action.perform(&model)
+	switch {
+	case key.Matches(message, keyMap.SwitchToNextPage):
+		return model.onSwitchToNextPage()
+
+	default:
+		for _, action := range model.commands {
+			if key.Matches(message, action.keyBinding) {
+				return model, action.perform(&model)
+			}
 		}
+
+		return model, nil
 	}
+}
+
+func (model Model) onSwitchToNextPage() (Model, tea.Cmd) {
+	if model.activePage == -1 {
+		// No pages available; do nothing
+		return model, nil
+	}
+
+	model.activePage = (model.activePage + 1) % len(model.pageViewers)
 
 	return model, nil
 }
