@@ -6,5 +6,6 @@ type MsgSetSource struct {
 }
 
 type msgSourceFormatted struct {
+	recipient       int
 	formattedSource string
 }

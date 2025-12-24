@@ -2,6 +2,7 @@ package sourceviewer
 
 import (
 	"log/slog"
+	"pkb-agent/ui/uid"
 	"pkb-agent/util"
 	"pkb-agent/util/syntaxhighlighting"
 
@@ -10,6 +11,7 @@ import (
 )
 
 type Model struct {
+	id              int
 	size            util.Size
 	source          string
 	language        string
@@ -18,6 +20,7 @@ type Model struct {
 
 func New() Model {
 	model := Model{
+		id:              uid.Generate(),
 		source:          "",
 		formattedSource: "",
 	}
@@ -42,10 +45,17 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		return model.onSetSource(message)
 
 	case msgSourceFormatted:
-		model.formattedSource = message.formattedSource
+		if message.recipient == model.id {
+			return model.onSourceFormatted(message)
+		}
 		return model, nil
 	}
 
+	return model, nil
+}
+
+func (model Model) onSourceFormatted(message msgSourceFormatted) (Model, tea.Cmd) {
+	model.formattedSource = message.formattedSource
 	return model, nil
 }
 
@@ -86,6 +96,7 @@ func (model Model) signalFormatSource() tea.Cmd {
 		}
 
 		return msgSourceFormatted{
+			recipient:       model.id,
 			formattedSource: formattedSource,
 		}
 	}
