@@ -123,7 +123,7 @@ func (model *Model) signalLoadNodeData() tea.Cmd {
 	return func() tea.Msg {
 		data, err := info.GetData()
 		if err != nil {
-			slog.Error("Error whlie reading node data", slog.String("error", err.Error()))
+			slog.Error("Error while reading node data", slog.String("error", err.Error()))
 			panic("failed to load node's data")
 		}
 
