@@ -21,6 +21,10 @@ func (graph *Graph) FindNode(name string) *Node {
 	return node
 }
 
+func (graph *Graph) GetNodeCount() int {
+	return len(graph.nodes)
+}
+
 func (graph *Graph) ListNodeNames() []string {
 	result := []string{}
 	generator := maps.Keys(graph.nodes)
