@@ -5,5 +5,6 @@ type MsgSetSource struct {
 }
 
 type msgRenderingDone struct {
+	recipient        int
 	renderedMarkdown string
 }

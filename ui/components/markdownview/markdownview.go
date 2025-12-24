@@ -1,6 +1,8 @@
 package markdownview
 
 import (
+	"log/slog"
+	"pkb-agent/ui/uid"
 	"pkb-agent/util"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -9,6 +11,7 @@ import (
 )
 
 type Model struct {
+	id               int
 	source           []byte
 	renderedMarkdown string
 	size             util.Size
@@ -17,6 +20,7 @@ type Model struct {
 func New() Model {
 	model := Model{
 		source: nil,
+		id:     uid.Generate(),
 	}
 
 	return model
@@ -39,7 +43,9 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		return model.onSetSource(message)
 
 	case msgRenderingDone:
-		model.renderedMarkdown = message.renderedMarkdown
+		if message.recipient == model.id {
+			return model.onRenderingDone(message)
+		}
 		return model, nil
 	}
 
@@ -51,8 +57,17 @@ func (model Model) View() string {
 	return style.Render(model.renderedMarkdown)
 }
 
+// onRenderingDone is only called when the recipient matches the current component's id.
+func (model Model) onRenderingDone(message msgRenderingDone) (Model, tea.Cmd) {
+	model.renderedMarkdown = message.renderedMarkdown
+	return model, nil
+}
+
 func (model Model) onSetSource(message MsgSetSource) (Model, tea.Cmd) {
+	slog.Debug("set source", "id", model.id, "source", message.Source)
+
 	width := model.size.Width
+	recipient := model.id
 
 	command := func() tea.Msg {
 		renderer, err := glamour.NewTermRenderer(
@@ -67,6 +82,7 @@ func (model Model) onSetSource(message MsgSetSource) (Model, tea.Cmd) {
 			panic("failed to render markdown file")
 		}
 		return msgRenderingDone{
+			recipient:        recipient,
 			renderedMarkdown: renderedMarkdown,
 		}
 	}
