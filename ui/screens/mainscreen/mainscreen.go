@@ -102,12 +102,21 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	case msgRemainingNodesDetermined:
 		model.remainingNodes = message.remainingNodes
 
-		return util.UpdateSingleChild(&model, &model.nodeSelectionView, nodeselectionview.MsgSetRemainingNodes{
+		commands := []tea.Cmd{}
+
+		util.UpdateChild(&model.nodeSelectionView, nodeselectionview.MsgSetRemainingNodes{
 			RemainingNodes: &SliceAdapter[*graph.Node]{
 				slice: model.remainingNodes,
 			},
 			SelectionIndex: message.selectionIndex,
-		})
+		}, &commands)
+
+		util.UpdateChild(&model.helpBar, helpbar.MsgSetNodeCounts{
+			Total:     model.graph.GetNodeCount(),
+			Remaining: len(model.remainingNodes),
+		}, &commands)
+
+		return model, tea.Batch(commands...)
 
 	case nodeselectionview.MsgRemainingNodeHighlighted:
 		return model.onNodeHighlighted(message)

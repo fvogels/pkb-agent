@@ -1,15 +1,21 @@
 package helpbar
 
 import (
+	"fmt"
+	"pkb-agent/util"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
-	keyBindings      []key.Binding
-	keyStyle         lipgloss.Style
-	descriptionStyle lipgloss.Style
+	size               util.Size
+	keyBindings        []key.Binding
+	remainingNodeCount int
+	totalNodeCount     int
+	keyStyle           lipgloss.Style
+	descriptionStyle   lipgloss.Style
 }
 
 func New() Model {
@@ -30,15 +36,43 @@ func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 
 func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	switch message := message.(type) {
+	case tea.WindowSizeMsg:
+		return model.onResize(message)
+
 	case MsgSetKeyBindings:
 		return model.setKeyBindings(message)
+
+	case MsgSetNodeCounts:
+		model.totalNodeCount = message.Total
+		model.remainingNodeCount = message.Remaining
+		return model, nil
 
 	default:
 		return model, nil
 	}
 }
 
+func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
+	model.size = util.Size{
+		Width:  message.Width,
+		Height: message.Height,
+	}
+
+	return model, nil
+}
+
 func (model Model) View() string {
+	keyBindings := model.renderKeyBindings()
+	counts := model.renderNodeCounts()
+
+	return lipgloss.JoinHorizontal(
+		0,
+		lipgloss.NewStyle().Width(model.size.Width-lipgloss.Width(counts)).Render(keyBindings),
+		counts,
+	)
+}
+
+func (model Model) renderKeyBindings() string {
 	parts := []string{}
 
 	for _, keyBinding := range model.keyBindings {
@@ -52,6 +86,10 @@ func (model Model) View() string {
 	}
 
 	return lipgloss.JoinHorizontal(0, parts...)
+}
+
+func (model Model) renderNodeCounts() string {
+	return fmt.Sprintf(" %d/%d ", model.remainingNodeCount, model.totalNodeCount)
 }
 
 func (model Model) setKeyBindings(message MsgSetKeyBindings) (Model, tea.Cmd) {
