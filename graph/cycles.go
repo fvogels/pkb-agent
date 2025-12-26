@@ -32,8 +32,6 @@ type cycleDetector struct {
 }
 
 func (detector *cycleDetector) detectCycles(nodeIndex int) bool {
-	slog.Debug("Checking", "index", nodeIndex, "name", detector.graph.FindNodeByIndex(nodeIndex).Name)
-
 	if detector.deemedSafe[nodeIndex] {
 		// Used cached result
 		return false
