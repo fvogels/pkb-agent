@@ -51,7 +51,7 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 	// This could be improved to also include indirect ancestors
 	if includeLinked {
 		for _, node := range remainingNodeSet.ToSlice() {
-			for _, linkedNodeName := range g.FindNode(node).Links {
+			for _, linkedNodeName := range g.FindNodeByName(node).Links {
 				if !remainingNodeSet.Contains(linkedNodeName) {
 					remainingNodeSet.Add(linkedNodeName)
 				}
@@ -86,7 +86,7 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 	})
 
 	return util.Map(result, func(name string) *graph.Node {
-		return g.FindNode(name)
+		return g.FindNodeByName(name)
 	})
 }
 
@@ -104,7 +104,7 @@ func collectDescendants(g *graph.Graph, node *graph.Node, includeIndirect bool) 
 			result.Add(identifier)
 
 			if includeIndirect {
-				descendant := g.FindNode(identifier)
+				descendant := g.FindNodeByName(identifier)
 				queue = append(queue, descendant)
 			}
 		}

@@ -7,12 +7,17 @@ import (
 )
 
 type Graph struct {
-	nodes    map[string]*Node
-	trieRoot *trie.Node[*Node]
+	nodesByIndex []*Node
+	nodesByName  map[string]*Node
+	trieRoot     *trie.Node[*Node]
 }
 
-func (graph *Graph) FindNode(name string) *Node {
-	node, ok := graph.nodes[name]
+func (graph *Graph) FindNodeByIndex(index int) *Node {
+	return graph.nodesByIndex[index]
+}
+
+func (graph *Graph) FindNodeByName(name string) *Node {
+	node, ok := graph.nodesByName[name]
 
 	if !ok {
 		return nil
@@ -22,12 +27,12 @@ func (graph *Graph) FindNode(name string) *Node {
 }
 
 func (graph *Graph) GetNodeCount() int {
-	return len(graph.nodes)
+	return len(graph.nodesByName)
 }
 
 func (graph *Graph) ListNodeNames() []string {
 	result := []string{}
-	generator := maps.Keys(graph.nodes)
+	generator := maps.Keys(graph.nodesByName)
 	generator(util.CollectTo(&result))
 
 	return result

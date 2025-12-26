@@ -42,8 +42,8 @@ func (builder *Builder) Finish() (*Graph, error) {
 	builder.addBackLinks()
 
 	graph := Graph{
-		nodes:    builder.nodes,
-		trieRoot: builder.createTrie(),
+		nodesByName: builder.nodes,
+		trieRoot:    builder.createTrie(),
 	}
 
 	return &graph, nil
