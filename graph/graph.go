@@ -68,6 +68,19 @@ func (graph *Graph) FindMatchingNodes(nameMatch string) MatchIterator {
 	}
 }
 
+func (graph *Graph) CollectAncestors(node *Node, yield func(*Node)) {
+	stackCapacity := 10
+	stack := make([]*Node, 1, stackCapacity)
+	stack[0] = node
+
+	for len(stack) > 0 {
+		current := stack[len(stack)-1]
+		stack = stack[0 : len(stack)-1 : stackCapacity]
+
+		for _, ancestorName := range current.Links {
+			ancestor := graph.FindNodeByName(ancestorName)
+			yield(ancestor)
+			stack = append(stack, ancestor)
 		}
 	}
 }
