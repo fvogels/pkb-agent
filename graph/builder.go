@@ -39,11 +39,13 @@ func (builder *Builder) Finish() (*Graph, error) {
 		return nil, err
 	}
 
+	nodesByIndex := builder.addIndices()
 	builder.addBackLinks()
 
 	graph := Graph{
-		nodesByName: builder.nodes,
-		trieRoot:    builder.createTrie(),
+		nodesByIndex: nodesByIndex,
+		nodesByName:  builder.nodes,
+		trieRoot:     builder.createTrie(),
 	}
 
 	return &graph, nil
@@ -71,7 +73,7 @@ func (builder *Builder) ensureLinkedNodeExistence() error {
 	return nil
 }
 
-func (builder *Builder) addIndices() {
+func (builder *Builder) addIndices() []*Node {
 	nodes := []*Node{}
 	maps.Values(builder.nodes)(func(node *Node) bool {
 		nodes = append(nodes, node)
@@ -85,6 +87,8 @@ func (builder *Builder) addIndices() {
 	for index, node := range nodes {
 		node.Index = index
 	}
+
+	return nodes
 }
 
 func (builder *Builder) addBackLinks() {
