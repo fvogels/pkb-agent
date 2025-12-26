@@ -20,6 +20,16 @@ type entry struct {
 	Links []string
 }
 
+func New(atomName string) *graph.Node {
+	return &graph.Node{
+		Name:      atomName,
+		Type:      "atom",
+		Links:     nil,
+		Backlinks: nil,
+		Info:      &Info{},
+	}
+}
+
 func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) error) error {
 	slog.Debug(
 		"Loading node file",
