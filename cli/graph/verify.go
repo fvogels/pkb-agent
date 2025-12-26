@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"errors"
 	"fmt"
 	"pkb-agent/graph"
 	"pkb-agent/graph/metaloader"
@@ -12,6 +13,9 @@ import (
 type verifyGraphCommand struct {
 	cobra.Command
 }
+
+var ErrCycle = errors.New("found cycle")
+var ErrRedundantLinks = errors.New("found redundant links")
 
 func newVerifyGraphCommand() *cobra.Command {
 	var command *verifyGraphCommand
@@ -40,11 +44,13 @@ func (c *verifyGraphCommand) execute() error {
 	}
 
 	if c.lookForCycles(g) {
-		return nil
+		return ErrCycle
 	}
 
 	// Only safe to do when we're sure there are no cycles in the graph
-	c.lookForDuplicateLinks(g)
+	if c.lookForDuplicateLinks(g) {
+		return ErrRedundantLinks
+	}
 
 	return nil
 }
@@ -58,7 +64,9 @@ func (c *verifyGraphCommand) lookForCycles(g *graph.Graph) bool {
 	return false
 }
 
-func (c *verifyGraphCommand) lookForDuplicateLinks(g *graph.Graph) {
+func (c *verifyGraphCommand) lookForDuplicateLinks(g *graph.Graph) bool {
+	result := false
+
 	for _, node := range g.ListNodes() {
 		duplicates := g.FindRedundantLinks(node)
 
@@ -68,6 +76,10 @@ func (c *verifyGraphCommand) lookForDuplicateLinks(g *graph.Graph) {
 			for _, link := range duplicates.ToSlice() {
 				fmt.Printf("  %s\n", g.FindNodeByIndex(link).Name)
 			}
+
+			result = true
 		}
 	}
+
+	return result
 }

@@ -1,7 +1,9 @@
 package cli
 
 import (
+	"fmt"
 	"log/slog"
+	"os"
 	"pkb-agent/cli/b2"
 	"pkb-agent/cli/graph"
 
@@ -26,5 +28,8 @@ func RunCLI() {
 	rootCommand.AddCommand(NewStartUserInterfaceCommand())
 	rootCommand.AddCommand(NewListHighlightableLanguagesCommand())
 
-	rootCommand.Execute()
+	if err := rootCommand.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
 }
