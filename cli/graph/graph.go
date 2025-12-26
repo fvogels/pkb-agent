@@ -10,6 +10,7 @@ func NewGraphCommand() *cobra.Command {
 
 	command.AddCommand(newListNodesCommand())
 	command.AddCommand(newSearchGraphCommand())
+	command.AddCommand(newVerifyGraphCommand())
 
 	return &command
 }
