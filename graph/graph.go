@@ -38,6 +38,12 @@ func (graph *Graph) ListNodeNames() []string {
 	return result
 }
 
+func (graph *Graph) ListNodes() []*Node {
+	nodes := make([]*Node, len(graph.nodesByIndex))
+	copy(nodes, graph.nodesByIndex)
+	return nodes
+}
+
 func (graph *Graph) FindMatchingNodes(nameMatch string) MatchIterator {
 	trieNode := graph.trieRoot.Descend(nameMatch)
 
