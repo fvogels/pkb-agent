@@ -2,8 +2,10 @@ package graph
 
 import (
 	"log/slog"
+	"maps"
 	"pkb-agent/trie"
 	"pkb-agent/util"
+	"slices"
 	"strings"
 	"unicode"
 )
@@ -67,6 +69,22 @@ func (builder *Builder) ensureLinkedNodeExistence() error {
 	}
 
 	return nil
+}
+
+func (builder *Builder) addIndices() {
+	nodes := []*Node{}
+	maps.Values(builder.nodes)(func(node *Node) bool {
+		nodes = append(nodes, node)
+		return true
+	})
+
+	slices.SortFunc(nodes, func(a, b *Node) int {
+		return strings.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
+	})
+
+	for index, node := range nodes {
+		node.Index = index
+	}
 }
 
 func (builder *Builder) addBackLinks() {
