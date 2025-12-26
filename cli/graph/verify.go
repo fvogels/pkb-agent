@@ -39,10 +39,35 @@ func (c *verifyGraphCommand) execute() error {
 		return err
 	}
 
-	if graph.ContainsCycles(g) {
-		fmt.Println("Error: cycle detected")
+	if c.lookForCycles(g) {
 		return nil
 	}
 
+	// Only safe to do when we're sure there are no cycles in the graph
+	c.lookForDuplicateLinks(g)
+
 	return nil
+}
+
+func (c *verifyGraphCommand) lookForCycles(g *graph.Graph) bool {
+	if graph.ContainsCycles(g) {
+		fmt.Println("Error: cycle detected")
+		return true
+	}
+
+	return false
+}
+
+func (c *verifyGraphCommand) lookForDuplicateLinks(g *graph.Graph) {
+	for _, node := range g.ListNodes() {
+		duplicates := g.FindRedundantLinks(node)
+
+		if duplicates.Size() > 0 {
+			fmt.Printf("Node \"%s\" has redundant links:\n", node.Name)
+
+			for _, link := range duplicates.ToSlice() {
+				fmt.Printf("  %s\n", g.FindNodeByIndex(link).Name)
+			}
+		}
+	}
 }
