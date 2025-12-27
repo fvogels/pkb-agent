@@ -85,18 +85,33 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: message.Height,
 	}
 
+	return model.updateChildSizes()
+}
+
+// updateChildSizes is called when the layout of the child components have to be updated.
+func (model Model) updateChildSizes() (Model, tea.Cmd) {
+	parentWidth := model.size.Width
+	parentHeight := model.size.Height
 	commands := []tea.Cmd{}
 
 	linksViewHeight := model.determineLinksViewHeight()
+	specializedViewerHeight := parentHeight - linksViewHeight - 1 // -1 needed for border separating links and node view
+
+	slog.Debug(
+		"Resizing nodeviewer",
+		slog.Int("totalHeight", model.size.Height),
+		slog.Int("linksViewerHeight", linksViewHeight),
+		slog.Int("viewerHeight", specializedViewerHeight),
+	)
 
 	util.UpdateChild(&model.linksView, tea.WindowSizeMsg{
-		Width:  message.Width,
+		Width:  parentWidth,
 		Height: linksViewHeight,
 	}, &commands)
 
 	nodeviewers.UpdateViewerChild(&model.viewer, tea.WindowSizeMsg{
-		Width:  message.Width,
-		Height: message.Height - linksViewHeight - 1, // -1 needed for border
+		Width:  parentWidth,
+		Height: specializedViewerHeight,
 	}, &commands)
 
 	return model, tea.Batch(commands...)
@@ -110,12 +125,6 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 	util.UpdateChild(&model.linksView, linksview.MsgSetLinks{
 		Links:     NewSliceAdapter(node.Links),
 		Backlinks: NewSliceAdapter(node.Backlinks),
-	}, &commands)
-
-	// Get desired height and resize
-	util.UpdateChild(&model.linksView, tea.WindowSizeMsg{
-		Width:  model.size.Width,
-		Height: model.determineLinksViewHeight(),
 	}, &commands)
 
 	// Select correct viewer appropriate for node type
@@ -148,12 +157,11 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 	}
 
 	commands = append(commands, model.viewer.Init())
-	nodeviewers.UpdateViewerChild(&model.viewer, tea.WindowSizeMsg{
-		Width:  model.size.Width,
-		Height: model.size.Height,
-	}, &commands)
 
-	return model, tea.Batch(commands...)
+	updatedModel, extraCommands := model.updateChildSizes()
+	commands = append(commands, extraCommands)
+
+	return updatedModel, tea.Batch(commands...)
 }
 
 // determineLinksViewHeight tries to give the links view its desired height,

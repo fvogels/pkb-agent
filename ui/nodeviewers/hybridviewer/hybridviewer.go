@@ -2,6 +2,7 @@ package hybridviewer
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"pkb-agent/backblaze"
@@ -18,6 +19,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
@@ -28,6 +30,7 @@ type Model struct {
 	activePage                     int
 	commands                       []command
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
+	statusBarStyle                 lipgloss.Style
 }
 
 var keyMap = struct {
@@ -55,6 +58,7 @@ func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg,
 		pageViewers:                    nil,
 		activePage:                     -1,
 		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,
+		statusBarStyle:                 lipgloss.NewStyle().Background(lipgloss.Color("#AAAAFF")),
 	}
 }
 
@@ -95,11 +99,33 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 }
 
 func (model Model) View() string {
+	var viewerResult string
 	if model.activePage == -1 {
-		return ""
+		viewerResult = ""
+	} else {
+		height := model.size.Height - 1
+		viewerResult = lipgloss.NewStyle().Height(height).MaxHeight(height).Render(model.pageViewers[model.activePage].View())
 	}
 
-	return model.pageViewers[model.activePage].View()
+	statusBar := model.renderStatusBar()
+
+	slog.Debug("rendered hybrid node", "viewerHeight", lipgloss.Height(viewerResult), "statusBarHeight", lipgloss.Height(statusBar), "totalHeight", model.size.Height)
+
+	return lipgloss.JoinVertical(0, viewerResult, statusBar)
+}
+
+func (model Model) renderStatusBar() string {
+	activePage := model.activePage
+	totalPages := len(model.pageViewers)
+
+	var contents string
+	if totalPages > 0 {
+		contents = fmt.Sprintf("Page %d/%d", activePage+1, totalPages)
+	} else {
+		contents = "no pages"
+	}
+
+	return model.statusBarStyle.Width(model.size.Width).Render(contents)
 }
 
 func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
@@ -110,8 +136,15 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 
 	commands := []tea.Cmd{}
 
+	// Size of each viewer
+	// Decrease height by one to allow for status bar
+	viewerSize := util.Size{
+		Width:  message.Width,
+		Height: message.Height - 1,
+	}
+
 	for index := range model.pageViewers {
-		util.UpdateUntypedChild(&model.pageViewers[index], message, &commands)
+		util.UpdateUntypedChild(&model.pageViewers[index], viewerSize, &commands)
 	}
 
 	return model, tea.Batch(commands...)
