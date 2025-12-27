@@ -1,7 +1,6 @@
 package markdownview
 
 import (
-	"log/slog"
 	"pkb-agent/ui/uid"
 	"pkb-agent/util"
 
@@ -64,8 +63,6 @@ func (model Model) onRenderingDone(message msgRenderingDone) (Model, tea.Cmd) {
 }
 
 func (model Model) onSetSource(message MsgSetSource) (Model, tea.Cmd) {
-	slog.Debug("set source", "id", model.id, "source", message.Source)
-
 	width := model.size.Width
 	recipient := model.id
 
