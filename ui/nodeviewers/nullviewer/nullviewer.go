@@ -1,6 +1,7 @@
 package nullviewer
 
 import (
+	"pkb-agent/ui/debug"
 	"pkb-agent/ui/nodeviewers"
 	"pkb-agent/util"
 
@@ -28,6 +29,8 @@ func (model Model) UpdateViewer(message tea.Msg) (nodeviewers.Viewer, tea.Cmd) {
 }
 
 func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
+	debug.ShowBubbleTeaMessage(message)
+
 	switch message := message.(type) {
 	case tea.WindowSizeMsg:
 		return model.onResized(message)
