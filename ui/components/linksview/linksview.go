@@ -161,8 +161,11 @@ func (model Model) onSetLinks(message MsgSetLinks) (Model, tea.Cmd) {
 	return model, tea.Batch(commands...)
 }
 
+// GetDesiredHeight returns the height the component wishes to be given.
 func (model *Model) GetDesiredHeight() int {
-	return 1 + util.MaxInt(
+	heightForCaptions := 1
+
+	return heightForCaptions + util.MaxInt(
 		model.links.Length(),
 		model.backlinks.Length(),
 	)
