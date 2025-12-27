@@ -134,17 +134,21 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 		Height: message.Height,
 	}
 
+	return model.updatePageViewersSize()
+}
+
+func (model Model) updatePageViewersSize() (Model, tea.Cmd) {
 	commands := []tea.Cmd{}
 
-	// Size of each viewer
-	// Decrease height by one to allow for status bar
-	viewerSize := util.Size{
-		Width:  message.Width,
-		Height: message.Height - 1,
+	resizeMessage := tea.WindowSizeMsg{
+		Width:  model.size.Width,
+		Height: model.size.Height - 1, // Decrease height by one to allow for status bar
 	}
 
+	slog.Debug("hybridviewer: resizing page viewers", slog.Int("pageCount", len(model.pageViewers)))
 	for index := range model.pageViewers {
-		util.UpdateUntypedChild(&model.pageViewers[index], viewerSize, &commands)
+		slog.Debug("hybridviewer: resizing page", slog.Int("pageIndex", index), slog.String("pageViewerType", reflect.TypeOf(model.pageViewers[index]).String()))
+		util.UpdateUntypedChild(&model.pageViewers[index], resizeMessage, &commands)
 	}
 
 	return model, tea.Batch(commands...)
@@ -208,6 +212,10 @@ func (model Model) onDataLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) {
 	}
 
 	model.pageViewers = pageViewers
+
+	updatedModel, extraCommand := model.updatePageViewersSize()
+	model = updatedModel
+	commands = append(commands, extraCommand)
 
 	return model, tea.Batch(commands...)
 }

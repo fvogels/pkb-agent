@@ -159,9 +159,10 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 	commands = append(commands, model.viewer.Init())
 
 	updatedModel, extraCommands := model.updateChildSizes()
+	model = updatedModel
 	commands = append(commands, extraCommands)
 
-	return updatedModel, tea.Batch(commands...)
+	return model, tea.Batch(commands...)
 }
 
 // determineLinksViewHeight tries to give the links view its desired height,

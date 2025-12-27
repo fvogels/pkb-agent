@@ -1,6 +1,8 @@
 package markdownview
 
 import (
+	"log/slog"
+	"pkb-agent/ui/debug"
 	"pkb-agent/ui/uid"
 	"pkb-agent/util"
 
@@ -11,14 +13,14 @@ import (
 
 type Model struct {
 	id               int
-	source           []byte
+	source           string
 	renderedMarkdown string
 	size             util.Size
 }
 
 func New() Model {
 	model := Model{
-		source: nil,
+		source: "",
 		id:     uid.Generate(),
 	}
 
@@ -34,6 +36,8 @@ func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
+	debug.ShowBubbleTeaMessage(message)
+
 	switch message := message.(type) {
 	case tea.WindowSizeMsg:
 		return model.onResize(message)
@@ -63,18 +67,29 @@ func (model Model) onRenderingDone(message msgRenderingDone) (Model, tea.Cmd) {
 }
 
 func (model Model) onSetSource(message MsgSetSource) (Model, tea.Cmd) {
+	model.source = message.Source
+
+	return model, model.signalFormatMarkdown()
+}
+
+func (model Model) signalFormatMarkdown() tea.Cmd {
 	width := model.size.Width
 	recipient := model.id
+	source := model.source
 
 	command := func() tea.Msg {
+		markdownWidth := width - 2
+
+		slog.Debug("formatting markdown", slog.Int("componentWidth", width), slog.Int("markdownWidth", markdownWidth))
+
 		renderer, err := glamour.NewTermRenderer(
 			glamour.WithAutoStyle(),
-			glamour.WithWordWrap(width-2),
+			glamour.WithWordWrap(markdownWidth),
 		)
 		if err != nil {
 			panic("failed to create markdown renderer")
 		}
-		renderedMarkdown, err := renderer.Render(message.Source)
+		renderedMarkdown, err := renderer.Render(source)
 		if err != nil {
 			panic("failed to render markdown file")
 		}
@@ -84,13 +99,16 @@ func (model Model) onSetSource(message MsgSetSource) (Model, tea.Cmd) {
 		}
 	}
 
-	return model, command
+	return command
 }
 
 func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
+	slog.Debug("!!!")
+
 	model.size = util.Size{
 		Width:  message.Width,
 		Height: message.Height,
 	}
-	return model, nil
+
+	return model, model.signalFormatMarkdown()
 }
