@@ -84,38 +84,19 @@ func (parser *parser) isDelimiterLine(line string) (string, bool) {
 
 // processDelimiterLine expects to receive a string from which the delimiter has already been stripped.
 func (parser *parser) processDelimiterLine(str string) error {
-	parts := strings.Split(str, " ")
+	indexOfSpace := strings.Index(str, " ")
+	if indexOfSpace == -1 {
+		parser.currentSegmentType = str
+	} else {
+		parser.currentSegmentType = str[:indexOfSpace]
 
-	if len(parts) == 0 {
-		return fmt.Errorf("no segment type specified: %w", &ErrInvalidDelimiterLine{})
-	}
-
-	parser.currentSegmentType = parts[0]
-
-	for _, part := range parts[1:] {
-		if err := parser.parseAttribute(part); err != nil {
+		table, err := parseAttributes(str[indexOfSpace+1:])
+		if err != nil {
 			return err
 		}
+
+		parser.currentSegmentAttributes = table
 	}
-
-	return nil
-}
-
-func (parser *parser) parseAttribute(str string) error {
-	parts := strings.SplitN(str, "=", 2)
-
-	if len(parts) != 2 {
-		return &ErrInvalidAttribute{}
-	}
-
-	key := parts[0]
-	value := parts[1]
-
-	if _, found := parser.currentSegmentAttributes[key]; found {
-		return &ErrDuplicateAttributeKeys{}
-	}
-
-	parser.currentSegmentAttributes[key] = value
 
 	return nil
 }
