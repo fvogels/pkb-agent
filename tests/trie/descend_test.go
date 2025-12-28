@@ -3,7 +3,7 @@
 package trie
 
 import (
-	"pkb-agent/trie"
+	"pkb-agent/util/trie"
 	"testing"
 
 	"github.com/stretchr/testify/require"

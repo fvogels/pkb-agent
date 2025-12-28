@@ -3,8 +3,8 @@ package graph
 import (
 	"log/slog"
 	"maps"
-	"pkb-agent/trie"
 	"pkb-agent/util"
+	"pkb-agent/util/trie"
 	"slices"
 	"strings"
 	"unicode"

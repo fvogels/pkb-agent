@@ -2,8 +2,8 @@ package graph
 
 import (
 	"maps"
-	"pkb-agent/trie"
 	"pkb-agent/util"
+	"pkb-agent/util/trie"
 )
 
 type Graph struct {

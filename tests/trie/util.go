@@ -1,6 +1,6 @@
 package trie
 
-import "pkb-agent/trie"
+import "pkb-agent/util/trie"
 
 func createTrie(entries ...string) *trie.Node[string] {
 	builder := trie.NewBuilder[string]()

@@ -1,7 +1,7 @@
 package graph
 
 import (
-	"pkb-agent/trie"
+	"pkb-agent/util/trie"
 )
 
 type MatchIterator struct {
