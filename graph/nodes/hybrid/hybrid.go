@@ -14,15 +14,30 @@ type Info struct {
 }
 
 type Data struct {
-	Pages   []any
+	Pages   []Page
 	Actions []Action
 }
 
+type Page interface {
+	GetAttributes() map[string]string
+}
+
+type PageBase struct {
+	Type       string
+	Attributes map[string]string
+}
+
+func (page *PageBase) GetAttributes() map[string]string {
+	return page.Attributes
+}
+
 type MarkdownPage struct {
+	PageBase
 	Source string
 }
 
 type SnippetPage struct {
+	PageBase
 	Language string
 	Source   string
 }
@@ -76,8 +91,8 @@ func (info *Info) GetData() (*Data, error) {
 	return &data, nil
 }
 
-func collectPages(multiFile *multifile.MultiFile) ([]any, error) {
-	pages := []any{}
+func collectPages(multiFile *multifile.MultiFile) ([]Page, error) {
+	pages := []Page{}
 	errs := []error{}
 
 	for _, segment := range multiFile.Segments {
@@ -106,16 +121,20 @@ func collectPages(multiFile *multifile.MultiFile) ([]any, error) {
 	}
 }
 
-func createMarkdownPage(segment *multifile.Segment) any {
+func createMarkdownPage(segment *multifile.Segment) *MarkdownPage {
 	source := strings.Join(segment.Contents, "\n")
 	page := MarkdownPage{
+		PageBase: PageBase{
+			Type:       segment.Type,
+			Attributes: segment.Attributes,
+		},
 		Source: source,
 	}
 
 	return &page
 }
 
-func createSnippetPage(segment *multifile.Segment) any {
+func createSnippetPage(segment *multifile.Segment) *SnippetPage {
 	source := strings.Join(segment.Contents, "\n")
 	language, found := segment.Attributes["language"]
 	if !found {
@@ -124,6 +143,10 @@ func createSnippetPage(segment *multifile.Segment) any {
 	}
 
 	page := SnippetPage{
+		PageBase: PageBase{
+			Type:       segment.Type,
+			Attributes: segment.Attributes,
+		},
 		Language: language,
 		Source:   source,
 	}
