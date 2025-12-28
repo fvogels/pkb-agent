@@ -1,9 +1,13 @@
 package multifile
 
 import (
+	"errors"
 	"fmt"
+	"log/slog"
+	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
 	"strings"
+	"unicode"
 )
 
 func Load(path pathlib.Path) (*MultiFile, error) {
@@ -34,14 +38,14 @@ func (parser *parser) parse(lines []string) (*MultiFile, error) {
 
 	for index, line := range lines {
 		if index == 0 {
-			if err := parser.parseFirstLine(line); err != nil {
+			if err := parser.processFirstLine(line); err != nil {
 				return nil, err
 			}
 		} else if remainder, ok := parser.isDelimiterLine(line); ok {
 			parser.finishSegment()
 			parser.startSegment()
 
-			if err := parser.parseDelimiterLine(remainder); err != nil {
+			if err := parser.processDelimiterLine(remainder); err != nil {
 				return nil, err
 			}
 		} else {
@@ -58,7 +62,7 @@ func (parser *parser) parse(lines []string) (*MultiFile, error) {
 	return &result, nil
 }
 
-func (parser *parser) parseFirstLine(line string) error {
+func (parser *parser) processFirstLine(line string) error {
 	index := strings.Index(line, " ")
 
 	if index == -1 {
@@ -71,15 +75,15 @@ func (parser *parser) parseFirstLine(line string) error {
 
 	parser.segmentDelimiter = line[:index+1]
 
-	return parser.parseDelimiterLine(line[index+1:])
+	return parser.processDelimiterLine(line[index+1:])
 }
 
 func (parser *parser) isDelimiterLine(line string) (string, bool) {
 	return strings.CutPrefix(line, parser.segmentDelimiter)
 }
 
-// parseDelimiterLine expects to receive a string from which the delimiter has already been stripped.
-func (parser *parser) parseDelimiterLine(str string) error {
+// processDelimiterLine expects to receive a string from which the delimiter has already been stripped.
+func (parser *parser) processDelimiterLine(str string) error {
 	parts := strings.Split(str, " ")
 
 	if len(parts) == 0 {
@@ -130,4 +134,97 @@ func (parser *parser) startSegment() {
 	parser.currentContents = nil
 	parser.currentSegmentAttributes = make(map[string]string)
 	parser.currentSegmentType = ""
+}
+
+var ErrInvalidAttributeString = errors.New("invalid attributes string")
+
+func parseAttributes(str string) (map[string]string, error) {
+	result := make(map[string]string)
+	runes := util.ConvertToRunes(str)
+	index := 0
+
+	for {
+		// Skip spaces
+		for index < len(runes) && unicode.IsSpace(runes[index].Rune) {
+			index++
+		}
+
+		// Check if we reached the end of the string
+		if index == len(runes) {
+			return result, nil
+		}
+
+		// Determine key
+		keyStartIndex := runes[index].Index
+		for runes[index].Rune != '=' {
+			index++
+
+			if index == len(runes) {
+				slog.Error("Invalid attributes: could not find '='", slog.String("string", str))
+				return nil, fmt.Errorf("missing =: %w", ErrInvalidAttributeString)
+			}
+		}
+		key := str[keyStartIndex:runes[index].Index]
+
+		// Check for duplicate keys
+		if _, found := result[key]; found {
+			slog.Error("Invalid attributes: duplicate key", slog.String("string", str), slog.String("duplicateKey", key))
+			return nil, fmt.Errorf("duplicate key %s: %w", key, ErrInvalidAttributeString)
+		}
+
+		// Skip =
+		index++
+
+		// Something must come after the =
+		if index == len(runes) {
+			slog.Error("Invalid attributes", slog.String("string", str))
+			return nil, fmt.Errorf("missing value: %w", ErrInvalidAttributeString)
+		}
+
+		var value string
+		// Check if the value is delimited by quotes
+		if runes[index].Rune == '"' {
+			// Skip "
+			index++
+			valueStartIndex := runes[index].Index
+
+			if index == len(runes) {
+				slog.Error("Invalid attributes", slog.String("string", str))
+				return nil, fmt.Errorf("missing value: %w", ErrInvalidAttributeString)
+			}
+
+			for runes[index].Rune != '"' {
+				index++
+				if index == len(runes) {
+					slog.Error("Invalid attributes", slog.String("string", str))
+					return nil, fmt.Errorf("unexpected end of value: %w", ErrInvalidAttributeString)
+				}
+			}
+
+			value = str[valueStartIndex:runes[index].Index]
+
+			// Skip "
+			index++
+		} else {
+			valueStartIndex := runes[index].Index
+
+			if index == len(runes) {
+				slog.Error("Invalid attributes", slog.String("string", str))
+				return nil, fmt.Errorf("missing value: %w", ErrInvalidAttributeString)
+			}
+
+			for index < len(runes) && runes[index].Rune != ' ' {
+				index++
+			}
+
+			if index == len(runes) {
+				value = str[valueStartIndex:]
+			} else {
+				value = str[valueStartIndex:runes[index].Index]
+			}
+		}
+
+		// Store key/value pair
+		result[key] = value
+	}
 }
