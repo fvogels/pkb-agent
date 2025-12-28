@@ -130,3 +130,22 @@ func SplitInLines(str string) []string {
 
 	return lines
 }
+
+type IndexedRune struct {
+	Rune  rune
+	Index int
+}
+
+func ConvertToRunes(str string) []IndexedRune {
+	result := []IndexedRune{}
+
+	for i, r := range str {
+		indexedRune := IndexedRune{
+			Index: i,
+			Rune:  r,
+		}
+		result = append(result, indexedRune)
+	}
+
+	return result
+}
