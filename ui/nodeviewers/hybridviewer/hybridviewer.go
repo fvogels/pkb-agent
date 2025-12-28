@@ -27,7 +27,7 @@ type Model struct {
 	nodeInfo                       *hybrid.Info
 	nodeData                       *hybrid.Data
 	pageViewers                    []tea.Model
-	activePage                     int
+	activePageInde                 int
 	commands                       []command
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
 	statusBarStyle                 lipgloss.Style
@@ -56,7 +56,7 @@ func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg,
 	return Model{
 		nodeInfo:                       nodeData,
 		pageViewers:                    nil,
-		activePage:                     -1,
+		activePageInde:                 -1,
 		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,
 		statusBarStyle:                 lipgloss.NewStyle().Background(lipgloss.Color("#AAAAFF")),
 	}
@@ -100,11 +100,11 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 
 func (model Model) View() string {
 	var viewerResult string
-	if model.activePage == -1 {
+	if model.activePageInde == -1 {
 		viewerResult = ""
 	} else {
 		height := model.size.Height - 1
-		viewerResult = lipgloss.NewStyle().Height(height).MaxHeight(height).Render(model.pageViewers[model.activePage].View())
+		viewerResult = lipgloss.NewStyle().Height(height).MaxHeight(height).Render(model.pageViewers[model.activePageInde].View())
 	}
 
 	statusBar := model.renderStatusBar()
@@ -115,12 +115,22 @@ func (model Model) View() string {
 }
 
 func (model Model) renderStatusBar() string {
-	activePage := model.activePage
+	activePageIndex := model.activePageInde
 	totalPages := len(model.pageViewers)
 
 	var contents string
 	if totalPages > 0 {
-		contents = fmt.Sprintf("Page %d/%d", activePage+1, totalPages)
+		activePage := model.nodeData.Pages[model.activePageInde]
+		activePageAttributes := activePage.GetAttributes()
+
+		var pageCaption string
+		if pc, found := activePageAttributes["caption"]; found {
+			pageCaption = pc
+		} else {
+			pageCaption = lipgloss.NewStyle().Italic(true).Render("untitled")
+		}
+
+		contents = fmt.Sprintf("Page %d/%d %s", activePageIndex+1, totalPages, pageCaption)
 	} else {
 		contents = "no pages"
 	}
@@ -145,9 +155,7 @@ func (model Model) updatePageViewersSize() (Model, tea.Cmd) {
 		Height: model.size.Height - 1, // Decrease height by one to allow for status bar
 	}
 
-	slog.Debug("hybridviewer: resizing page viewers", slog.Int("pageCount", len(model.pageViewers)))
 	for index := range model.pageViewers {
-		slog.Debug("hybridviewer: resizing page", slog.Int("pageIndex", index), slog.String("pageViewerType", reflect.TypeOf(model.pageViewers[index]).String()))
 		util.UpdateUntypedChild(&model.pageViewers[index], resizeMessage, &commands)
 	}
 
@@ -177,7 +185,7 @@ func (model Model) onDataLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) {
 	pageViewers := []tea.Model{}
 
 	for _, page := range model.nodeData.Pages {
-		model.activePage = 0
+		model.activePageInde = 0
 
 		switch page := page.(type) {
 		case *hybrid.MarkdownPage:
@@ -261,12 +269,12 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 }
 
 func (model Model) onSwitchToNextPage() (Model, tea.Cmd) {
-	if model.activePage == -1 {
+	if model.activePageInde == -1 {
 		// No pages available; do nothing
 		return model, nil
 	}
 
-	model.activePage = (model.activePage + 1) % len(model.pageViewers)
+	model.activePageInde = (model.activePageInde + 1) % len(model.pageViewers)
 
 	return model, nil
 }
