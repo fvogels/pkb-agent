@@ -27,7 +27,7 @@ type Model struct {
 	nodeInfo                       *hybrid.Info
 	nodeData                       *hybrid.Data
 	pageViewers                    []tea.Model
-	activePageInde                 int
+	activePageIndex                int
 	commands                       []command
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
 	pageLocationStyle              lipgloss.Style
@@ -57,7 +57,7 @@ func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg,
 	return Model{
 		nodeInfo:                       nodeData,
 		pageViewers:                    nil,
-		activePageInde:                 -1,
+		activePageIndex:                -1,
 		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,
 		pageLocationStyle:              lipgloss.NewStyle().Background(lipgloss.Color("#8888FF")),
 		pageCaptionStyle:               lipgloss.NewStyle().Background(lipgloss.Color("#AAAAFF")),
@@ -102,11 +102,11 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 
 func (model Model) View() string {
 	var viewerResult string
-	if model.activePageInde == -1 {
+	if model.activePageIndex == -1 {
 		viewerResult = ""
 	} else {
 		height := model.size.Height - 1
-		viewerResult = lipgloss.NewStyle().Height(height).MaxHeight(height).Render(model.pageViewers[model.activePageInde].View())
+		viewerResult = lipgloss.NewStyle().Height(height).MaxHeight(height).Render(model.pageViewers[model.activePageIndex].View())
 	}
 
 	statusBar := model.renderStatusBar()
@@ -117,14 +117,14 @@ func (model Model) View() string {
 }
 
 func (model Model) renderStatusBar() string {
-	activePageIndex := model.activePageInde
+	activePageIndex := model.activePageIndex
 	totalPages := len(model.pageViewers)
 
 	var contents string
 	if totalPages > 0 {
 		pageLocation := model.pageLocationStyle.Render(fmt.Sprintf(" Page %d/%d ", activePageIndex+1, totalPages))
 
-		activePage := model.nodeData.Pages[model.activePageInde]
+		activePage := model.nodeData.Pages[model.activePageIndex]
 		activePageAttributes := activePage.GetAttributes()
 
 		var pageCaption string
@@ -189,7 +189,7 @@ func (model Model) onDataLoaded(message msgMarkdownLoaded) (Model, tea.Cmd) {
 	pageViewers := []tea.Model{}
 
 	for _, page := range model.nodeData.Pages {
-		model.activePageInde = 0
+		model.activePageIndex = 0
 
 		switch page := page.(type) {
 		case *hybrid.MarkdownPage:
@@ -273,12 +273,12 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 }
 
 func (model Model) onSwitchToNextPage() (Model, tea.Cmd) {
-	if model.activePageInde == -1 {
+	if model.activePageIndex == -1 {
 		// No pages available; do nothing
 		return model, nil
 	}
 
-	model.activePageInde = (model.activePageInde + 1) % len(model.pageViewers)
+	model.activePageIndex = (model.activePageIndex + 1) % len(model.pageViewers)
 
 	return model, nil
 }
