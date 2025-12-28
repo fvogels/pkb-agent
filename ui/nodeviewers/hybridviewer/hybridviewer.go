@@ -111,8 +111,6 @@ func (model Model) View() string {
 
 	statusBar := model.renderStatusBar()
 
-	slog.Debug("rendered hybrid node", "viewerHeight", lipgloss.Height(viewerResult), "statusBarHeight", lipgloss.Height(statusBar), "totalHeight", model.size.Height)
-
 	return lipgloss.JoinVertical(0, viewerResult, statusBar)
 }
 
