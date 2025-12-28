@@ -30,7 +30,8 @@ type Model struct {
 	activePageInde                 int
 	commands                       []command
 	createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg
-	statusBarStyle                 lipgloss.Style
+	pageLocationStyle              lipgloss.Style
+	pageCaptionStyle               lipgloss.Style
 }
 
 var keyMap = struct {
@@ -58,7 +59,8 @@ func New(createUpdateKeyBindingsMessage func(keyBindings []key.Binding) tea.Msg,
 		pageViewers:                    nil,
 		activePageInde:                 -1,
 		createUpdateKeyBindingsMessage: createUpdateKeyBindingsMessage,
-		statusBarStyle:                 lipgloss.NewStyle().Background(lipgloss.Color("#AAAAFF")),
+		pageLocationStyle:              lipgloss.NewStyle().Background(lipgloss.Color("#8888FF")),
+		pageCaptionStyle:               lipgloss.NewStyle().Background(lipgloss.Color("#AAAAFF")),
 	}
 }
 
@@ -120,22 +122,24 @@ func (model Model) renderStatusBar() string {
 
 	var contents string
 	if totalPages > 0 {
+		pageLocation := model.pageLocationStyle.Render(fmt.Sprintf(" Page %d/%d ", activePageIndex+1, totalPages))
+
 		activePage := model.nodeData.Pages[model.activePageInde]
 		activePageAttributes := activePage.GetAttributes()
 
 		var pageCaption string
+		var pageCaptionStyle = model.pageCaptionStyle.Width(model.size.Width - lipgloss.Width(pageLocation))
 		if pc, found := activePageAttributes["caption"]; found {
-			pageCaption = pc
+			pageCaption = pageCaptionStyle.Render(" " + pc)
 		} else {
-			pageCaption = lipgloss.NewStyle().Italic(true).Render("untitled")
+			pageCaption = pageCaptionStyle.Italic(true).Render(" untitled")
 		}
 
-		contents = fmt.Sprintf("Page %d/%d %s", activePageIndex+1, totalPages, pageCaption)
+		return lipgloss.JoinHorizontal(0, pageLocation, pageCaption)
 	} else {
 		contents = "no pages"
+		return model.pageCaptionStyle.Width(model.size.Width).Render(contents)
 	}
-
-	return model.statusBarStyle.Width(model.size.Width).Render(contents)
 }
 
 func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
