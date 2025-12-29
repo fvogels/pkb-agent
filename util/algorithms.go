@@ -68,6 +68,30 @@ func RemoveAccents(s string) string {
 	return t
 }
 
+func Words(str string) []string {
+	start := -1
+	result := []string{}
+
+	for index, char := range str {
+		if unicode.IsLetter(char) {
+			if start == -1 {
+				start = index
+			}
+		} else {
+			if start != -1 {
+				result = append(result, str[start:index])
+			}
+			start = -1
+		}
+	}
+
+	if start != -1 {
+		result = append(result, str[start:])
+	}
+
+	return result
+}
+
 func KeepOnlyLettersAndSpaces(s string) string {
 	var builder strings.Builder
 	lastWasSpace := true
