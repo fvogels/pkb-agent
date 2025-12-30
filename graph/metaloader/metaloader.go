@@ -4,20 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"pkb-agent/graph"
-	"pkb-agent/graph/nodes/atom"
-	"pkb-agent/graph/nodes/backblaze"
-	"pkb-agent/graph/nodes/bookmark"
-	"pkb-agent/graph/nodes/hybrid"
-	"pkb-agent/graph/nodes/markdown"
-	"pkb-agent/graph/nodes/snippet"
+	"pkb-agent/graph/node"
+	"pkb-agent/graph/node/atom"
+	"pkb-agent/graph/node/backblaze"
+	"pkb-agent/graph/node/bookmark"
 	pathlib "pkb-agent/util/pathlib"
 
 	"gopkg.in/yaml.v3"
 )
 
 type Loader struct {
-	loaders map[string]graph.Loader
+	loaders map[string]node.Loader
 }
 
 type entry struct {
@@ -25,14 +22,12 @@ type entry struct {
 	Path   string
 }
 
-func New() *Loader {
-	loaders := make(map[string]graph.Loader)
-	loaders["snippet"] = snippet.NewLoader()
+func New() node.Loader {
+	loaders := make(map[string]node.Loader)
+
 	loaders["atom"] = atom.NewLoader()
 	loaders["bookmark"] = bookmark.NewLoader()
 	loaders["backblaze"] = backblaze.NewLoader()
-	loaders["markdown"] = markdown.NewLoader()
-	loaders["hybrid"] = hybrid.NewLoader()
 
 	loader := Loader{
 		loaders: loaders,
@@ -43,7 +38,7 @@ func New() *Loader {
 	return &loader
 }
 
-func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) error) error {
+func (loader *Loader) Load(path pathlib.Path, callback func(node node.RawNode) error) error {
 	slog.Debug(
 		"Loading node file",
 		slog.String("loader", "meta"),
@@ -63,6 +58,9 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node *graph.Node) er
 
 	errs := []error{}
 	for _, entry := range entries {
+		slog.Debug("Metaloader is processing entry",
+			slog.String("path", entry.Path),
+		)
 		pathPattern := pathlib.New(entry.Path)
 
 		paths, err := parentDirectory.Join(pathPattern).Glob()
@@ -96,7 +94,7 @@ func (loader *Loader) loadEntries(source []byte) ([]entry, error) {
 	return entries, nil
 }
 
-func (loader *Loader) findLoader(name string) (graph.Loader, error) {
+func (loader *Loader) findLoader(name string) (node.Loader, error) {
 	ldr, ok := loader.loaders[name]
 	if !ok {
 		return nil, &ErrUnknownLoader{unknownLoaderName: name}

@@ -3,10 +3,10 @@ package mainscreen
 import (
 	"pkb-agent/ui/components/helpbar"
 	"pkb-agent/ui/components/nodeselectionview"
+	"pkb-agent/ui/components/nodeviewer"
 	"pkb-agent/ui/layout"
 	"pkb-agent/ui/layout/border"
 	"pkb-agent/ui/layout/vertical"
-	"pkb-agent/ui/nodeviewers/nodeviewer"
 	"pkb-agent/util"
 
 	"github.com/charmbracelet/bubbles/key"

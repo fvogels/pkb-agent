@@ -1,141 +1,151 @@
 package graph
 
 import (
-	"log/slog"
+	"errors"
+	"fmt"
 	"maps"
-	"pkb-agent/util"
+	"pkb-agent/graph/node"
 	"pkb-agent/util/trie"
 	"slices"
 	"strings"
-	"unicode"
 )
 
 type Builder struct {
-	nodes map[string]*Node
+	rawNodes map[string]node.RawNode
 }
 
 func NewBuilder() *Builder {
 	builder := Builder{
-		nodes: make(map[string]*Node),
+		rawNodes: make(map[string]node.RawNode),
 	}
 
 	return &builder
 }
 
-func (builder *Builder) AddNode(node *Node) error {
-	if _, alreadyExists := builder.nodes[node.Name]; alreadyExists {
-		slog.Error("Multiple nodes with same name", slog.String("name", node.Name))
-		return &ErrNameClash{
-			name: node.Name,
-		}
+func (builder *Builder) AddNode(node node.RawNode) error {
+	if _, alreadyExists := builder.rawNodes[node.GetName()]; alreadyExists {
+		return fmt.Errorf("%w: %s", ErrNameClash, node.GetName())
 	}
 
-	builder.nodes[node.Name] = node
+	builder.rawNodes[node.GetName()] = node
 	return nil
 }
 
 func (builder *Builder) Finish() (*Graph, error) {
-	if err := builder.ensureLinkedNodeExistence(); err != nil {
+	nodes := builder.wrapNodes()
+
+	nodesByName, err := builder.buildNameToNodeTable(nodes)
+	if err != nil {
 		return nil, err
 	}
 
-	nodesByIndex := builder.addIndices()
-	builder.addBackLinks()
+	builder.sortByName(nodes)
+	builder.addIndices(nodes)
+
+	if err := builder.linkNodes(nodesByName); err != nil {
+		return nil, err
+	}
+
+	builder.addBackLinks(nodes)
 
 	graph := Graph{
-		nodesByIndex: nodesByIndex,
-		nodesByName:  builder.nodes,
-		trieRoot:     builder.createTrie(),
+		nodesByIndex: nodes,
+		nodesByName:  nodesByName,
+		trieRoot:     builder.createTrie(nodes),
 	}
 
 	return &graph, nil
 }
 
-func (builder *Builder) ensureLinkedNodeExistence() error {
-	slog.Debug("Checking node links")
+func (builder *Builder) wrapNodes() []*Node {
+	result := []*Node{}
 
-	nodes := builder.nodes
-
-	foundUnknownLinks := false
-	for _, node := range nodes {
-		for _, link := range node.Links {
-			if _, found := nodes[link]; !found {
-				slog.Error("Unknown link", slog.String("node", node.Name), slog.String("link target", link))
-				foundUnknownLinks = true
-			}
+	maps.Values(builder.rawNodes)(func(rawNode node.RawNode) bool {
+		wrapper := Node{
+			rawNode: rawNode,
 		}
-	}
 
-	if foundUnknownLinks {
-		return &ErrUnknownNodes{}
-	}
+		result = append(result, &wrapper)
 
-	return nil
-}
-
-func (builder *Builder) addIndices() []*Node {
-	nodes := []*Node{}
-	maps.Values(builder.nodes)(func(node *Node) bool {
-		nodes = append(nodes, node)
 		return true
 	})
 
-	slices.SortFunc(nodes, func(a, b *Node) int {
-		return strings.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
-	})
-
-	for index, node := range nodes {
-		node.Index = index
-	}
-
-	return nodes
+	return result
 }
 
-func (builder *Builder) addBackLinks() {
-	slog.Debug("Adding back links to graph")
+func (builder *Builder) sortByName(wrappers []*Node) {
+	slices.SortFunc(wrappers, func(first *Node, second *Node) int {
+		firstName := strings.ToLower(first.rawNode.GetName())
+		secondName := strings.ToLower(second.rawNode.GetName())
 
-	nodes := builder.nodes
-	for _, node := range nodes {
-		for _, link := range node.Links {
-			linkedNode, ok := nodes[link]
-			if !ok {
-				panic("missing node; should have been noticed earlier")
+		return strings.Compare(firstName, secondName)
+	})
+}
+
+func (builder *Builder) addIndices(wrappers []*Node) {
+	for index, wrapper := range wrappers {
+		wrapper.id = index
+	}
+}
+
+func (builder *Builder) buildNameToNodeTable(wrappers []*Node) (map[string]*Node, error) {
+	result := make(map[string]*Node)
+	errs := []error{}
+
+	for _, node := range wrappers {
+		nodeName := node.rawNode.GetName()
+
+		if _, found := result[nodeName]; found {
+			errs = append(errs, fmt.Errorf("%w: multiple nodes with name \"%s\"", ErrNameClash, nodeName))
+		} else {
+			result[nodeName] = node
+		}
+	}
+
+	if len(errs) > 0 {
+		return nil, errors.Join(errs...)
+	}
+
+	return result, nil
+}
+
+func (builder *Builder) linkNodes(table map[string]*Node) error {
+	errs := []error{}
+
+	maps.Values(table)(func(node *Node) bool {
+		for _, linkedName := range node.rawNode.GetLinks() {
+			linkedNode, found := table[linkedName]
+
+			if !found {
+				err := fmt.Errorf("%w: \"%s\" links to unknown node \"%s\"", ErrUnknownNode, node.rawNode.GetName(), linkedName)
+				errs = append(errs, err)
 			}
 
-			linkedNode.Backlinks = append(linkedNode.Backlinks, node.Name)
+			node.links = append(node.links, linkedNode)
+		}
+
+		return true
+	})
+
+	return errors.Join(errs...)
+}
+
+func (builder *Builder) addBackLinks(nodes []*Node) {
+	for _, node := range nodes {
+		for _, linkedNode := range node.links {
+			linkedNode.backlinks = append(linkedNode.backlinks, node)
 		}
 	}
 }
 
-func (builder *Builder) createTrie() *trie.Node[*Node] {
-	nodes := builder.nodes
+func (builder *Builder) createTrie(nodes []*Node) *trie.Node[*Node] {
 	trieBuilder := trie.NewBuilder[*Node]()
 
-	for name, node := range nodes {
-		searchPrefixes := builder.deriveSearchPrefixes(name)
-
-		for _, searchPrefix := range searchPrefixes {
-			trieBuilder.Add(searchPrefix, node)
+	for _, node := range nodes {
+		for _, keyword := range node.rawNode.GetSearchStrings() {
+			trieBuilder.Add(keyword, node)
 		}
 	}
 
 	return trieBuilder.Finish()
-}
-
-func (builder *Builder) deriveSearchPrefixes(nodeName string) []string {
-	s := nodeName
-	s = strings.TrimSpace(s)
-	s = util.RemoveAccents(s)
-	s = strings.ToLower(s)
-	s = util.KeepOnlyLettersAndSpaces(s)
-
-	prefixes := []string{s}
-
-	for index, rune := range s {
-		if unicode.IsSpace(rune) {
-			prefixes = append(prefixes, s[index+1:])
-		}
-	}
-
-	return prefixes
 }

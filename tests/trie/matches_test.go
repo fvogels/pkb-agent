@@ -5,7 +5,7 @@ package trie
 import (
 	"fmt"
 	"pkb-agent/graph"
-	"pkb-agent/graph/nodes/atom"
+	"pkb-agent/tests/testlib"
 	"strings"
 	"testing"
 
@@ -57,11 +57,8 @@ func (tc matchTestCase) test(t *testing.T) {
 	builder := graph.NewBuilder()
 
 	for _, node := range tc.nodes {
-		builder.AddNode(&graph.Node{
-			Name:  node,
-			Links: nil,
-			Type:  "atom",
-			Info:  atom.Info{},
+		builder.AddNode(&testlib.TestNode{
+			Name: node,
 		})
 	}
 
@@ -72,7 +69,7 @@ func (tc matchTestCase) test(t *testing.T) {
 
 	for index, current := range tc.expected {
 		require.NotNil(t, iterator.Current(), "index %d, expecting %s", index, current)
-		require.Equal(t, current, iterator.Current().Name)
+		require.Equal(t, current, iterator.Current().GetName())
 		iterator.Next()
 	}
 

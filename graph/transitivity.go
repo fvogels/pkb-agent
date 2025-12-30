@@ -6,12 +6,11 @@ func (graph *Graph) FindRedundantLinks(node *Node) set.Set[int] {
 	indirectAncestors := set.New[int]()
 	directAncestors := set.New[int]()
 
-	for _, directAncestorName := range node.Links {
-		directAncestor := graph.FindNodeByName(directAncestorName)
-		directAncestors.Add(directAncestor.Index)
+	for _, directAncestor := range node.links {
+		directAncestors.Add(directAncestor.id)
 
 		graph.CollectAncestors(directAncestor, func(indirectAncestor *Node) {
-			indirectAncestors.Add(indirectAncestor.Index)
+			indirectAncestors.Add(indirectAncestor.id)
 		})
 	}
 

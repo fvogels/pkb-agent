@@ -77,8 +77,7 @@ func (graph *Graph) CollectAncestors(node *Node, yield func(*Node)) {
 		current := stack[len(stack)-1]
 		stack = stack[0 : len(stack)-1 : stackCapacity]
 
-		for _, ancestorName := range current.Links {
-			ancestor := graph.FindNodeByName(ancestorName)
+		for _, ancestor := range current.links {
 			yield(ancestor)
 			stack = append(stack, ancestor)
 		}

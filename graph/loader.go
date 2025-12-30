@@ -1,19 +1,16 @@
 package graph
 
 import (
+	"pkb-agent/graph/node"
 	pathlib "pkb-agent/util/pathlib"
 )
 
-type Loader interface {
-	Load(path pathlib.Path, callback func(node *Node) error) error
-}
-
 type GraphLoader struct {
 	root       pathlib.Path
-	nodeLoader Loader
+	nodeLoader node.Loader
 }
 
-func LoadGraph(root pathlib.Path, loader Loader) (*Graph, error) {
+func LoadGraph(root pathlib.Path, loader node.Loader) (*Graph, error) {
 	graphLoader := GraphLoader{
 		root:       root,
 		nodeLoader: loader,
@@ -33,7 +30,7 @@ func (gl *GraphLoader) Load() (*Graph, error) {
 func (gl *GraphLoader) LoadNodes() (*Builder, error) {
 	builder := NewBuilder()
 
-	callback := func(node *Node) error {
+	callback := func(node node.RawNode) error {
 		return builder.AddNode(node)
 	}
 

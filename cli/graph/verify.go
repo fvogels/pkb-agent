@@ -71,10 +71,10 @@ func (c *verifyGraphCommand) lookForDuplicateLinks(g *graph.Graph) bool {
 		duplicates := g.FindRedundantLinks(node)
 
 		if duplicates.Size() > 0 {
-			fmt.Printf("Node \"%s\" has redundant links:\n", node.Name)
+			fmt.Printf("Node \"%s\" has redundant links:\n", node.GetName())
 
 			for _, link := range duplicates.ToSlice() {
-				fmt.Printf("  %s\n", g.FindNodeByIndex(link).Name)
+				fmt.Printf("  %s\n", g.FindNodeByIndex(link).GetName())
 			}
 
 			result = true

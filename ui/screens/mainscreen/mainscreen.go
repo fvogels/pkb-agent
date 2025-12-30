@@ -6,9 +6,9 @@ import (
 	"pkb-agent/graph/metaloader"
 	"pkb-agent/ui/components/helpbar"
 	"pkb-agent/ui/components/nodeselectionview"
+	"pkb-agent/ui/components/nodeviewer"
 	"pkb-agent/ui/components/textinput"
 	"pkb-agent/ui/debug"
-	"pkb-agent/ui/nodeviewers/nodeviewer"
 	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
 	"slices"
@@ -168,6 +168,11 @@ func (model *Model) signalLoadGraph() tea.Cmd {
 	return func() tea.Msg {
 		g, err := loadGraph()
 		if err != nil {
+			strings.Lines(err.Error())(func(errorMessage string) bool {
+				slog.Error("Failed to load graph", slog.String("error", errorMessage))
+				return true
+			})
+
 			panic("Failed to load graph")
 		}
 
@@ -183,7 +188,6 @@ func loadGraph() (*graph.Graph, error) {
 
 	g, err := graph.LoadGraph(path, loader)
 	if err != nil {
-		slog.Error("error loading graph", slog.String("error", err.Error()))
 		return nil, err
 	}
 
@@ -220,7 +224,7 @@ func (model Model) signalRefreshRemainingNodes(keepSameNodeHighlighted bool) tea
 		)
 
 		sort.Slice(remainingNodes, func(i, j int) bool {
-			return strings.ToLower(remainingNodes[i].Name) < strings.ToLower(remainingNodes[j].Name)
+			return strings.ToLower(remainingNodes[i].GetName()) < strings.ToLower(remainingNodes[j].GetName())
 		})
 
 		highlightIndex := 0
@@ -228,14 +232,14 @@ func (model Model) signalRefreshRemainingNodes(keepSameNodeHighlighted bool) tea
 		if !keepSameNodeHighlighted || highlighedNode == nil {
 			target = input
 		} else {
-			target = strings.ToLower(highlighedNode.Name)
+			target = strings.ToLower(highlighedNode.GetName())
 		}
 
 		bestMatchIndex, found := slices.BinarySearchFunc(
 			remainingNodes,
 			target,
 			func(node *graph.Node, target string) int {
-				nodeName := strings.ToLower(node.Name)
+				nodeName := strings.ToLower(node.GetName())
 				if strings.HasPrefix(nodeName, target) {
 					return 0
 				}

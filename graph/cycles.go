@@ -12,12 +12,12 @@ func ContainsCycles(graph *Graph) bool {
 	}
 
 	for i := range nodeCount {
-		slog.Debug("Looking for cycle", slog.String("startNode", graph.FindNodeByIndex(i).Name))
+		slog.Debug("Looking for cycle", slog.String("startNode", graph.FindNodeByIndex(i).rawNode.GetName()))
 
 		if detector.detectCycles(i) {
 			node := graph.FindNodeByIndex(i)
 
-			slog.Error("Cycle detected", slog.String("nodeName", node.Name))
+			slog.Error("Cycle detected", slog.String("nodeName", node.rawNode.GetName()))
 			return true
 		}
 	}
@@ -46,8 +46,8 @@ func (detector *cycleDetector) detectCycles(nodeIndex int) bool {
 	detector.visited[nodeIndex] = true
 	node := graph.FindNodeByIndex(nodeIndex)
 
-	for _, linked := range node.Links {
-		if detector.detectCycles(graph.FindNodeByName(linked).Index) {
+	for _, linked := range node.links {
+		if detector.detectCycles(linked.id) {
 			return true
 		}
 	}

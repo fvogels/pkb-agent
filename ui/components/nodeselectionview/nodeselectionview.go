@@ -202,7 +202,7 @@ func (model Model) signalRemainingNodeHighlighted(node *graph.Node) tea.Cmd {
 
 func (model Model) createRenderer() func(*graph.Node) string {
 	return func(node *graph.Node) string {
-		isLeaf := len(node.Backlinks) == 0
+		isLeaf := len(node.GetBacklinks()) == 0
 		leafSymbol := "*"
 		treeSymbol := " "
 
@@ -220,10 +220,10 @@ func (model Model) createRenderer() func(*graph.Node) string {
 					0,
 					symbol,
 					" ",
-					node.Name,
+					node.GetName(),
 				),
 			),
-			node.Type,
+			"type",
 		)
 	}
 }

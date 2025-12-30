@@ -173,3 +173,17 @@ func ConvertToRunes(str string) []IndexedRune {
 
 	return result
 }
+
+func UnwrapError(err error) []error {
+	if joined, ok := err.(interface{ Unwrap() []error }); ok {
+		result := []error{}
+
+		for _, suberr := range joined.Unwrap() {
+			result = append(result, UnwrapError(suberr)...)
+		}
+
+		return result
+	} else {
+		return []error{err}
+	}
+}

@@ -42,7 +42,7 @@ func (c *searchGraphCommand) execute(str string) error {
 
 	iterator := g.FindMatchingNodes(str)
 	for iterator.Current() != nil {
-		fmt.Println(iterator.Current().Name)
+		fmt.Println(iterator.Current().GetName())
 		iterator.Next()
 	}
 

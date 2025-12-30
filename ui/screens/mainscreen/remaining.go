@@ -15,13 +15,13 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 
 		// nameSet is used to prevent duplicates
 		// Adding the selected nodes ensures that already selected nodes do not appear as remaining choices
-		nameSet := set.FromSlice(util.Map(selectedNodes, func(node *graph.Node) string { return node.Name }))
+		nameSet := set.FromSlice(util.Map(selectedNodes, func(node *graph.Node) string { return node.GetName() }))
 		remaining := []*graph.Node{}
 
 		for iterator.Current() != nil {
 			// The same node can occur more than once during iteration
 			// Ensure that we add each node only once to remainingNodes
-			name := iterator.Current().Name
+			name := iterator.Current().GetName()
 			if nameSet.Contains(name) {
 				iterator.Next()
 				continue
@@ -33,7 +33,7 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 		}
 
 		sort.Slice(remaining, func(i, j int) bool {
-			return strings.ToLower(remaining[i].Name) < strings.ToLower(remaining[j].Name)
+			return strings.ToLower(remaining[i].GetName()) < strings.ToLower(remaining[j].GetName())
 		})
 
 		return remaining
@@ -51,7 +51,8 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 	// This could be improved to also include indirect ancestors
 	if includeLinked {
 		for _, node := range remainingNodeSet.ToSlice() {
-			for _, linkedNodeName := range g.FindNodeByName(node).Links {
+			for _, linkedNode := range g.FindNodeByName(node).GetLinks() {
+				linkedNodeName := linkedNode.GetName()
 				if !remainingNodeSet.Contains(linkedNodeName) {
 					remainingNodeSet.Add(linkedNodeName)
 				}
@@ -66,8 +67,8 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 		iterator := g.FindMatchingNodes(input)
 
 		for iterator.Current() != nil {
-			if remainingNodeSet.Contains(iterator.Current().Name) {
-				subselection.Add(iterator.Current().Name)
+			if remainingNodeSet.Contains(iterator.Current().GetName()) {
+				subselection.Add(iterator.Current().GetName())
 			}
 			iterator.Next()
 		}
@@ -77,7 +78,7 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 
 	// Step 4: remove nodes that are already selected
 	for _, selectedNode := range selectedNodes {
-		remainingNodeSet.Remove(selectedNode.Name)
+		remainingNodeSet.Remove(selectedNode.GetName())
 	}
 
 	result := remainingNodeSet.ToSlice()
@@ -100,11 +101,12 @@ func collectDescendants(g *graph.Graph, node *graph.Node, includeIndirect bool) 
 		current := queue[len(queue)-1]
 		queue = queue[:len(queue)-1]
 
-		for _, identifier := range current.Backlinks {
-			result.Add(identifier)
+		for _, backlinked := range current.GetBacklinks() {
+			backlinkedName := backlinked.GetName()
+			result.Add(backlinkedName)
 
 			if includeIndirect {
-				descendant := g.FindNodeByName(identifier)
+				descendant := g.FindNodeByName(backlinkedName)
 				queue = append(queue, descendant)
 			}
 		}
