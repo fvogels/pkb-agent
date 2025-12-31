@@ -1,10 +1,21 @@
 package bookmark
 
 import (
+	"pkb-agent/extern"
 	"pkb-agent/util"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+var keyMap = struct {
+	OpenInBrowser key.Binding
+}{
+	OpenInBrowser: key.NewBinding(
+		key.WithKeys("o"),
+		key.WithHelp("o", "open"),
+	),
+}
 
 type Model struct {
 	size util.Size
@@ -30,6 +41,9 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		return model.onResize(message)
 
+	case tea.KeyMsg:
+		return model.onKeyPressed(message)
+
 	default:
 		return model, nil
 	}
@@ -39,6 +53,24 @@ func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	model.size = util.Size{
 		Width:  message.Width,
 		Height: message.Height,
+	}
+
+	return model, nil
+}
+
+func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
+	switch {
+	case key.Matches(message, keyMap.OpenInBrowser):
+		return model.onOpenInBrowser()
+
+	default:
+		return model, nil
+	}
+}
+
+func (model Model) onOpenInBrowser() (Model, tea.Cmd) {
+	if err := extern.OpenURLInBrowser(model.url); err != nil {
+		panic("failed to open browser")
 	}
 
 	return model, nil
