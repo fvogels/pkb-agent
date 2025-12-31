@@ -93,7 +93,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		return model.onResized(message)
 
-	case MsgGraphLoaded:
+	case msgGraphLoaded:
 		return model.onGraphLoaded(message)
 
 	case textinput.MsgInputUpdated:
@@ -159,7 +159,7 @@ func (model Model) View() string {
 	return model.mode.render(&model)
 }
 
-func (model Model) onGraphLoaded(message MsgGraphLoaded) (Model, tea.Cmd) {
+func (model Model) onGraphLoaded(message msgGraphLoaded) (Model, tea.Cmd) {
 	model.graph = message.graph
 	return model, model.signalRefreshRemainingNodes(false)
 }
@@ -176,7 +176,7 @@ func (model *Model) signalLoadGraph() tea.Cmd {
 			panic("Failed to load graph")
 		}
 
-		return MsgGraphLoaded{
+		return msgGraphLoaded{
 			graph: g,
 		}
 	}

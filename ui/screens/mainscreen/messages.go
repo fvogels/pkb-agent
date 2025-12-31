@@ -7,7 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type MsgGraphLoaded struct {
+type msgGraphLoaded struct {
 	graph *graph.Graph
 }
 
