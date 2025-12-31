@@ -2,6 +2,7 @@ package bookmark
 
 import (
 	"pkb-agent/extern"
+	"pkb-agent/graph/node"
 	"pkb-agent/util"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -29,7 +30,7 @@ func NewViewer(url string) Model {
 }
 
 func (model Model) Init() tea.Cmd {
-	return nil
+	return model.signalKeybindingsUpdate()
 }
 
 func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
@@ -78,4 +79,14 @@ func (model Model) onOpenInBrowser() (Model, tea.Cmd) {
 
 func (model Model) View() string {
 	return model.url
+}
+
+func (model Model) signalKeybindingsUpdate() tea.Cmd {
+	return func() tea.Msg {
+		return node.MsgUpdateNodeViewerBindings{
+			KeyBindings: []key.Binding{
+				keyMap.OpenInBrowser,
+			},
+		}
+	}
 }
