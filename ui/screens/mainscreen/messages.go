@@ -3,7 +3,6 @@ package mainscreen
 import (
 	"pkb-agent/graph"
 
-	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -30,8 +29,4 @@ type msgActivateMode struct{}
 
 type msgSwitchMode struct {
 	mode mode
-}
-
-type MsgUpdateNodeViewerBindings struct {
-	KeyBindings []key.Binding
 }

@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"pkb-agent/graph"
 	"pkb-agent/graph/metaloader"
+	"pkb-agent/graph/node"
 	"pkb-agent/ui/components/helpbar"
 	"pkb-agent/ui/components/nodeselectionview"
 	"pkb-agent/ui/components/nodeviewer"
@@ -49,7 +50,7 @@ func New() Model {
 	inputMode := NewInputMode(&layoutConfiguration)
 
 	createUpdateKeyBindingsMessage := func(keyBindings []key.Binding) tea.Msg {
-		return MsgUpdateNodeViewerBindings{
+		return node.MsgUpdateNodeViewerBindings{
 			KeyBindings: keyBindings,
 		}
 	}
@@ -125,7 +126,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		command := model.mode.activate(&model)
 		return model, command
 
-	case MsgUpdateNodeViewerBindings:
+	case node.MsgUpdateNodeViewerBindings:
 		model.nodeViewerKeyBindings = message.KeyBindings
 		return model.refreshHelpBar()
 

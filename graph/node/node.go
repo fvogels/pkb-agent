@@ -4,6 +4,7 @@ import (
 	"io"
 	"pkb-agent/util/pathlib"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -26,4 +27,8 @@ type Action interface {
 
 type Loader interface {
 	Load(path pathlib.Path, callback func(node RawNode) error) error
+}
+
+type MsgUpdateNodeViewerBindings struct {
+	KeyBindings []key.Binding
 }
