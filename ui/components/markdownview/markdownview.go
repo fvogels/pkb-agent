@@ -103,8 +103,6 @@ func (model Model) signalFormatMarkdown() tea.Cmd {
 }
 
 func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
-	slog.Debug("!!!")
-
 	model.size = util.Size{
 		Width:  message.Width,
 		Height: message.Height,
