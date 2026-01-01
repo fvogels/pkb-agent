@@ -18,18 +18,18 @@ type Model struct {
 	formattedSource string
 }
 
-func New() Model {
+func New(source string, language string) Model {
 	model := Model{
-		id:              uid.Generate(),
-		source:          "",
-		formattedSource: "",
+		id:       uid.Generate(),
+		source:   source,
+		language: language,
 	}
 
 	return model
 }
 
 func (model Model) Init() tea.Cmd {
-	return nil
+	return model.signalFormatSource()
 }
 
 func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {

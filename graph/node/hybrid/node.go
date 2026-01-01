@@ -2,7 +2,9 @@ package hybrid
 
 import (
 	"io"
+	"log/slog"
 	markdownpage "pkb-agent/graph/node/hybrid/pages/markdown"
+	snippetpage "pkb-agent/graph/node/hybrid/pages/snippet"
 	"pkb-agent/util"
 	"pkb-agent/util/multifile"
 	"pkb-agent/util/pathlib"
@@ -111,6 +113,22 @@ func (node *RawNode) loadPages(file *multifile.MultiFile) []Page {
 			}
 			source := strings.Join(segment.Contents, "\n")
 			page := markdownpage.New(caption, source)
+
+			pages = append(pages, page)
+
+		case "snippet":
+			caption, foundCaption := segment.Attributes["caption"]
+			if !foundCaption {
+				caption = "untitled"
+			}
+
+			language, foundLanguage := segment.Attributes["language"]
+			if !foundLanguage {
+				slog.Warn("Snippet page is missing language attribute, using plaintext", slog.String("filename", file.Path.String()))
+				language = "plaintext"
+			}
+			source := strings.Join(segment.Contents, "\n")
+			page := snippetpage.New(caption, source, language)
 
 			pages = append(pages, page)
 		}
