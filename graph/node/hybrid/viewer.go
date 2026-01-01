@@ -191,13 +191,17 @@ func (model Model) renderStatusBar() string {
 }
 
 func (model Model) onSwitchToPreviousPage() (Model, tea.Cmd) {
-	model.activeSubviewerIndex = (model.activeSubviewerIndex - 1 + len(model.subviewers)) % len(model.subviewers)
+	if len(model.subviewers) > 0 {
+		model.activeSubviewerIndex = (model.activeSubviewerIndex - 1 + len(model.subviewers)) % len(model.subviewers)
+	}
 
 	return model, nil
 }
 
 func (model Model) onSwitchToNextPage() (Model, tea.Cmd) {
-	model.activeSubviewerIndex = (model.activeSubviewerIndex + 1) % len(model.subviewers)
+	if len(model.subviewers) > 0 {
+		model.activeSubviewerIndex = (model.activeSubviewerIndex + 1) % len(model.subviewers)
+	}
 
 	return model, nil
 }
