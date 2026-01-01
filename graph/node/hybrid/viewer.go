@@ -1,11 +1,12 @@
 package hybrid
 
 import (
-	"log/slog"
+	"fmt"
 	"pkb-agent/ui/uid"
 	"pkb-agent/util"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
@@ -104,7 +105,7 @@ func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 	commands := []tea.Cmd{}
 	subviewerMessage := tea.WindowSizeMsg{
 		Width:  model.size.Width,
-		Height: model.size.Height,
+		Height: model.size.Height - 1,
 	}
 	for subviewerIndex := range len(model.subviewers) {
 		util.UpdateUntypedChild(&model.subviewers[subviewerIndex], subviewerMessage, &commands)
@@ -122,10 +123,13 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 
 func (model Model) View() string {
 	if len(model.subviewers) != 0 {
-		slog.Debug("viewing hybrid node", "subviewersLen", len(model.subviewers))
 		activeSubviewer := model.subviewers[model.activeSubviewerIndex]
 
-		return activeSubviewer.View()
+		return lipgloss.JoinVertical(
+			0,
+			lipgloss.NewStyle().Height(model.size.Height-1).Render(activeSubviewer.View()),
+			model.renderStatusBar(),
+		)
 	} else {
 		return "no pages"
 	}
@@ -135,4 +139,10 @@ func (model Model) signalKeybindingsUpdate() tea.Cmd {
 	return func() tea.Msg {
 		return nil
 	}
+}
+
+func (model Model) renderStatusBar() string {
+	currentPage := model.activeSubviewerIndex + 1
+	totalPageCount := len(model.data.pages)
+	return fmt.Sprintf("Page %d/%d", currentPage, totalPageCount)
 }
