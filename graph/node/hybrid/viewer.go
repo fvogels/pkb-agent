@@ -65,9 +65,6 @@ func (model Model) Init() tea.Cmd {
 	// We cannot update the model here (since Init receives a copy), so we send ourselves a message
 	commands = append(commands, model.signalUpdateSubviewers(subviewers))
 
-	// Inform higher up component of updated key bindings
-	commands = append(commands, model.signalKeybindingsUpdate())
-
 	return tea.Batch(commands...)
 }
 
@@ -113,7 +110,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 func (model Model) onSetSubviewers(message msgSetSubviewers) (Model, tea.Cmd) {
 	model.subviewers = message.subviewers
 
-	return model, nil
+	return model, model.signalKeybindingsUpdate()
 }
 
 func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
@@ -167,11 +164,14 @@ func (model Model) View() string {
 
 func (model Model) signalKeybindingsUpdate() tea.Cmd {
 	return func() tea.Msg {
+		keyBindings := []key.Binding{}
+
+		if len(model.subviewers) > 0 {
+			keyBindings = append(keyBindings, keyMap.PreviousPage, keyMap.NextPage)
+		}
+
 		return node.MsgUpdateNodeViewerBindings{
-			KeyBindings: []key.Binding{
-				keyMap.PreviousPage,
-				keyMap.NextPage,
-			},
+			KeyBindings: keyBindings,
 		}
 	}
 }
