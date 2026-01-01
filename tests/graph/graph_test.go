@@ -23,7 +23,7 @@ func TestDescend(t *testing.T) {
 			Keywords: []string{"b"},
 		})
 
-		g, err := builder.Finish()
+		g, err := builder.Finalize()
 		require.NoError(t, err)
 
 		iterator := g.FindMatchingNodes("a")
@@ -44,7 +44,7 @@ func TestDescend(t *testing.T) {
 			Keywords: []string{"abb"},
 		})
 
-		g, err := builder.Finish()
+		g, err := builder.Finalize()
 		require.NoError(t, err)
 
 		iterator := g.FindMatchingNodes("a")

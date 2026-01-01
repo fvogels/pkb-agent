@@ -3,6 +3,7 @@ package graph
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"maps"
 	"pkb-agent/graph/node"
 	"pkb-agent/util/trie"
@@ -31,28 +32,42 @@ func (builder *Builder) AddNode(node node.RawNode) error {
 	return nil
 }
 
-func (builder *Builder) Finish() (*Graph, error) {
+func (builder *Builder) Finalize() (*Graph, error) {
+	slog.Debug("Finalizing graph")
+
+	slog.Debug("Wrapping nodes")
 	nodes := builder.wrapNodes()
 
+	slog.Debug("Building nodesByName table")
 	nodesByName, err := builder.buildNameToNodeTable(nodes)
 	if err != nil {
 		return nil, err
 	}
 
+	slog.Debug("Sorting nodes by name")
 	builder.sortByName(nodes)
+
+	slog.Debug("Indexing nodes")
 	builder.addIndices(nodes)
 
+	slog.Debug("Linking nodes")
 	if err := builder.linkNodes(nodesByName); err != nil {
 		return nil, err
 	}
 
+	slog.Debug("Backlinking nodes")
 	builder.addBackLinks(nodes)
+
+	slog.Debug("Creating trie")
+	trie := builder.createTrie(nodes)
 
 	graph := Graph{
 		nodesByIndex: nodes,
 		nodesByName:  nodesByName,
-		trieRoot:     builder.createTrie(nodes),
+		trieRoot:     trie,
 	}
+
+	slog.Debug("Finished finalizing graph")
 
 	return &graph, nil
 }

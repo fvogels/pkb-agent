@@ -22,7 +22,7 @@ func (node *RawNode) GetName() string {
 }
 
 func (node *RawNode) GetSearchStrings() []string {
-	return util.Words(strings.ToLower(node.name))
+	return util.Words(strings.ToLower(util.RemoveAccents(node.name)))
 }
 
 func (node *RawNode) GetLinks() []string {

@@ -62,7 +62,7 @@ func (tc matchTestCase) test(t *testing.T) {
 		})
 	}
 
-	g, err := builder.Finish()
+	g, err := builder.Finalize()
 	require.NoError(t, err)
 
 	iterator := g.FindMatchingNodes(tc.searchString)

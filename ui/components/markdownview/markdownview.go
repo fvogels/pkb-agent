@@ -18,17 +18,17 @@ type Model struct {
 	size             util.Size
 }
 
-func New() Model {
+func New(source string) Model {
 	model := Model{
-		source: "",
 		id:     uid.Generate(),
+		source: source,
 	}
 
 	return model
 }
 
 func (model Model) Init() tea.Cmd {
-	return nil
+	return model.signalFormatMarkdown()
 }
 
 func (model Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {

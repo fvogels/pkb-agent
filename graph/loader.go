@@ -24,7 +24,7 @@ func (gl *GraphLoader) Load() (*Graph, error) {
 		return nil, err
 	}
 
-	return builder.Finish()
+	return builder.Finalize()
 }
 
 func (gl *GraphLoader) LoadNodes() (*Builder, error) {
