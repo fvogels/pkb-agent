@@ -166,7 +166,7 @@ func (model Model) signalKeybindingsUpdate() tea.Cmd {
 	return func() tea.Msg {
 		keyBindings := []key.Binding{}
 
-		if len(model.subviewers) > 0 {
+		if len(model.subviewers) > 1 {
 			keyBindings = append(keyBindings, keyMap.PreviousPage, keyMap.NextPage)
 		}
 
@@ -191,7 +191,7 @@ func (model Model) renderStatusBar() string {
 }
 
 func (model Model) onSwitchToPreviousPage() (Model, tea.Cmd) {
-	if len(model.subviewers) > 0 {
+	if len(model.subviewers) > 1 {
 		model.activeSubviewerIndex = (model.activeSubviewerIndex - 1 + len(model.subviewers)) % len(model.subviewers)
 	}
 
@@ -199,7 +199,7 @@ func (model Model) onSwitchToPreviousPage() (Model, tea.Cmd) {
 }
 
 func (model Model) onSwitchToNextPage() (Model, tea.Cmd) {
-	if len(model.subviewers) > 0 {
+	if len(model.subviewers) > 1 {
 		model.activeSubviewerIndex = (model.activeSubviewerIndex + 1) % len(model.subviewers)
 	}
 
