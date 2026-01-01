@@ -5,15 +5,21 @@ import (
 )
 
 type Page struct {
-	source string
+	caption string
+	source  string
 }
 
-func New(source string) *Page {
+func New(caption string, source string) *Page {
 	return &Page{
-		source: source,
+		caption: caption,
+		source:  source,
 	}
 }
 
 func (page *Page) CreateViewer() tea.Model {
 	return NewModel(page.source)
+}
+
+func (page *Page) GetCaption() string {
+	return page.caption
 }

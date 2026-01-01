@@ -10,19 +10,23 @@ import (
 )
 
 type Model struct {
-	id                   int
-	size                 util.Size
-	node                 *RawNode
-	data                 *nodeData
-	activeSubviewerIndex int
-	subviewers           []tea.Model
+	id                         int
+	size                       util.Size
+	node                       *RawNode
+	data                       *nodeData
+	activeSubviewerIndex       int
+	subviewers                 []tea.Model
+	statusBarPageLocationStyle lipgloss.Style
+	statusBarPageCaptionStyle  lipgloss.Style
 }
 
 func NewViewer(node *RawNode, data *nodeData) Model {
 	return Model{
-		id:   uid.Generate(),
-		node: node,
-		data: data,
+		id:                         uid.Generate(),
+		node:                       node,
+		data:                       data,
+		statusBarPageLocationStyle: lipgloss.NewStyle().Background(lipgloss.Color("#88FF88")),
+		statusBarPageCaptionStyle:  lipgloss.NewStyle().Background(lipgloss.Color("#AAFFAA")),
 	}
 }
 
@@ -131,7 +135,11 @@ func (model Model) View() string {
 			model.renderStatusBar(),
 		)
 	} else {
-		return "no pages"
+		return lipgloss.JoinVertical(
+			0,
+			lipgloss.NewStyle().Height(model.size.Height-1).Render(""),
+			model.renderStatusBar(),
+		)
 	}
 }
 
@@ -142,7 +150,15 @@ func (model Model) signalKeybindingsUpdate() tea.Cmd {
 }
 
 func (model Model) renderStatusBar() string {
-	currentPage := model.activeSubviewerIndex + 1
-	totalPageCount := len(model.data.pages)
-	return fmt.Sprintf("Page %d/%d", currentPage, totalPageCount)
+	if len(model.data.pages) > 0 {
+		currentPage := model.activeSubviewerIndex + 1
+		totalPageCount := len(model.data.pages)
+		pageLocation := model.statusBarPageLocationStyle.Render(fmt.Sprintf(" Page %d/%d ", currentPage, totalPageCount))
+		pageLocationWidth := lipgloss.Width(pageLocation)
+		pageCaption := model.statusBarPageCaptionStyle.Width(model.size.Width - pageLocationWidth).Render(" " + model.data.pages[model.activeSubviewerIndex].GetCaption())
+
+		return lipgloss.JoinHorizontal(0, pageLocation, pageCaption)
+	} else {
+		return model.statusBarPageLocationStyle.Width(model.size.Width).Render(" no pages ")
+	}
 }

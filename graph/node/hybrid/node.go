@@ -26,6 +26,7 @@ type nodeData struct {
 }
 
 type Page interface {
+	GetCaption() string
 	CreateViewer() tea.Model
 }
 
@@ -104,8 +105,9 @@ func (node *RawNode) loadPages(file *multifile.MultiFile) []Page {
 	for _, segment := range file.Segments {
 		switch segment.Type {
 		case "markdown":
+			caption := "caption"
 			source := strings.Join(segment.Contents, "\n")
-			page := markdownpage.New(source)
+			page := markdownpage.New(caption, source)
 
 			pages = append(pages, page)
 		}
