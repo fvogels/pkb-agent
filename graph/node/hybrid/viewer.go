@@ -2,9 +2,11 @@ package hybrid
 
 import (
 	"fmt"
+	"pkb-agent/graph/node"
 	"pkb-agent/ui/uid"
 	"pkb-agent/util"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -18,6 +20,20 @@ type Model struct {
 	subviewers                 []tea.Model
 	statusBarPageLocationStyle lipgloss.Style
 	statusBarPageCaptionStyle  lipgloss.Style
+}
+
+var keyMap = struct {
+	PreviousPage key.Binding
+	NextPage     key.Binding
+}{
+	PreviousPage: key.NewBinding(
+		key.WithKeys("shift+tab"),
+		key.WithHelp("s-tab", "previous"),
+	),
+	NextPage: key.NewBinding(
+		key.WithKeys("tab"),
+		key.WithHelp("tab", "next"),
+	),
 }
 
 func NewViewer(node *RawNode, data *nodeData) Model {
@@ -120,6 +136,12 @@ func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 
 func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 	switch {
+	case key.Matches(message, keyMap.PreviousPage):
+		return model.onSwitchToPreviousPage()
+
+	case key.Matches(message, keyMap.NextPage):
+		return model.onSwitchToNextPage()
+
 	default:
 		return model, nil
 	}
@@ -145,7 +167,12 @@ func (model Model) View() string {
 
 func (model Model) signalKeybindingsUpdate() tea.Cmd {
 	return func() tea.Msg {
-		return nil
+		return node.MsgUpdateNodeViewerBindings{
+			KeyBindings: []key.Binding{
+				keyMap.PreviousPage,
+				keyMap.NextPage,
+			},
+		}
 	}
 }
 
@@ -161,4 +188,16 @@ func (model Model) renderStatusBar() string {
 	} else {
 		return model.statusBarPageLocationStyle.Width(model.size.Width).Render(" no pages ")
 	}
+}
+
+func (model Model) onSwitchToPreviousPage() (Model, tea.Cmd) {
+	model.activeSubviewerIndex = (model.activeSubviewerIndex - 1 + len(model.subviewers)) % len(model.subviewers)
+
+	return model, nil
+}
+
+func (model Model) onSwitchToNextPage() (Model, tea.Cmd) {
+	model.activeSubviewerIndex = (model.activeSubviewerIndex + 1) % len(model.subviewers)
+
+	return model, nil
 }
