@@ -105,7 +105,10 @@ func (node *RawNode) loadPages(file *multifile.MultiFile) []Page {
 	for _, segment := range file.Segments {
 		switch segment.Type {
 		case "markdown":
-			caption := "caption"
+			caption, foundCaption := segment.Attributes["caption"]
+			if !foundCaption {
+				caption = "untitled"
+			}
 			source := strings.Join(segment.Contents, "\n")
 			page := markdownpage.New(caption, source)
 
