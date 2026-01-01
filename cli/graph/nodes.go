@@ -3,7 +3,7 @@ package graph
 import (
 	"fmt"
 	"pkb-agent/graph"
-	"pkb-agent/graph/metaloader"
+	"pkb-agent/graph/loaders/metaloader"
 	pathlib "pkb-agent/util/pathlib"
 
 	"github.com/spf13/cobra"

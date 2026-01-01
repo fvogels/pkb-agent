@@ -3,7 +3,7 @@ package mainscreen
 import (
 	"log/slog"
 	"pkb-agent/graph"
-	"pkb-agent/graph/metaloader"
+	"pkb-agent/graph/loaders/metaloader"
 	"pkb-agent/graph/node"
 	"pkb-agent/ui/components/helpbar"
 	"pkb-agent/ui/components/nodeselectionview"
