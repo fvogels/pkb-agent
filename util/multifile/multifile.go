@@ -1,7 +1,10 @@
 package multifile
 
+import "pkb-agent/util/pathlib"
+
 type MultiFile struct {
 	Segments []*Segment
+	Path     pathlib.Path
 }
 
 type Segment struct {

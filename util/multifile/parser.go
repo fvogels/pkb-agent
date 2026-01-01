@@ -16,16 +16,19 @@ func Load(path pathlib.Path) (*MultiFile, error) {
 		return nil, err
 	}
 
-	return Parse(lines)
+	return Parse(path, lines)
 }
 
-func Parse(contents []string) (*MultiFile, error) {
-	parser := parser{}
+func Parse(path pathlib.Path, contents []string) (*MultiFile, error) {
+	parser := parser{
+		path: path,
+	}
 
 	return parser.parse(contents)
 }
 
 type parser struct {
+	path                     pathlib.Path
 	segmentDelimiter         string // line prefix that denotes the start of a new segment; always contains a space at the end
 	segments                 []*Segment
 	currentSegmentType       string
@@ -56,6 +59,7 @@ func (parser *parser) parse(lines []string) (*MultiFile, error) {
 	parser.finishSegment()
 
 	result := MultiFile{
+		Path:     parser.path,
 		Segments: parser.segments,
 	}
 
