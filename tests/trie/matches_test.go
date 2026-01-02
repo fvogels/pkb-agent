@@ -58,7 +58,8 @@ func (tc matchTestCase) test(t *testing.T) {
 
 	for _, node := range tc.nodes {
 		builder.AddNode(&testlib.TestNode{
-			Name: node,
+			Name:     node,
+			Keywords: []string{node},
 		})
 	}
 

@@ -41,7 +41,7 @@ func TestDescend(t *testing.T) {
 		})
 		builder.AddNode(&testlib.TestNode{
 			Name:     "bbb",
-			Keywords: []string{"abb"},
+			Keywords: []string{"bbb"},
 		})
 
 		g, err := builder.Finalize()
