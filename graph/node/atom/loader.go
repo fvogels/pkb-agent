@@ -43,7 +43,7 @@ func (loader *Loader) Load(path pathlib.Path, callback func(node node.RawNode) e
 		rawNode, err := loader.convertEntryToNode(&entry)
 
 		if err != nil {
-			err = fmt.Errorf("File: %s, index: %s, error: %w", path.String(), index, err)
+			err = fmt.Errorf("File: %s, index: %d, error: %w", path.String(), index, err)
 			errs = append(errs, err)
 		}
 
