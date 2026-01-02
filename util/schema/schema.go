@@ -1,6 +1,6 @@
 package schema
 
-func GetMapEntry[K comparable, T any](unknown any, key K, target *T, errs *[]error) {
+func BindMapEntry[K comparable, T any](unknown any, key K, target *T, errs *[]error) {
 	table, ok := unknown.(map[K]any)
 	if !ok {
 		*errs = append(*errs, ErrNotAMap)

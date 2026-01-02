@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetMapEntry(t *testing.T) {
+func TestBindMapEntry(t *testing.T) {
 	t.Run("map[string]int", func(t *testing.T) {
 		errs := []error{}
 		var target int
@@ -15,7 +15,7 @@ func TestGetMapEntry(t *testing.T) {
 			"value": 5,
 		}
 
-		GetMapEntry(unknown, "value", &target, &errs)
+		BindMapEntry(unknown, "value", &target, &errs)
 
 		err := errors.Join(errs...)
 		require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestGetMapEntry(t *testing.T) {
 			"value": true,
 		}
 
-		GetMapEntry(unknown, "value", &target, &errs)
+		BindMapEntry(unknown, "value", &target, &errs)
 
 		err := errors.Join(errs...)
 		require.NoError(t, err)
@@ -43,7 +43,7 @@ func TestGetMapEntry(t *testing.T) {
 			5: true,
 		}
 
-		GetMapEntry(unknown, 5, &target, &errs)
+		BindMapEntry(unknown, 5, &target, &errs)
 
 		err := errors.Join(errs...)
 		require.NoError(t, err)
@@ -55,7 +55,7 @@ func TestGetMapEntry(t *testing.T) {
 		var target bool
 		var unknown any = []string{}
 
-		GetMapEntry(unknown, "value", &target, &errs)
+		BindMapEntry(unknown, "value", &target, &errs)
 
 		err := errors.Join(errs...)
 		require.ErrorIs(t, err, ErrNotAMap)
@@ -68,7 +68,7 @@ func TestGetMapEntry(t *testing.T) {
 			"a": 5,
 		}
 
-		GetMapEntry(unknown, "b", &target, &errs)
+		BindMapEntry(unknown, "b", &target, &errs)
 
 		err := errors.Join(errs...)
 		require.ErrorIs(t, err, ErrMissingKey)
@@ -81,7 +81,7 @@ func TestGetMapEntry(t *testing.T) {
 			"a": 5,
 		}
 
-		GetMapEntry(unknown, "a", &target, &errs)
+		BindMapEntry(unknown, "a", &target, &errs)
 
 		err := errors.Join(errs...)
 		require.ErrorIs(t, err, ErrNotAMap)
