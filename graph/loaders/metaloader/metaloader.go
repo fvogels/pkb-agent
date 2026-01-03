@@ -2,7 +2,6 @@ package metaloader
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"pkb-agent/graph/node"
 	"pkb-agent/graph/node/atom"
@@ -10,8 +9,7 @@ import (
 	"pkb-agent/graph/node/bookmark"
 	"pkb-agent/graph/node/hybrid"
 	pathlib "pkb-agent/util/pathlib"
-
-	"gopkg.in/yaml.v3"
+	"pkb-agent/util/schema"
 )
 
 type Loader struct {
@@ -19,8 +17,8 @@ type Loader struct {
 }
 
 type entry struct {
-	Loader string
-	Path   string
+	Loader    string
+	Arguments any
 }
 
 func New() node.Loader {
@@ -40,57 +38,46 @@ func New() node.Loader {
 	return &loader
 }
 
-func (loader *Loader) Load(path pathlib.Path, callback func(node node.RawNode) error) error {
+func (loader *Loader) Load(parentDirectory pathlib.Path, configuration any, callback func(node node.RawNode) error) error {
 	slog.Debug(
 		"Loading node file",
 		slog.String("loader", "meta"),
-		slog.String("path", path.String()),
 	)
 
-	parentDirectory := path.Parent()
-	source, err := path.ReadFile()
-	if err != nil {
-		return err
-	}
-
-	entries, err := loader.loadEntries(source)
+	entries, err := loader.parseConfiguration(configuration)
 	if err != nil {
 		return err
 	}
 
 	errs := []error{}
 	for _, entry := range entries {
-		slog.Debug("Metaloader is processing entry",
-			slog.String("path", entry.Path),
-		)
-		pathPattern := pathlib.New(entry.Path)
-
-		paths, err := parentDirectory.Join(pathPattern).Glob()
+		subloader, err := loader.findLoader(entry.Loader)
 		if err != nil {
 			errs = append(errs, err)
+			continue
 		}
 
-		for _, targetPath := range paths {
-			subloaderName := entry.Loader
-			subloader, err := loader.findLoader(subloaderName)
-			if err != nil {
-				errs = append(errs, err)
-				continue
-			}
-
-			if err := subloader.Load(targetPath, callback); err != nil {
-				errs = append(errs, err)
-			}
+		if err := subloader.Load(parentDirectory, entry.Arguments, callback); err != nil {
+			errs = append(errs, err)
 		}
 	}
 
 	return errors.Join(errs...)
 }
 
-func (loader *Loader) loadEntries(source []byte) ([]entry, error) {
-	var entries []entry
-	if err := yaml.Unmarshal(source, &entries); err != nil {
-		return nil, fmt.Errorf("failed to load entries: %w", err)
+func (loader *Loader) parseConfiguration(configuration any) ([]entry, error) {
+	var items []map[string]any
+	errs := []error{}
+
+	schema.BindSlice(configuration, &items, &errs)
+	if len(errs) > 0 {
+		return nil, errors.Join(errs...)
+	}
+
+	entries := make([]entry, len(items))
+	for index, item := range items {
+		schema.BindMapEntry(item, "loader", &entries[index].Loader, &errs)
+		schema.BindMapEntry(item, "arguments", &entries[index].Arguments, &errs)
 	}
 
 	return entries, nil

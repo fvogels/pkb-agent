@@ -4,17 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"pkb-agent/graph/loaders"
 	"pkb-agent/graph/node"
 	"pkb-agent/util/pathlib"
+	"pkb-agent/util/schema"
 
 	"gopkg.in/yaml.v3"
 )
 
 type Loader struct{}
-
-func NewLoader() *Loader {
-	return &Loader{}
-}
 
 type entry struct {
 	Name        string   `yaml:"name"`
@@ -23,7 +21,22 @@ type entry struct {
 	Description string   `yaml:"description"`
 }
 
-func (loader *Loader) Load(path pathlib.Path, callback func(node node.RawNode) error) error {
+type configuration struct {
+	path pathlib.Path
+}
+
+func init() {
+	loaders.RegisterLoader("bookmark", NewLoader())
+}
+
+func NewLoader() *Loader {
+	return &Loader{}
+}
+
+func (loader *Loader) Load(parentDirectory pathlib.Path, rawConfiguration any, callback func(node node.RawNode) error) error {
+	configuration, err := loader.parseConfiguration(parentDirectory, rawConfiguration)
+	path := configuration.path
+
 	slog.Debug(
 		"Loading bookmarks node file",
 		slog.String("loader", "bookmark"),
@@ -93,4 +106,21 @@ func (loader *Loader) convertEntryToNode(entry *entry) (*RawNode, error) {
 	}
 
 	return &node, nil
+}
+
+func (loader *Loader) parseConfiguration(parentDirectory pathlib.Path, rawConfiguration any) (*configuration, error) {
+	var path string
+	var errs = []error{}
+
+	schema.BindMapEntry(rawConfiguration, "path", &path, &errs)
+
+	if len(errs) > 0 {
+		return nil, errors.Join(errs...)
+	}
+
+	configuration := configuration{
+		path: parentDirectory.Join(pathlib.New(path)),
+	}
+
+	return &configuration, nil
 }

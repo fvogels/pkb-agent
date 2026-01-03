@@ -3,7 +3,7 @@ package mainscreen
 import (
 	"log/slog"
 	"pkb-agent/graph"
-	"pkb-agent/graph/loaders/metaloader"
+	"pkb-agent/graph/loaders/sequence"
 	"pkb-agent/graph/node"
 	"pkb-agent/ui/components/helpbar"
 	"pkb-agent/ui/components/nodeselectionview"
@@ -170,7 +170,7 @@ func (model *Model) signalLoadGraph() tea.Cmd {
 		g, err := loadGraph()
 		if err != nil {
 			strings.Lines(err.Error())(func(errorMessage string) bool {
-				slog.Error("Failed to load graph", slog.String("error", errorMessage))
+				slog.Error("Failed to load graph", slog.String("error", strings.TrimSpace(errorMessage)))
 				return true
 			})
 
@@ -184,7 +184,7 @@ func (model *Model) signalLoadGraph() tea.Cmd {
 }
 
 func loadGraph() (*graph.Graph, error) {
-	loader := metaloader.New()
+	loader := sequence.New()
 	path := pathlib.New(`F:\repos\pkb\pkb-data\root.yaml`)
 
 	g, err := graph.LoadGraph(path, loader)
@@ -209,7 +209,7 @@ func (model Model) onResized(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 func (model Model) signalRefreshRemainingNodes(keepSameNodeHighlighted bool) tea.Cmd {
 	input := strings.ToLower(model.textInput.GetInput())
 	selectedNodes := model.selectedNodes
-	highlighedNode := model.nodeSelectionView.GetSelectedRemainingNode()
+	highlightedNode := model.nodeSelectionView.GetSelectedRemainingNode()
 
 	if len(input) == 0 {
 		keepSameNodeHighlighted = true
@@ -230,10 +230,10 @@ func (model Model) signalRefreshRemainingNodes(keepSameNodeHighlighted bool) tea
 
 		highlightIndex := 0
 		var target string
-		if !keepSameNodeHighlighted || highlighedNode == nil {
+		if !keepSameNodeHighlighted || highlightedNode == nil {
 			target = input
 		} else {
-			target = strings.ToLower(highlighedNode.GetName())
+			target = strings.ToLower(highlightedNode.GetName())
 		}
 
 		bestMatchIndex, found := slices.BinarySearchFunc(

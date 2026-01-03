@@ -26,7 +26,7 @@ type Action interface {
 }
 
 type Loader interface {
-	Load(path pathlib.Path, callback func(node RawNode) error) error
+	Load(pathlib.Path, any, func(node RawNode) error) error
 }
 
 type MsgUpdateNodeViewerBindings struct {

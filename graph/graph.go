@@ -4,6 +4,13 @@ import (
 	"maps"
 	"pkb-agent/util"
 	"pkb-agent/util/trie"
+
+	_ "pkb-agent/graph/loaders/glob"
+	_ "pkb-agent/graph/loaders/sequence"
+	_ "pkb-agent/graph/node/atom"
+	_ "pkb-agent/graph/node/backblaze"
+	_ "pkb-agent/graph/node/bookmark"
+	_ "pkb-agent/graph/node/hybrid"
 )
 
 type Graph struct {

@@ -1,11 +1,14 @@
 package hybrid
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
+	"pkb-agent/graph/loaders"
 	"pkb-agent/graph/node"
 	"pkb-agent/util/multifile"
 	"pkb-agent/util/pathlib"
+	"pkb-agent/util/schema"
 	"strings"
 
 	"github.com/stretchr/testify/assert/yaml"
@@ -13,17 +16,32 @@ import (
 
 type Loader struct{}
 
-func NewLoader() *Loader {
-	return &Loader{}
-}
-
 type metadata struct {
 	Name    string              `yaml:"name"`    // Name of the snippet
 	Links   []string            `yaml:"links"`   // Links to other nodes
 	Actions []map[string]string `yaml:"actions"` // Actions that can be performed on the node
 }
 
-func (loader *Loader) Load(path pathlib.Path, callback func(node node.RawNode) error) error {
+type configuration struct {
+	path pathlib.Path
+}
+
+func init() {
+	loaders.RegisterLoader("hybrid", NewLoader())
+}
+
+func NewLoader() *Loader {
+	return &Loader{}
+}
+
+func (loader *Loader) Load(parentDirectory pathlib.Path, rawConfiguration any, callback func(node node.RawNode) error) error {
+	configuration, err := loader.parseConfiguration(parentDirectory, rawConfiguration)
+	if err != nil {
+		return fmt.Errorf("failed to load hybrid node: %w", err)
+	}
+
+	path := configuration.path
+
 	slog.Debug(
 		"Loading hybrid node file",
 		slog.String("loader", "bookmark"),
@@ -72,4 +90,21 @@ func parseMetadata(lines []string) (metadata, error) {
 	}
 
 	return result, nil
+}
+
+func (loader *Loader) parseConfiguration(parentDirectory pathlib.Path, rawConfiguration any) (*configuration, error) {
+	var path string
+	var errs = []error{}
+
+	schema.BindMapEntry(rawConfiguration, "path", &path, &errs)
+
+	if len(errs) > 0 {
+		return nil, fmt.Errorf("failed to read configuration: %w", errors.Join(errs...))
+	}
+
+	configuration := configuration{
+		path: parentDirectory.Join(pathlib.New(path)),
+	}
+
+	return &configuration, nil
 }
