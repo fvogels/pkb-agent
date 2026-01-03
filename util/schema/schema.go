@@ -20,7 +20,7 @@ func BindMapEntry[K comparable, T any](unknown any, key K, target *T, errs *[]er
 
 	castValue, ok := value.(T)
 	if !ok {
-		*errs = append(*errs, ErrWrongType)
+		*errs = append(*errs, fmt.Errorf("%w: failed to cast map value (actual: %s, target: %s)", ErrWrongType, reflect.TypeOf(value).String(), reflect.TypeFor[T]().String()))
 	}
 
 	*target = castValue
