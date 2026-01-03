@@ -67,6 +67,42 @@ func (p Path) Basename() string {
 	return filepath.Base(p.path)
 }
 
+var ErrMustBeDirectory = errors.New("not a directory")
+
+// FindFiles returns the paths of all files in the current directory or its subdirectories.
+func (p Path) FindFiles() ([]Path, error) {
+	isDir, err := p.IsDirectory()
+	if err != nil {
+		return nil, err
+	}
+	if !isDir {
+		// Current path must refer to a directory
+		return nil, ErrMustBeDirectory
+	}
+
+	result := []Path{}
+
+	walker := func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.Mode().IsRegular() {
+			// path refers to file
+			result = append(result, New(path))
+		}
+
+		// Continue walking
+		return nil
+	}
+
+	if err := filepath.Walk(p.String(), walker); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func (p Path) Glob() ([]Path, error) {
 	absolute, err := p.Absolute()
 	if err != nil {
