@@ -1,6 +1,9 @@
 package schema
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+)
 
 func BindMapEntry[K comparable, T any](unknown any, key K, target *T, errs *[]error) {
 	table, ok := unknown.(map[K]any)
@@ -11,7 +14,7 @@ func BindMapEntry[K comparable, T any](unknown any, key K, target *T, errs *[]er
 
 	value, ok := table[key]
 	if !ok {
-		*errs = append(*errs, ErrMissingKey)
+		*errs = append(*errs, fmt.Errorf("%w: %v", ErrMissingKey, key))
 		return
 	}
 
@@ -35,7 +38,7 @@ func BindSlice[T any](unknown any, target *[]T, errs *[]error) {
 	for index, x := range slice {
 		cast, ok := x.(T)
 		if !ok {
-			err := fmt.Errorf("%w, index %d", ErrWrongType, index)
+			err := fmt.Errorf("%w, index %d, type %s", ErrWrongType, index, reflect.TypeOf(x).String())
 			*errs = append(*errs, err)
 		} else {
 			(*target)[index] = cast
