@@ -7,6 +7,7 @@ import (
 
 	_ "pkb-agent/graph/loaders/glob"
 	_ "pkb-agent/graph/loaders/sequence"
+	_ "pkb-agent/graph/loaders/tagger"
 	_ "pkb-agent/graph/node/atom"
 	_ "pkb-agent/graph/node/backblaze"
 	_ "pkb-agent/graph/node/bookmark"
