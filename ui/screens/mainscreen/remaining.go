@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// determineRemainingNodes computes which nodes are compatible with the selected nodes and the search filter.
 func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*graph.Node, includeLinked bool, includeIndirectAncestors bool) []*graph.Node {
 	if len(selectedNodes) == 0 {
 		// Deal with this case separately for efficiency reasons
