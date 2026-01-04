@@ -16,11 +16,12 @@ type Model struct {
 	size                       util.Size
 	node                       *RawNode
 	data                       *nodeData // (strong) pointer to the node data, keeps information alive while viewer exists
-	activeSubviewerIndex       int
+	activePageIndex            int
 	subviewers                 []tea.Model
 	statusBarPageLocationStyle lipgloss.Style
 	statusBarPageCaptionStyle  lipgloss.Style
 	actionKeyBindings          []ActionKeyBinding
+	pageActionKeyBindings      [][]ActionKeyBinding
 }
 
 type ActionKeyBinding struct {
@@ -43,13 +44,16 @@ var keyMap = struct {
 }
 
 func NewViewer(node *RawNode, data *nodeData) Model {
+	actionKeyBindings, pageActionKeyBindings := createActionKeyBindings(data.actions, data.pages)
+
 	return Model{
 		id:                         uid.Generate(),
 		node:                       node,
 		data:                       data,
 		statusBarPageLocationStyle: lipgloss.NewStyle().Background(lipgloss.Color("#88FF88")),
 		statusBarPageCaptionStyle:  lipgloss.NewStyle().Background(lipgloss.Color("#AAFFAA")),
-		actionKeyBindings:          createActionKeyBindings(data.actions),
+		actionKeyBindings:          actionKeyBindings,
+		pageActionKeyBindings:      pageActionKeyBindings,
 	}
 }
 
@@ -146,6 +150,15 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 		}
 	}
 
+	// Deal with page key bindings
+	if len(model.data.pages) > 0 {
+		for _, actionKeyBinding := range model.pageActionKeyBindings[model.activePageIndex] {
+			if key.Matches(message, actionKeyBinding.keyBinding) {
+				return model, model.signalPerformAction(actionKeyBinding.action)
+			}
+		}
+	}
+
 	// Deal with fixed key bindings
 	switch {
 	case key.Matches(message, keyMap.PreviousPage):
@@ -169,7 +182,7 @@ func (model Model) signalPerformAction(action node.Action) tea.Cmd {
 
 func (model Model) View() string {
 	if len(model.subviewers) != 0 {
-		activeSubviewer := model.subviewers[model.activeSubviewerIndex]
+		activeSubviewer := model.subviewers[model.activePageIndex]
 
 		return lipgloss.JoinVertical(
 			0,
@@ -208,16 +221,25 @@ func (model Model) determineKeyBindings() []key.Binding {
 		keyBindings = append(keyBindings, actionKeyBinding.keyBinding)
 	}
 
+	// Add page action bindings
+	if len(model.data.pages) > 0 {
+		pageKeyBindings := model.pageActionKeyBindings[model.activePageIndex]
+
+		for _, pageKeyBinding := range pageKeyBindings {
+			keyBindings = append(keyBindings, pageKeyBinding.keyBinding)
+		}
+	}
+
 	return keyBindings
 }
 
 func (model Model) renderStatusBar() string {
 	if len(model.data.pages) > 0 {
-		currentPage := model.activeSubviewerIndex + 1
+		currentPage := model.activePageIndex + 1
 		totalPageCount := len(model.data.pages)
 		pageLocation := model.statusBarPageLocationStyle.Render(fmt.Sprintf(" Page %d/%d ", currentPage, totalPageCount))
 		pageLocationWidth := lipgloss.Width(pageLocation)
-		pageCaption := model.statusBarPageCaptionStyle.Width(model.size.Width - pageLocationWidth).Render(" " + model.data.pages[model.activeSubviewerIndex].GetCaption())
+		pageCaption := model.statusBarPageCaptionStyle.Width(model.size.Width - pageLocationWidth).Render(" " + model.data.pages[model.activePageIndex].GetCaption())
 
 		return lipgloss.JoinHorizontal(0, pageLocation, pageCaption)
 	} else {
@@ -227,7 +249,7 @@ func (model Model) renderStatusBar() string {
 
 func (model Model) onSwitchToPreviousPage() (Model, tea.Cmd) {
 	if len(model.subviewers) > 1 {
-		model.activeSubviewerIndex = (model.activeSubviewerIndex - 1 + len(model.subviewers)) % len(model.subviewers)
+		model.activePageIndex = (model.activePageIndex - 1 + len(model.subviewers)) % len(model.subviewers)
 	}
 
 	return model, nil
@@ -235,15 +257,15 @@ func (model Model) onSwitchToPreviousPage() (Model, tea.Cmd) {
 
 func (model Model) onSwitchToNextPage() (Model, tea.Cmd) {
 	if len(model.subviewers) > 1 {
-		model.activeSubviewerIndex = (model.activeSubviewerIndex + 1) % len(model.subviewers)
+		model.activePageIndex = (model.activePageIndex + 1) % len(model.subviewers)
 	}
 
 	return model, nil
 }
 
-func createActionKeyBindings(actions []node.Action) []ActionKeyBinding {
+func createActionKeyBindings(actions []node.Action, pages []Page) ([]ActionKeyBinding, [][]ActionKeyBinding) {
 	keys := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"}
-	result := []ActionKeyBinding{}
+	nodeActionBindings := []ActionKeyBinding{}
 
 	for index, action := range actions {
 		keyBinding := key.NewBinding(
@@ -256,8 +278,31 @@ func createActionKeyBindings(actions []node.Action) []ActionKeyBinding {
 			action:     action,
 		}
 
-		result = append(result, actionKeyBinding)
+		nodeActionBindings = append(nodeActionBindings, actionKeyBinding)
 	}
 
-	return result
+	pageActionBindings := [][]ActionKeyBinding{}
+	startIndex := len(actions)
+
+	for _, page := range pages {
+		actionBindings := []ActionKeyBinding{}
+
+		for actionIndex, action := range page.GetActions() {
+			keyBinding := key.NewBinding(
+				key.WithKeys(keys[startIndex+actionIndex]),
+				key.WithHelp(keys[startIndex+actionIndex], action.GetDescription()),
+			)
+
+			actionKeyBinding := ActionKeyBinding{
+				keyBinding: keyBinding,
+				action:     action,
+			}
+
+			actionBindings = append(actionBindings, actionKeyBinding)
+		}
+
+		pageActionBindings = append(pageActionBindings, actionBindings)
+	}
+
+	return nodeActionBindings, pageActionBindings
 }

@@ -7,6 +7,13 @@ type Action struct {
 	url         string
 }
 
+func New(description string, url string) *Action {
+	return &Action{
+		description: description,
+		url:         url,
+	}
+}
+
 func (action Action) GetDescription() string {
 	return action.description
 }
