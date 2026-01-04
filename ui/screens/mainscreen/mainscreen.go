@@ -58,7 +58,7 @@ func New() Model {
 	model := Model{
 		mode:                     viewMode,
 		includeLinkedNodes:       true,
-		includeIndirectAncestors: false,
+		includeIndirectAncestors: true,
 		nodeSelectionView:        nodeselectionview.New(),
 		textInput:                textinput.New(),
 		helpBar:                  helpbar.New(),
