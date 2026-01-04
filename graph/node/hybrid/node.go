@@ -35,6 +35,7 @@ type nodeData struct {
 type Page interface {
 	GetCaption() string
 	CreateViewer() tea.Model
+	GetActions() []node.Action
 }
 
 func (rawNode *RawNode) GetName() string {

@@ -1,6 +1,8 @@
 package markdownpage
 
 import (
+	"pkb-agent/graph/node"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -22,4 +24,8 @@ func (page *Page) CreateViewer() tea.Model {
 
 func (page *Page) GetCaption() string {
 	return page.caption
+}
+
+func (page *Page) GetActions() []node.Action {
+	return nil
 }
