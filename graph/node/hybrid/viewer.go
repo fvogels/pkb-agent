@@ -15,7 +15,7 @@ type Model struct {
 	id                         int
 	size                       util.Size
 	node                       *RawNode
-	data                       *nodeData
+	data                       *nodeData // (strong) pointer to the node data, keeps information alive while viewer exists
 	activeSubviewerIndex       int
 	subviewers                 []tea.Model
 	statusBarPageLocationStyle lipgloss.Style
@@ -110,7 +110,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 func (model Model) onSetSubviewers(message msgSetSubviewers) (Model, tea.Cmd) {
 	model.subviewers = message.subviewers
 
-	return model, model.signalKeybindingsUpdate()
+	return model, model.signalKeyBindingsUpdate()
 }
 
 func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
@@ -162,18 +162,25 @@ func (model Model) View() string {
 	}
 }
 
-func (model Model) signalKeybindingsUpdate() tea.Cmd {
+func (model Model) signalKeyBindingsUpdate() tea.Cmd {
 	return func() tea.Msg {
-		keyBindings := []key.Binding{}
-
-		if len(model.subviewers) > 1 {
-			keyBindings = append(keyBindings, keyMap.PreviousPage, keyMap.NextPage)
-		}
+		keyBindings := model.determineKeyBindings()
 
 		return node.MsgUpdateNodeViewerBindings{
 			KeyBindings: keyBindings,
 		}
 	}
+}
+
+func (model Model) determineKeyBindings() []key.Binding {
+	keyBindings := []key.Binding{}
+
+	// Add "previous page" and "next page" keybindings if there are at least two pages
+	if len(model.subviewers) >= 2 {
+		keyBindings = append(keyBindings, keyMap.PreviousPage, keyMap.NextPage)
+	}
+
+	return keyBindings
 }
 
 func (model Model) renderStatusBar() string {

@@ -77,13 +77,16 @@ func (loader *Loader) Load(parentDirectory pathlib.Path, rawConfiguration any, c
 }
 
 func parseMetadata(lines []string) (metadata, error) {
+	// Rejoin strings into one big string so as to be able to feed it to the yaml parser
 	unparsedMetadata := strings.Join(lines, "\n")
 
+	// Parse yaml contents
 	var result metadata
 	if err := yaml.Unmarshal([]byte(unparsedMetadata), &result); err != nil {
 		return metadata{}, err
 	}
 
+	// name attribute is mandatory
 	if len(result.Name) == 0 {
 		slog.Error("Hybrid node is missing name", slog.String("metadata", unparsedMetadata))
 		return metadata{}, ErrMissingName

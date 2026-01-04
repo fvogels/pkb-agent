@@ -24,7 +24,8 @@ type RawNode struct {
 }
 
 type nodeData struct {
-	pages []Page
+	pages    []Page
+	metadata metadata
 }
 
 type Page interface {
@@ -53,8 +54,16 @@ func (node *RawNode) getData() (*nodeData, error) {
 			return nil, err
 		}
 
+		metadataSegment := file.FindSegmentOfType("metadata")
+		metadata, err := parseMetadata(metadataSegment.Contents)
+		if err != nil {
+			slog.Debug("Error parsing hybrid node's metadata; should have been caught earlier")
+			return nil, err
+		}
+
 		data = &nodeData{
-			pages: node.loadPages(file),
+			pages:    node.loadPages(file),
+			metadata: metadata,
 		}
 
 		node.data = weak.Make(data)
