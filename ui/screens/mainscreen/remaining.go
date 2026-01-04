@@ -4,6 +4,7 @@ import (
 	"pkb-agent/graph"
 	"pkb-agent/util"
 	"pkb-agent/util/set"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -52,10 +53,10 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 	// This could be improved to also include indirect ancestors
 	if includeLinked {
 		for _, node := range remainingNodeSet.ToSlice() {
-			for _, linkedNode := range g.FindNodeByName(node).GetLinks() {
-				linkedNodeName := linkedNode.GetName()
-				if !remainingNodeSet.Contains(linkedNodeName) {
-					remainingNodeSet.Add(linkedNodeName)
+			for _, linkedNode := range g.FindNodeByIndex(node).GetLinks() {
+				linkedNodeIndex := linkedNode.GetIndex()
+				if !remainingNodeSet.Contains(linkedNodeIndex) {
+					remainingNodeSet.Add(linkedNodeIndex)
 				}
 			}
 		}
@@ -63,13 +64,13 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 
 	// Step 3: only keep nodes that are compatible with the filter
 	if len(input) != 0 {
-		subselection := set.New[string]()
+		subselection := set.New[int]()
 
 		iterator := g.FindMatchingNodes(input)
 
 		for iterator.Current() != nil {
-			if remainingNodeSet.Contains(iterator.Current().GetName()) {
-				subselection.Add(iterator.Current().GetName())
+			if remainingNodeSet.Contains(iterator.Current().GetIndex()) {
+				subselection.Add(iterator.Current().GetIndex())
 			}
 			iterator.Next()
 		}
@@ -79,22 +80,20 @@ func determineRemainingNodes(input string, g *graph.Graph, selectedNodes []*grap
 
 	// Step 4: remove nodes that are already selected
 	for _, selectedNode := range selectedNodes {
-		remainingNodeSet.Remove(selectedNode.GetName())
+		remainingNodeSet.Remove(selectedNode.GetIndex())
 	}
 
 	result := remainingNodeSet.ToSlice()
-	sort.Slice(result, func(i, j int) bool {
-		return strings.ToLower(result[i]) < strings.ToLower(result[j])
-	})
+	slices.Sort(result)
 
-	return util.Map(result, func(name string) *graph.Node {
-		return g.FindNodeByName(name)
+	return util.Map(result, func(index int) *graph.Node {
+		return g.FindNodeByIndex(index)
 	})
 }
 
 // collectDescendants collects the names of all backlinked nodes
-func collectDescendants(g *graph.Graph, node *graph.Node, includeIndirect bool) set.Set[string] {
-	result := set.New[string]()
+func collectDescendants(g *graph.Graph, node *graph.Node, includeIndirect bool) set.Set[int] {
+	result := set.New[int]()
 	queue := make([]*graph.Node, 1, 20)
 	queue[0] = node
 
@@ -103,11 +102,11 @@ func collectDescendants(g *graph.Graph, node *graph.Node, includeIndirect bool) 
 		queue = queue[:len(queue)-1]
 
 		for _, backlinked := range current.GetBacklinks() {
-			backlinkedName := backlinked.GetName()
-			result.Add(backlinkedName)
+			backlinkedIndex := backlinked.GetIndex()
+			result.Add(backlinkedIndex)
 
 			if includeIndirect {
-				descendant := g.FindNodeByName(backlinkedName)
+				descendant := g.FindNodeByIndex(backlinkedIndex)
 				queue = append(queue, descendant)
 			}
 		}
