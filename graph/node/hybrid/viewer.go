@@ -20,6 +20,12 @@ type Model struct {
 	subviewers                 []tea.Model
 	statusBarPageLocationStyle lipgloss.Style
 	statusBarPageCaptionStyle  lipgloss.Style
+	actionKeyBindings          []ActionKeyBinding
+}
+
+type ActionKeyBinding struct {
+	action     node.Action
+	keyBinding key.Binding
 }
 
 var keyMap = struct {
@@ -43,6 +49,7 @@ func NewViewer(node *RawNode, data *nodeData) Model {
 		data:                       data,
 		statusBarPageLocationStyle: lipgloss.NewStyle().Background(lipgloss.Color("#88FF88")),
 		statusBarPageCaptionStyle:  lipgloss.NewStyle().Background(lipgloss.Color("#AAFFAA")),
+		actionKeyBindings:          createActionKeyBindings(data.actions),
 	}
 }
 
@@ -132,6 +139,14 @@ func (model Model) onResize(message tea.WindowSizeMsg) (Model, tea.Cmd) {
 }
 
 func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
+	// Deal with node key bindings
+	for _, actionKeyBinding := range model.actionKeyBindings {
+		if key.Matches(message, actionKeyBinding.keyBinding) {
+			return model, model.signalPerformAction(actionKeyBinding.action)
+		}
+	}
+
+	// Deal with fixed key bindings
 	switch {
 	case key.Matches(message, keyMap.PreviousPage):
 		return model.onSwitchToPreviousPage()
@@ -141,6 +156,14 @@ func (model Model) onKeyPressed(message tea.KeyMsg) (Model, tea.Cmd) {
 
 	default:
 		return model, nil
+	}
+}
+
+func (model Model) signalPerformAction(action node.Action) tea.Cmd {
+	return func() tea.Msg {
+		action.Perform()
+
+		return nil
 	}
 }
 
@@ -180,6 +203,11 @@ func (model Model) determineKeyBindings() []key.Binding {
 		keyBindings = append(keyBindings, keyMap.PreviousPage, keyMap.NextPage)
 	}
 
+	// Add node action bindings
+	for _, actionKeyBinding := range model.actionKeyBindings {
+		keyBindings = append(keyBindings, actionKeyBinding.keyBinding)
+	}
+
 	return keyBindings
 }
 
@@ -211,4 +239,25 @@ func (model Model) onSwitchToNextPage() (Model, tea.Cmd) {
 	}
 
 	return model, nil
+}
+
+func createActionKeyBindings(actions []node.Action) []ActionKeyBinding {
+	keys := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"}
+	result := []ActionKeyBinding{}
+
+	for index, action := range actions {
+		keyBinding := key.NewBinding(
+			key.WithKeys(keys[index]),
+			key.WithHelp(keys[index], action.GetDescription()),
+		)
+
+		actionKeyBinding := ActionKeyBinding{
+			keyBinding: keyBinding,
+			action:     action,
+		}
+
+		result = append(result, actionKeyBinding)
+	}
+
+	return result
 }

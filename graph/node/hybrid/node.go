@@ -1,8 +1,12 @@
 package hybrid
 
 import (
+	"errors"
+	"fmt"
 	"io"
 	"log/slog"
+	"pkb-agent/graph/node"
+	"pkb-agent/graph/node/hybrid/actions/www"
 	markdownpage "pkb-agent/graph/node/hybrid/pages/markdown"
 	snippetpage "pkb-agent/graph/node/hybrid/pages/snippet"
 	"pkb-agent/util"
@@ -24,8 +28,8 @@ type RawNode struct {
 }
 
 type nodeData struct {
-	pages    []Page
-	metadata metadata
+	pages   []Page
+	actions []node.Action
 }
 
 type Page interface {
@@ -33,23 +37,23 @@ type Page interface {
 	CreateViewer() tea.Model
 }
 
-func (node *RawNode) GetName() string {
-	return node.name
+func (rawNode *RawNode) GetName() string {
+	return rawNode.name
 }
 
-func (node *RawNode) GetSearchStrings() []string {
-	return util.Words(strings.ToLower(util.RemoveAccents(node.name)))
+func (rawNode *RawNode) GetSearchStrings() []string {
+	return util.Words(strings.ToLower(util.RemoveAccents(rawNode.name)))
 }
 
-func (node *RawNode) GetLinks() []string {
-	return node.links
+func (rawNode *RawNode) GetLinks() []string {
+	return rawNode.links
 }
 
-func (node *RawNode) getData() (*nodeData, error) {
-	data := node.data.Value()
+func (rawNode *RawNode) getData() (*nodeData, error) {
+	data := rawNode.data.Value()
 
 	if data == nil {
-		file, err := multifile.Load(node.path)
+		file, err := multifile.Load(rawNode.path)
 		if err != nil {
 			return nil, err
 		}
@@ -61,27 +65,33 @@ func (node *RawNode) getData() (*nodeData, error) {
 			return nil, err
 		}
 
-		data = &nodeData{
-			pages:    node.loadPages(file),
-			metadata: metadata,
+		actions, err := rawNode.parseActions(metadata.Actions)
+		if err != nil {
+			slog.Debug("Error parsing hybrid node's actions")
+			return nil, fmt.Errorf("failed to parse actions: %w", err)
 		}
 
-		node.data = weak.Make(data)
+		data = &nodeData{
+			pages:   rawNode.loadPages(file),
+			actions: actions,
+		}
+
+		rawNode.data = weak.Make(data)
 	}
 
 	return data, nil
 }
 
-func (node *RawNode) GetViewer() tea.Model {
-	data, err := node.getData()
+func (rawNode *RawNode) GetViewer() tea.Model {
+	data, err := rawNode.getData()
 	if err != nil {
 		panic("error loading data")
 	}
 
-	return NewViewer(node, data)
+	return NewViewer(rawNode, data)
 }
 
-func (node *RawNode) Serialize(writer io.Writer) error {
+func (rawNode *RawNode) Serialize(writer io.Writer) error {
 	// bufferSize := 0
 	// bufferSize += 4              // type id
 	// bufferSize += 4              // len(name)
@@ -110,7 +120,7 @@ func (node *RawNode) Serialize(writer io.Writer) error {
 	return nil
 }
 
-func (node *RawNode) loadPages(file *multifile.MultiFile) []Page {
+func (rawNode *RawNode) loadPages(file *multifile.MultiFile) []Page {
 	pages := []Page{}
 
 	for _, segment := range file.Segments {
@@ -144,4 +154,40 @@ func (node *RawNode) loadPages(file *multifile.MultiFile) []Page {
 	}
 
 	return pages
+}
+
+func (rawNode *RawNode) parseActions(rawActions []map[string]string) ([]node.Action, error) {
+	result := []node.Action{}
+	errs := []error{}
+
+	for _, rawAction := range rawActions {
+		action, err := rawNode.parseAction(rawAction)
+
+		if err != nil {
+			errs = append(errs, err)
+		} else {
+			result = append(result, action)
+		}
+	}
+
+	if len(errs) > 0 {
+		return nil, errors.Join(errs...)
+	}
+
+	return result, nil
+}
+
+func (rawNode *RawNode) parseAction(rawAction map[string]string) (node.Action, error) {
+	actionType, ok := rawAction["type"]
+	if !ok {
+		return nil, ErrMissingActionType
+	}
+
+	switch actionType {
+	case "www":
+		return www.Parse(rawAction)
+
+	default:
+		return nil, fmt.Errorf("%w: %s", ErrUnknownActionType, actionType)
+	}
 }
