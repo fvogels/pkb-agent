@@ -1,0 +1,111 @@
+package tuimain
+
+import (
+	"log"
+	"pkb-agent/tui"
+	"pkb-agent/tui/component/docksouth"
+	"pkb-agent/tui/component/label"
+	"pkb-agent/tui/data"
+
+	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
+)
+
+func Start(verbose bool) error {
+	defStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
+	// boxStyle := tcell.StyleDefault.Foreground(color.White).Background(color.Purple)
+
+	// Initialize screen
+	screen, err := tcell.NewScreen()
+	if err != nil {
+		log.Fatalf("%+v", err)
+	}
+	if err := screen.Init(); err != nil {
+		log.Fatalf("%+v", err)
+	}
+	screen.SetStyle(defStyle)
+	// s.EnableMouse()
+	// s.EnablePaste()
+	screen.Clear()
+
+	quit := func() {
+		// You have to catch panics in a defer, clean up, and
+		// re-raise them - otherwise your application can
+		// die without leaving any diagnostic trace.
+		maybePanic := recover()
+		screen.Fini()
+		if maybePanic != nil {
+			panic(maybePanic)
+		}
+	}
+	defer quit()
+
+	// Event loop
+	eventLoop(screen)
+
+	return nil
+}
+
+func eventLoop(screen tcell.Screen) {
+	style := tcell.StyleDefault.Background(color.Green).Foreground(color.Reset)
+	statusStyle := tcell.StyleDefault.Background(color.Red).Foreground(color.Reset)
+
+	mainView := label.New(data.NewVariable("main view"), style)
+	statusBar := label.New(data.NewVariable("status bar"), statusStyle)
+	root := docksouth.New(mainView, statusBar, 1)
+
+	for {
+		// Update screen
+		screen.Clear()
+		grid := root.Render()
+		gridSize := grid.GetSize()
+		runes := make([]rune, 1)
+
+		for y := range gridSize.Height {
+			for x := range gridSize.Width {
+				position := tui.Position{X: x, Y: y}
+				cell := grid.Get(position)
+				runes[0] = cell.Contents
+				screen.Put(x, y, string(runes), *cell.Style)
+			}
+		}
+
+		screen.Show()
+
+		// Poll event (this can be in a select statement as well)
+		ev := <-screen.EventQ()
+
+		// Process event
+		switch ev := ev.(type) {
+		case *tcell.EventResize:
+			width, height := ev.Size()
+
+			root.Handle(tui.MsgResize{
+				Size: tui.Size{
+					Width:  width,
+					Height: height,
+				},
+			})
+			screen.Sync()
+
+		case *tcell.EventKey:
+			if ev.Str() == "q" || ev.Key() == tcell.KeyCtrlC {
+				return
+			} else if ev.Key() == tcell.KeyCtrlL {
+				screen.Sync()
+			} else if ev.Str() == "C" || ev.Str() == "c" {
+				screen.Clear()
+			}
+
+		case *tcell.EventMouse:
+			// x, y := ev.Position()
+
+			// switch ev.Buttons() {
+			// case tcell.Button1, tcell.Button2:
+
+			// case tcell.ButtonNone:
+
+			// }
+		}
+	}
+}

@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"pkb-agent/ui"
+	"pkb-agent/tui/tuimain"
 
 	"github.com/spf13/cobra"
 )
@@ -36,5 +36,5 @@ func (c *startUserInterfaceCommand) execute() error {
 		verbose = verboseFlag.Value.String() == "true"
 	}
 
-	return ui.Start(verbose)
+	return tuimain.Start(verbose)
 }
