@@ -21,6 +21,9 @@ func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgResize:
 		component.onResize(message)
+
+	default:
+		component.child.Handle(message)
 	}
 }
 
