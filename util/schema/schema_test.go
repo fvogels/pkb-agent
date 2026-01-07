@@ -84,6 +84,6 @@ func TestBindMapEntry(t *testing.T) {
 		BindMapEntry(unknown, "a", &target, &errs)
 
 		err := errors.Join(errs...)
-		require.ErrorIs(t, err, ErrNotAMap)
+		require.ErrorIs(t, err, ErrWrongType)
 	})
 }
