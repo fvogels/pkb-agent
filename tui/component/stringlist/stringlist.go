@@ -117,4 +117,6 @@ func (component *Component) onKey(message tui.MsgKey) {
 	case "PgUp":
 		onSelectionChanged(selectedIndex - pageSize)
 	}
+
+	component.ensureSelectedItemIsVisible()
 }
