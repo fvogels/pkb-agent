@@ -9,15 +9,24 @@ import (
 	"pkb-agent/tui/component/border"
 	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/input"
-	"pkb-agent/tui/component/label"
+	"pkb-agent/tui/component/strlist"
 	"pkb-agent/tui/data"
+	"time"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
 )
 
 func Start(verbose bool) error {
-	initializeLogging(verbose)
+	// out, _ := os.Create("profile.txt")
+	// pprof.StartCPUProfile(out)
+	// defer pprof.StopCPUProfile()
+
+	closeLog, err := initializeLogging(verbose)
+	if err != nil {
+		return err
+	}
+	defer closeLog()
 
 	defStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	// boxStyle := tcell.StyleDefault.Foreground(color.White).Background(color.Purple)
@@ -56,18 +65,25 @@ func Start(verbose bool) error {
 func eventLoop(screen tcell.Screen) {
 	style := tcell.StyleDefault.Background(color.Green).Foreground(color.Reset)
 	statusStyle := tcell.StyleDefault.Background(color.Red).Foreground(color.Reset)
+	selectedStyle := tcell.StyleDefault.Background(color.Gray).Foreground(color.Reset)
+	items := data.NewSliceList([]string{"a", "bb", "ccc", "dddd", "eeeee", "ffffff", "ggggggg", "hhhhhhhh"})
+	selectedItem := data.NewVariable(0)
 
 	text := data.NewVariable("")
-	mainView := border.New(label.New(data.NewVariable("main view"), style), style)
+	mainView := border.New(strlist.New(items, selectedItem, &style, &selectedStyle), style)
+
 	statusBar := input.New(text, statusStyle, func(s string) { text.Set(s) })
 	root := docksouth.New(mainView, statusBar, 1)
 
 	for {
 		// Update screen
 		screen.Clear()
+
 		grid := root.Render()
 		gridSize := grid.GetSize()
 		runes := make([]rune, 1)
+
+		timeBeforeUpdate := time.Now()
 
 		for y := range gridSize.Height {
 			for x := range gridSize.Width {
@@ -79,14 +95,15 @@ func eventLoop(screen tcell.Screen) {
 		}
 
 		screen.Show()
+		slog.Debug("stringlist", slog.String("duration", time.Since(timeBeforeUpdate).String()))
 
 		// Poll event (this can be in a select statement as well)
 		ev := <-screen.EventQ()
 
 		// Process event
-		switch ev := ev.(type) {
+		switch event := ev.(type) {
 		case *tcell.EventResize:
-			width, height := ev.Size()
+			width, height := event.Size()
 
 			root.Handle(tui.MsgResize{
 				Size: tui.Size{
@@ -97,14 +114,22 @@ func eventLoop(screen tcell.Screen) {
 			screen.Sync()
 
 		case *tcell.EventKey:
-			if ev.Str() == "q" {
+			if event.Str() == "q" {
 				return
 			} else {
-				message := tui.MsgKey{
-					Key: translateKey(ev),
-				}
+				translation := translateKey(event)
 
-				root.Handle(message)
+				switch translation {
+				case "Down":
+					selectedItem.Set(selectedItem.Get() + 1)
+
+				default:
+					message := tui.MsgKey{
+						Key: translateKey(event),
+					}
+
+					root.Handle(message)
+				}
 			}
 
 		case *tcell.EventMouse:
@@ -120,22 +145,21 @@ func eventLoop(screen tcell.Screen) {
 	}
 }
 
-func initializeLogging(verbose bool) error {
+func initializeLogging(verbose bool) (func(), error) {
 	if verbose {
 		logFile, err := os.Create("ui.log")
 		if err != nil {
 			fmt.Println("Failed to create log")
-			return err
+			return nil, err
 		}
-		defer logFile.Close()
 
 		logger := slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug}))
 		slog.SetDefault(logger)
 
-		return nil
+		return func() { logFile.Close() }, nil
 	}
 
-	return nil
+	return func() {}, nil
 }
 
 func translateKey(event *tcell.EventKey) string {
