@@ -69,7 +69,10 @@ func eventLoop(screen tcell.Screen) {
 	selectedItem := data.NewVariable(0)
 
 	text := data.NewVariable("")
-	mainView := border.New(stringlist.New(items, selectedItem), style)
+	list := stringlist.New(items, selectedItem)
+	list.SetOnSelectionChanged(func(index int) { selectedItem.Set(index) })
+
+	mainView := border.New(list, style)
 
 	statusBar := input.New(text, statusStyle, func(s string) { text.Set(s) })
 	root := docksouth.New(mainView, statusBar, 1)
@@ -118,10 +121,9 @@ func eventLoop(screen tcell.Screen) {
 			} else {
 				translation := translateKey(event)
 
-				switch translation {
-				case "Down":
-					selectedItem.Set(selectedItem.Get() + 1)
+				slog.Debug("Key pressed", slog.String("key", translation))
 
+				switch translation {
 				default:
 					message := tui.MsgKey{
 						Key: translateKey(event),
@@ -132,7 +134,13 @@ func eventLoop(screen tcell.Screen) {
 			}
 
 		case *tcell.EventMouse:
-			// x, y := ev.Position()
+			x, y := event.Position()
+			position := tui.Position{X: x, Y: y}
+			clickHandler := grid.Get(position).OnClick
+
+			if clickHandler != nil {
+				clickHandler()
+			}
 
 			// switch ev.Buttons() {
 			// case tcell.Button1, tcell.Button2:
