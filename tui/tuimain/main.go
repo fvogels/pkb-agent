@@ -1,9 +1,14 @@
 package tuimain
 
 import (
+	"fmt"
 	"log"
+	"log/slog"
+	"os"
 	"pkb-agent/tui"
+	"pkb-agent/tui/component/border"
 	"pkb-agent/tui/component/docksouth"
+	"pkb-agent/tui/component/input"
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"
 
@@ -12,6 +17,8 @@ import (
 )
 
 func Start(verbose bool) error {
+	initializeLogging(verbose)
+
 	defStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	// boxStyle := tcell.StyleDefault.Foreground(color.White).Background(color.Purple)
 
@@ -50,8 +57,9 @@ func eventLoop(screen tcell.Screen) {
 	style := tcell.StyleDefault.Background(color.Green).Foreground(color.Reset)
 	statusStyle := tcell.StyleDefault.Background(color.Red).Foreground(color.Reset)
 
-	mainView := label.New(data.NewVariable("main view"), style)
-	statusBar := label.New(data.NewVariable("status bar"), statusStyle)
+	text := data.NewVariable("")
+	mainView := border.New(label.New(data.NewVariable("main view"), style), style)
+	statusBar := input.New(text, statusStyle, func(s string) { text.Set(s) })
 	root := docksouth.New(mainView, statusBar, 1)
 
 	for {
@@ -89,12 +97,14 @@ func eventLoop(screen tcell.Screen) {
 			screen.Sync()
 
 		case *tcell.EventKey:
-			if ev.Str() == "q" || ev.Key() == tcell.KeyCtrlC {
+			if ev.Str() == "q" {
 				return
-			} else if ev.Key() == tcell.KeyCtrlL {
-				screen.Sync()
-			} else if ev.Str() == "C" || ev.Str() == "c" {
-				screen.Clear()
+			} else {
+				message := tui.MsgKey{
+					Key: translateKey(ev),
+				}
+
+				root.Handle(message)
 			}
 
 		case *tcell.EventMouse:
@@ -107,5 +117,31 @@ func eventLoop(screen tcell.Screen) {
 
 			// }
 		}
+	}
+}
+
+func initializeLogging(verbose bool) error {
+	if verbose {
+		logFile, err := os.Create("ui.log")
+		if err != nil {
+			fmt.Println("Failed to create log")
+			return err
+		}
+		defer logFile.Close()
+
+		logger := slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		slog.SetDefault(logger)
+
+		return nil
+	}
+
+	return nil
+}
+
+func translateKey(event *tcell.EventKey) string {
+	if event.Key() == tcell.KeyRune {
+		return event.Str()
+	} else {
+		return tcell.KeyNames[event.Key()]
 	}
 }

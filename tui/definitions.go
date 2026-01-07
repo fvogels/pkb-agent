@@ -29,6 +29,10 @@ type MsgResize struct {
 	Size Size
 }
 
+type MsgKey struct {
+	Key string
+}
+
 type Position struct {
 	X int
 	Y int
