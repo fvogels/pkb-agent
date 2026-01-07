@@ -61,27 +61,7 @@ func (component *Component) Handle(message tui.Message) {
 }
 
 func (component *Component) Render() tui.Grid {
-	lineCount := component.size.Height
-	itemCount := component.items.Size()
-	itemIndex := component.firstVisibleIndex
-	lineIndex := 0
-	itemsAsRunes := make([][]rune, lineCount)
-
-	for lineIndex < lineCount && itemIndex < itemCount {
-		item := component.items.At(itemIndex)
-		itemsAsRunes[lineIndex] = []rune(item)
-		lineIndex++
-		itemIndex++
-	}
-
-	return &grid{
-		size:          component.size,
-		items:         itemsAsRunes,
-		selectedIndex: component.selectedIndex.Get() - component.firstVisibleIndex,
-		emptyStyle:    component.emptyStyle,
-		itemStyle:     component.itemStyle,
-		selectedStyle: component.selectedItemStyle,
-	}
+	return newGrid(component)
 }
 
 func (component *Component) onResize(message tui.MsgResize) {

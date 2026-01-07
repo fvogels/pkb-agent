@@ -13,6 +13,30 @@ type grid struct {
 	selectedStyle *tui.Style
 }
 
+func newGrid(component *Component) *grid {
+	lineCount := component.size.Height
+	itemCount := component.items.Size()
+	itemIndex := component.firstVisibleIndex
+	lineIndex := 0
+	itemsAsRunes := make([][]rune, lineCount)
+
+	for lineIndex < lineCount && itemIndex < itemCount {
+		item := component.items.At(itemIndex)
+		itemsAsRunes[lineIndex] = []rune(item)
+		lineIndex++
+		itemIndex++
+	}
+
+	return &grid{
+		size:          component.size,
+		items:         itemsAsRunes,
+		selectedIndex: component.selectedIndex.Get() - component.firstVisibleIndex,
+		emptyStyle:    component.emptyStyle,
+		itemStyle:     component.itemStyle,
+		selectedStyle: component.selectedItemStyle,
+	}
+}
+
 func (grid *grid) GetSize() tui.Size {
 	return grid.size
 }
