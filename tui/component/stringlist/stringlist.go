@@ -9,13 +9,14 @@ import (
 )
 
 type Component struct {
-	size              tui.Size
-	items             data.List[string]
-	selectedIndex     data.Value[int]
-	emptyStyle        *tui.Style
-	itemStyle         *tui.Style
-	selectedItemStyle *tui.Style
-	firstVisibleIndex int
+	size               tui.Size
+	items              data.List[string]
+	selectedIndex      data.Value[int]
+	emptyStyle         *tui.Style
+	itemStyle          *tui.Style
+	selectedItemStyle  *tui.Style
+	firstVisibleIndex  int
+	onSelectionChanged func(int)
 }
 
 func New(items data.List[string], selectedItem data.Value[int]) *Component {
@@ -45,10 +46,17 @@ func (component *Component) SetSelectedItemStyle(selectedItemStyle *tui.Style) {
 	component.selectedItemStyle = selectedItemStyle
 }
 
+func (component *Component) SetOnSelectionChanged(callback func(int)) {
+	component.onSelectionChanged = callback
+}
+
 func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgResize:
 		component.onResize(message)
+
+	case tui.MsgKey:
+		component.onKey(message)
 	}
 }
 
@@ -92,6 +100,24 @@ func (component *Component) ensureSelectedItemIsVisible() {
 			component.firstVisibleIndex = selectedIndex
 		} else if component.firstVisibleIndex+component.size.Height <= selectedIndex {
 			component.firstVisibleIndex = selectedIndex - component.size.Height + 1
+		}
+	}
+}
+
+func (component *Component) onKey(message tui.MsgKey) {
+	selectedIndex := component.selectedIndex.Get()
+	maximumIndex := component.items.Size() - 1
+	onSelectionChanged := component.onSelectionChanged
+
+	switch message.Key {
+	case "Down":
+		if selectedIndex+1 <= maximumIndex {
+			onSelectionChanged(selectedIndex + 1)
+		}
+
+	case "Up":
+		if selectedIndex-1 >= 0 {
+			onSelectionChanged(selectedIndex - 1)
 		}
 	}
 }
