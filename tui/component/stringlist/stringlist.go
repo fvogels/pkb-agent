@@ -3,6 +3,9 @@ package stringlist
 import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
+
+	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 )
 
 type Component struct {
@@ -11,19 +14,35 @@ type Component struct {
 	selectedIndex     data.Value[int]
 	emptyStyle        *tui.Style
 	itemStyle         *tui.Style
-	selectedStyle     *tui.Style
+	selectedItemStyle *tui.Style
 	firstVisibleIndex int
 }
 
-func New(items data.List[string], selectedItem data.Value[int], style *tui.Style, selectedStyle *tui.Style) *Component {
+func New(items data.List[string], selectedItem data.Value[int]) *Component {
+	defaultEmptyStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
+	defaultItemStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
+	defaultSelectedItemStyle := tcell.StyleDefault.Background(color.Gray).Foreground(color.Reset)
+
 	return &Component{
 		items:             items,
 		selectedIndex:     selectedItem,
-		itemStyle:         style,
-		emptyStyle:        style,
-		selectedStyle:     selectedStyle,
+		itemStyle:         &defaultItemStyle,
+		emptyStyle:        &defaultEmptyStyle,
+		selectedItemStyle: &defaultSelectedItemStyle,
 		firstVisibleIndex: 0,
 	}
+}
+
+func (component *Component) SetEmptyStyle(emptyStyle *tui.Style) {
+	component.emptyStyle = emptyStyle
+}
+
+func (component *Component) SetItemStyle(itemStyle *tui.Style) {
+	component.itemStyle = itemStyle
+}
+
+func (component *Component) SetSelectedItemStyle(selectedItemStyle *tui.Style) {
+	component.selectedItemStyle = selectedItemStyle
 }
 
 func (component *Component) Handle(message tui.Message) {
@@ -53,7 +72,7 @@ func (component *Component) Render() tui.Grid {
 		selectedIndex: component.selectedIndex.Get() - component.firstVisibleIndex,
 		emptyStyle:    component.emptyStyle,
 		itemStyle:     component.itemStyle,
-		selectedStyle: component.selectedStyle,
+		selectedStyle: component.selectedItemStyle,
 	}
 }
 

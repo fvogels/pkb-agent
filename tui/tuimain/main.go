@@ -65,12 +65,11 @@ func Start(verbose bool) error {
 func eventLoop(screen tcell.Screen) {
 	style := tcell.StyleDefault.Background(color.Green).Foreground(color.Reset)
 	statusStyle := tcell.StyleDefault.Background(color.Red).Foreground(color.Reset)
-	selectedStyle := tcell.StyleDefault.Background(color.Gray).Foreground(color.Reset)
 	items := data.NewSliceList([]string{"a", "bb", "ccc", "dddd", "eeeee", "ffffff", "ggggggg", "hhhhhhhh"})
 	selectedItem := data.NewVariable(0)
 
 	text := data.NewVariable("")
-	mainView := border.New(stringlist.New(items, selectedItem, &style, &selectedStyle), style)
+	mainView := border.New(stringlist.New(items, selectedItem), style)
 
 	statusBar := input.New(text, statusStyle, func(s string) { text.Set(s) })
 	root := docksouth.New(mainView, statusBar, 1)
