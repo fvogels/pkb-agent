@@ -23,6 +23,7 @@ type Style = tcell.Style
 type Cell struct {
 	Contents rune
 	Style    *Style
+	OnClick  func()
 }
 
 type MsgResize struct {
