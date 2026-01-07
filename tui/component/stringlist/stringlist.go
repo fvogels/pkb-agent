@@ -107,17 +107,34 @@ func (component *Component) ensureSelectedItemIsVisible() {
 func (component *Component) onKey(message tui.MsgKey) {
 	selectedIndex := component.selectedIndex.Get()
 	maximumIndex := component.items.Size() - 1
-	onSelectionChanged := component.onSelectionChanged
+	pageSize := component.size.Height
+	onSelectionChanged := func(index int) {
+		if index > maximumIndex {
+			index = maximumIndex
+		}
+		if index < 0 {
+			index = 0
+		}
+		component.onSelectionChanged(index)
+	}
 
 	switch message.Key {
 	case "Down":
-		if selectedIndex+1 <= maximumIndex {
-			onSelectionChanged(selectedIndex + 1)
-		}
+		onSelectionChanged(selectedIndex + 1)
 
 	case "Up":
-		if selectedIndex-1 >= 0 {
-			onSelectionChanged(selectedIndex - 1)
-		}
+		onSelectionChanged(selectedIndex - 1)
+
+	case "Home":
+		onSelectionChanged(0)
+
+	case "End":
+		onSelectionChanged(maximumIndex)
+
+	case "PgDn":
+		onSelectionChanged(selectedIndex + pageSize)
+
+	case "PgUp":
+		onSelectionChanged(selectedIndex - pageSize)
 	}
 }
