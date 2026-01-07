@@ -8,13 +8,13 @@ import (
 
 type Component struct {
 	size     tui.Size
-	contents data.Data[string]
+	contents data.Value[string]
 	style    tui.Style
 	onChange func(string)
 	label    *label.Component
 }
 
-func New(contents data.Data[string], style tui.Style, onChange func(string)) *Component {
+func New(contents data.Value[string], style tui.Style, onChange func(string)) *Component {
 	return &Component{
 		contents: contents,
 		style:    style,

@@ -7,11 +7,11 @@ import (
 
 type Component struct {
 	size     tui.Size
-	contents data.Data[string]
+	contents data.Value[string]
 	style    tui.Style
 }
 
-func New(contents data.Data[string], style tui.Style) *Component {
+func New(contents data.Value[string], style tui.Style) *Component {
 	return &Component{
 		contents: contents,
 		style:    style,

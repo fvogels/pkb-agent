@@ -1,5 +1,5 @@
 package data
 
-type Data[T any] interface {
+type Value[T any] interface {
 	Get() T
 }
