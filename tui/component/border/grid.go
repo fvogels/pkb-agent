@@ -33,6 +33,7 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 
 	var char rune
 	var style *tui.Style
+	var onClick func()
 
 	if x == 0 {
 		style = &grid.style
@@ -67,11 +68,13 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 		cell := grid.childGrid.Get(tui.Position{X: x - 1, Y: y - 1})
 		style = cell.Style
 		char = cell.Contents
+		onClick = cell.OnClick
 	}
 
 	return tui.Cell{
 		Contents: char,
 		Style:    style,
+		OnClick:  onClick,
 	}
 }
 
