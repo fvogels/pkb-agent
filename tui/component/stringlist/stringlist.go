@@ -2,6 +2,7 @@ package stringlist
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
 
 	"github.com/gdamore/tcell/v3"
@@ -17,12 +18,19 @@ type Component struct {
 	selectedItemStyle  *tui.Style
 	firstVisibleIndex  int
 	onSelectionChanged func(int)
+	subComponent       stringsview.Component
 }
 
 func New(items data.List[string], selectedItem data.Value[int]) *Component {
 	defaultEmptyStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	defaultItemStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	defaultSelectedItemStyle := tcell.StyleDefault.Background(color.Gray).Foreground(color.Reset)
+	subComponentList := SubComponentList{
+		items:         items,
+		selectedIndex: selectedItem,
+		defaultStyle:  &defaultItemStyle,
+		selectedStyle: &defaultSelectedItemStyle,
+	}
 
 	return &Component{
 		items:             items,
@@ -31,6 +39,7 @@ func New(items data.List[string], selectedItem data.Value[int]) *Component {
 		emptyStyle:        &defaultEmptyStyle,
 		selectedItemStyle: &defaultSelectedItemStyle,
 		firstVisibleIndex: 0,
+		subComponent:      *stringsview.New(&subComponentList),
 	}
 }
 
@@ -57,31 +66,26 @@ func (component *Component) Handle(message tui.Message) {
 
 	case tui.MsgKey:
 		component.onKey(message)
+
+	default:
+		component.subComponent.Handle(message)
 	}
 }
 
 func (component *Component) Render() tui.Grid {
-	return newGrid(component)
+	return component.subComponent.Render()
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
 	component.size = message.Size
-
+	component.subComponent.Handle(message)
 	component.ensureSelectedItemIsVisible()
 }
 
 func (component *Component) ensureSelectedItemIsVisible() {
 	selectedIndex := component.selectedIndex.Get()
 
-	if component.items.Size() == 0 {
-		component.firstVisibleIndex = 0
-	} else {
-		if component.selectedIndex.Get() < component.firstVisibleIndex {
-			component.firstVisibleIndex = selectedIndex
-		} else if component.firstVisibleIndex+component.size.Height <= selectedIndex {
-			component.firstVisibleIndex = selectedIndex - component.size.Height + 1
-		}
-	}
+	component.subComponent.EnsureItemIsVisible(selectedIndex)
 }
 
 func (component *Component) onKey(message tui.MsgKey) {
@@ -119,4 +123,29 @@ func (component *Component) onKey(message tui.MsgKey) {
 	}
 
 	component.ensureSelectedItemIsVisible()
+}
+
+type SubComponentList struct {
+	items         data.List[string]
+	selectedIndex data.Value[int]
+	defaultStyle  *tui.Style
+	selectedStyle *tui.Style
+}
+
+func (list *SubComponentList) Size() int {
+	return list.items.Size()
+}
+
+func (list *SubComponentList) At(index int) stringsview.Item {
+	var style *tui.Style
+	if index == list.selectedIndex.Get() {
+		style = list.selectedStyle
+	} else {
+		style = list.defaultStyle
+	}
+
+	return stringsview.Item{
+		Runes: []rune(list.items.At(index)),
+		Style: style,
+	}
 }
