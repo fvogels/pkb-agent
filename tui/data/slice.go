@@ -17,3 +17,5 @@ func (slice *SliceList[T]) Size() int {
 func (slice *SliceList[T]) At(index int) T {
 	return slice.items[index]
 }
+
+func (slice *SliceList[T]) Observe(func()) {}
