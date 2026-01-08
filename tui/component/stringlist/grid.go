@@ -5,12 +5,10 @@ import (
 )
 
 type grid struct {
-	size          tui.Size
-	items         [][]rune
-	selectedIndex int
-	emptyStyle    *tui.Style
-	itemStyle     *tui.Style
-	selectedStyle *tui.Style
+	parent           *Component
+	rows             [][]rune
+	rowClickHandlers []func()
+	selectedRowIndex int
 }
 
 func newGrid(component *Component) *grid {
@@ -19,26 +17,30 @@ func newGrid(component *Component) *grid {
 	itemIndex := component.firstVisibleIndex
 	lineIndex := 0
 	itemsAsRunes := make([][]rune, lineCount)
+	rowClickHandlers := make([]func(), lineCount)
 
 	for lineIndex < lineCount && itemIndex < itemCount {
 		item := component.items.At(itemIndex)
 		itemsAsRunes[lineIndex] = []rune(item)
+
+		itemIndexCopy := itemIndex
+		rowClickHandlers[lineIndex] = func() {
+			component.onSelectionChanged(itemIndexCopy)
+		}
 		lineIndex++
 		itemIndex++
 	}
 
 	return &grid{
-		size:          component.size,
-		items:         itemsAsRunes,
-		selectedIndex: component.selectedIndex.Get() - component.firstVisibleIndex,
-		emptyStyle:    component.emptyStyle,
-		itemStyle:     component.itemStyle,
-		selectedStyle: component.selectedItemStyle,
+		parent:           component,
+		rows:             itemsAsRunes,
+		selectedRowIndex: component.selectedIndex.Get() - component.firstVisibleIndex,
+		rowClickHandlers: rowClickHandlers,
 	}
 }
 
 func (grid *grid) GetSize() tui.Size {
-	return grid.size
+	return grid.parent.size
 }
 
 func (grid *grid) Get(position tui.Position) tui.Cell {
@@ -48,8 +50,8 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 
 	x := position.X
 	y := position.Y
-	selectedIndex := grid.selectedIndex
-	items := grid.items
+	selectedRowIndex := grid.selectedRowIndex
+	items := grid.rows
 
 	var contents rune
 	var style *tui.Style
@@ -57,7 +59,7 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 	if y >= len(items) {
 		// Current line is outside of bounds of list
 		contents = ' '
-		style = grid.emptyStyle
+		style = grid.parent.emptyStyle
 	} else {
 		// Current line contains item
 		visibleItem := items[y]
@@ -68,16 +70,17 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 			contents = ' '
 		}
 
-		if y == selectedIndex {
-			style = grid.selectedStyle
+		if y == selectedRowIndex {
+			style = grid.parent.selectedItemStyle
 		} else {
-			style = grid.itemStyle
+			style = grid.parent.itemStyle
 		}
 	}
 
 	cell := tui.Cell{
 		Contents: contents,
 		Style:    style,
+		OnClick:  grid.rowClickHandlers[y],
 	}
 
 	return cell
