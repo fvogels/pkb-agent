@@ -48,3 +48,15 @@ func (component *Component) Render() tui.Grid {
 func (component *Component) onResize(message tui.MsgResize) {
 	component.size = message.Size
 }
+
+func (component *Component) EnsureItemIsVisible(index int) {
+	if component.items.Size() == 0 {
+		component.firstVisibleIndex = 0
+	} else {
+		if index < component.firstVisibleIndex {
+			component.firstVisibleIndex = index
+		} else if component.firstVisibleIndex+component.size.Height <= index {
+			component.firstVisibleIndex = index - component.size.Height + 1
+		}
+	}
+}
