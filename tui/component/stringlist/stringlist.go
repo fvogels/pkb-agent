@@ -18,7 +18,7 @@ type Component struct {
 	selectedItemStyle  *tui.Style
 	firstVisibleIndex  int
 	onSelectionChanged func(int)
-	subComponent       stringsview.Component
+	subComponent       *stringsview.Component
 }
 
 func New(items data.List[string], selectedItem data.Value[int]) *Component {
@@ -31,16 +31,25 @@ func New(items data.List[string], selectedItem data.Value[int]) *Component {
 		defaultStyle:  &defaultItemStyle,
 		selectedStyle: &defaultSelectedItemStyle,
 	}
+	subComponent := stringsview.New(&subComponentList)
 
-	return &Component{
+	component := Component{
 		items:             items,
 		selectedIndex:     selectedItem,
 		itemStyle:         &defaultItemStyle,
 		emptyStyle:        &defaultEmptyStyle,
 		selectedItemStyle: &defaultSelectedItemStyle,
 		firstVisibleIndex: 0,
-		subComponent:      *stringsview.New(&subComponentList),
+		subComponent:      subComponent,
 	}
+
+	subComponent.SetOnItemClicked(func(index int) {
+		if component.onSelectionChanged != nil {
+			component.onSelectionChanged(index)
+		}
+	})
+
+	return &component
 }
 
 func (component *Component) SetEmptyStyle(emptyStyle *tui.Style) {
