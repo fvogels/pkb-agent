@@ -149,3 +149,5 @@ func (list *SubComponentList) At(index int) stringsview.Item {
 		Style: style,
 	}
 }
+
+func (list *SubComponentList) Observe(func()) {}
