@@ -7,6 +7,7 @@ import (
 	"os"
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/border"
+	"pkb-agent/tui/component/cache"
 	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/input"
 	"pkb-agent/tui/component/stringlist"
@@ -78,10 +79,11 @@ func eventLoop(screen tcell.Screen) {
 
 	text := data.NewVariable("")
 	selectedItem := data.NewVariable(0)
+
 	list := stringlist.New(data.NewSliceList(strings), selectedItem)
 	list.SetOnSelectionChanged(func(index int) { selectedItem.Set(index) })
 
-	mainView := border.New(list, style)
+	mainView := border.New(cache.New(list, selectedItem), style)
 
 	statusBar := input.New(text, statusStyle, func(s string) { text.Set(s) })
 	root := docksouth.New(mainView, statusBar, 1)
