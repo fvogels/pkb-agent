@@ -11,9 +11,25 @@ type Component struct {
 	dirty  bool
 }
 
-func New(child tui.Component) *Component {
-	return &Component{
+type Observable interface {
+	Observe(func())
+}
+
+func New(child tui.Component, observables ...Observable) *Component {
+	result := Component{
 		child: child,
+	}
+
+	result.AddInvalidators(observables...)
+
+	return &result
+}
+
+func (component *Component) AddInvalidators(observables ...Observable) {
+	f := func() { component.Invalidate() }
+
+	for _, observable := range observables {
+		observable.Observe(f)
 	}
 }
 
@@ -39,10 +55,10 @@ func (component *Component) Render() tui.Grid {
 func (component *Component) onResize(message tui.MsgResize) {
 	component.size = message.Size
 	component.child.Handle(message)
-	component.Dirty()
+	component.Invalidate()
 }
 
-func (component *Component) Dirty() {
+func (component *Component) Invalidate() {
 	component.dirty = true
 }
 
