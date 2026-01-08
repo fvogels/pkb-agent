@@ -2,15 +2,6 @@ package data
 
 import "pkb-agent/tui"
 
-type Value[T any] interface {
-	Get() T
-}
-
-type List[T any] interface {
-	Size() int
-	At(index int) T
-}
-
 func Sublist[T any](list List[T], startIndex int, length int) List[T] {
 	return &sublist[T]{
 		original:   list,
