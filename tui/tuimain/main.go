@@ -10,6 +10,7 @@ import (
 	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/input"
 	"pkb-agent/tui/component/stringlist"
+	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
 	"time"
 
@@ -40,7 +41,7 @@ func Start(verbose bool) error {
 		log.Fatalf("%+v", err)
 	}
 	screen.SetStyle(defStyle)
-	// s.EnableMouse()
+	screen.EnableMouse()
 	// s.EnablePaste()
 	screen.Clear()
 
@@ -65,11 +66,19 @@ func Start(verbose bool) error {
 func eventLoop(screen tcell.Screen) {
 	style := tcell.StyleDefault.Background(color.Green).Foreground(color.Reset)
 	statusStyle := tcell.StyleDefault.Background(color.Red).Foreground(color.Reset)
-	items := data.NewSliceList([]string{"a", "bb", "ccc", "dddd", "eeeee", "ffffff", "ggggggg", "hhhhhhhh"})
-	selectedItem := data.NewVariable(0)
+
+	strings := []string{"a", "bb", "ccc", "dddd", "eeeee", "ffffff", "ggggggg", "hhhhhhhh", "a", "bb", "ccc", "dddd", "eeeee", "ffffff", "ggggggg", "hhhhhhhh", "a", "bb", "ccc", "dddd", "eeeee", "ffffff", "ggggggg", "hhhhhhhh", "a", "bb", "ccc", "dddd", "eeeee", "ffffff", "ggggggg", "hhhhhhhh"}
+	// runes := util.Map(strings, func(s string) []rune { return []rune(s) })
+	// items := data.NewSliceList(strings)
+	// runedItems := ItemList{
+	// 	items: runes,
+	// 	style: &style,
+	// }
+	// selectedItem := data.NewVariable(0)
 
 	text := data.NewVariable("")
-	list := stringlist.New(items, selectedItem)
+	selectedItem := data.NewVariable(0)
+	list := stringlist.New(data.NewSliceList(strings), selectedItem)
 	list.SetOnSelectionChanged(func(index int) { selectedItem.Set(index) })
 
 	mainView := border.New(list, style)
@@ -138,7 +147,7 @@ func eventLoop(screen tcell.Screen) {
 			position := tui.Position{X: x, Y: y}
 			clickHandler := grid.Get(position).OnClick
 
-			if clickHandler != nil {
+			if clickHandler != nil && event.Buttons() == tcell.Button1 {
 				clickHandler()
 			}
 
@@ -174,5 +183,21 @@ func translateKey(event *tcell.EventKey) string {
 		return event.Str()
 	} else {
 		return tcell.KeyNames[event.Key()]
+	}
+}
+
+type ItemList struct {
+	items [][]rune
+	style *tui.Style
+}
+
+func (list ItemList) Size() int {
+	return len(list.items)
+}
+
+func (list ItemList) At(index int) stringsview.Item {
+	return stringsview.Item{
+		Runes: list.items[index],
+		Style: list.style,
 	}
 }
