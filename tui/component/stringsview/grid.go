@@ -31,11 +31,13 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 
 	var contents rune
 	var style *tui.Style
+	var onClick func()
 
 	if currentItemIndex >= items.Size() {
 		// Current line is outside of bounds of list
 		contents = ' '
 		style = grid.parent.emptyStyle
+		onClick = nil
 	} else {
 		// Current line contains item
 		currentItem := items.At(currentItemIndex)
@@ -47,12 +49,13 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 		}
 
 		style = currentItem.Style
+		onClick = func() { grid.parent.onItemClicked(currentItemIndex) }
 	}
 
 	cell := tui.Cell{
 		Contents: contents,
 		Style:    style,
-		OnClick:  nil,
+		OnClick:  onClick,
 	}
 
 	return cell

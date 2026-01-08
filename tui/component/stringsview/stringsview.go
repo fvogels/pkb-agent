@@ -13,6 +13,7 @@ type Component struct {
 	items             data.List[Item]
 	emptyStyle        *tui.Style
 	firstVisibleIndex int
+	onItemClicked     func(int)
 }
 
 type Item struct {
@@ -27,11 +28,16 @@ func New(items data.List[Item]) *Component {
 		items:             items,
 		emptyStyle:        &defaultEmptyStyle,
 		firstVisibleIndex: 0,
+		onItemClicked:     nil,
 	}
 }
 
 func (component *Component) SetEmptyStyle(emptyStyle *tui.Style) {
 	component.emptyStyle = emptyStyle
+}
+
+func (component *Component) SetOnItemClicked(onItemClicked func(int)) {
+	component.onItemClicked = onItemClicked
 }
 
 func (component *Component) Handle(message tui.Message) {
