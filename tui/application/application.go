@@ -60,16 +60,12 @@ func (application *Application) Start() error {
 		return err
 	}
 
-	graph, err := loadGraph()
-	if err != nil {
-		panic("failed to load graph")
+	if err := application.loadGraph(); err != nil {
+		return err
 	}
-	slog.Debug("Loaded graph", slog.Int("nodeCount", graph.GetNodeCount()))
-	application.graph = graph
 
-	application.model = createModel(graph)
+	application.model = application.createModel()
 
-	// Event loop
 	application.eventLoop()
 
 	return nil
@@ -207,7 +203,9 @@ func (application *Application) eventLoop() {
 	}
 }
 
-func createModel(graph *pkg.Graph) Model {
+func (application *Application) createModel() Model {
+	graph := application.graph
+
 	input := data.NewVariable("")
 	selectedNodes := data.NewSliceList[*pkg.Node](nil)
 	intersectionNodes := data.NewSliceList[*pkg.Node](nil)
@@ -271,16 +269,18 @@ func (list ItemList) At(index int) stringsview.Item {
 	}
 }
 
-func loadGraph() (*pkg.Graph, error) {
+func (application *Application) loadGraph() error {
 	before := time.Now()
 	loader := sequence.New()
 	path := pathlib.New(`F:\repos\pkb\pkb-data\root.yaml`)
 
-	g, err := pkg.LoadGraph(path, loader)
+	graph, err := pkg.LoadGraph(path, loader)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	slog.Debug("Graph loaded", slog.String("loadTime", time.Since(before).String()))
 
-	return g, nil
+	application.graph = graph
+
+	return nil
 }
