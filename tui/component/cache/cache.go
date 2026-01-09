@@ -2,6 +2,7 @@ package cache
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/tui/data"
 )
 
 type Component struct {
@@ -11,11 +12,7 @@ type Component struct {
 	dirty  bool
 }
 
-type Observable interface {
-	Observe(func())
-}
-
-func New(child tui.Component, observables ...Observable) *Component {
+func New(child tui.Component, observables ...data.Observable) *Component {
 	result := Component{
 		child: child,
 	}
@@ -25,7 +22,7 @@ func New(child tui.Component, observables ...Observable) *Component {
 	return &result
 }
 
-func (component *Component) AddInvalidators(observables ...Observable) {
+func (component *Component) AddInvalidators(observables ...data.Observable) {
 	f := func() { component.Invalidate() }
 
 	for _, observable := range observables {
