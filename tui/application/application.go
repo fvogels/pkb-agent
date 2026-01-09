@@ -7,10 +7,13 @@ import (
 	"pkb-agent/graph/loaders/sequence"
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
+	"pkb-agent/tui/component/docksouth"
+	"pkb-agent/tui/component/input"
 	"pkb-agent/tui/component/stringlist"
 	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
 	"pkb-agent/util/pathlib"
+	"strings"
 	"time"
 
 	"github.com/gdamore/tcell/v3"
@@ -35,6 +38,7 @@ type Model struct {
 }
 
 type View struct {
+	inputField        *input.Component
 	intersectionNodes *stringlist.Component
 	root              tui.Component
 }
@@ -111,7 +115,13 @@ func (application *Application) createView() {
 
 	intersectionNodeView := stringlist.New(model.intersectionNodeNames, model.selectedItemIndex)
 	intersectionNodeView.SetOnSelectionChanged(func(value int) { model.selectedItemIndex.Set(value) })
-	root := intersectionNodeView
+
+	inputTextField := input.New(model.input)
+	style := tcell.StyleDefault.Background(color.Red)
+	inputTextField.SetStyle(&style)
+	inputTextField.SetOnChange(func(s string) { model.input.Set(strings.ToLower(s)) })
+
+	root := docksouth.New(intersectionNodeView, inputTextField, 1)
 
 	application.view = View{
 		intersectionNodes: intersectionNodeView,
