@@ -224,6 +224,7 @@ func (model Model) signalRefreshRemainingNodes(keepSameNodeHighlighted bool) tea
 			model.includeIndirectAncestors,
 		)
 
+		// Probably redundant; look into it
 		sort.Slice(remainingNodes, func(i, j int) bool {
 			return strings.ToLower(remainingNodes[i].GetName()) < strings.ToLower(remainingNodes[j].GetName())
 		})
