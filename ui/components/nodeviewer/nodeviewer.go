@@ -2,7 +2,7 @@ package nodeviewer
 
 import (
 	"log/slog"
-	"pkb-agent/graph"
+	"pkb-agent/pkg"
 	"pkb-agent/ui/components/linksview"
 	"pkb-agent/ui/components/nullviewer"
 	"pkb-agent/ui/debug"
@@ -111,8 +111,8 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 
 	// Update links and backlinks
 	util.UpdateChild(&model.linksView, linksview.MsgSetLinks{
-		Links:     NewSliceAdapter(util.Map(node.GetLinks(), func(n *graph.Node) string { return n.GetName() })),
-		Backlinks: NewSliceAdapter(util.Map(node.GetBacklinks(), func(n *graph.Node) string { return n.GetName() })),
+		Links:     NewSliceAdapter(util.Map(node.GetLinks(), func(n *pkg.Node) string { return n.GetName() })),
+		Backlinks: NewSliceAdapter(util.Map(node.GetBacklinks(), func(n *pkg.Node) string { return n.GetName() })),
 	}, &commands)
 
 	// Get viewer

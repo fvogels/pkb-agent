@@ -1,9 +1,9 @@
 package nodeviewer
 
 import (
-	"pkb-agent/graph"
+	"pkb-agent/pkg"
 )
 
 type MsgSetNode struct {
-	Node *graph.Node
+	Node *pkg.Node
 }

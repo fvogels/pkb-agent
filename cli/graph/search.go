@@ -2,8 +2,8 @@ package graph
 
 import (
 	"fmt"
-	"pkb-agent/graph"
 	"pkb-agent/graph/loaders/metaloader"
+	"pkb-agent/pkg"
 	pathlib "pkb-agent/util/pathlib"
 
 	"github.com/spf13/cobra"
@@ -35,7 +35,7 @@ func (c *searchGraphCommand) execute(str string) error {
 	loader := metaloader.New()
 	path := pathlib.New(`F:\repos\pkb\pkb-data\root.yaml`)
 
-	g, err := graph.LoadGraph(path, loader)
+	g, err := pkg.LoadGraph(path, loader)
 	if err != nil {
 		return err
 	}

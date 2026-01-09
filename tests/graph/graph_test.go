@@ -3,7 +3,7 @@
 package graph
 
 import (
-	"pkb-agent/graph"
+	"pkb-agent/pkg"
 	"testing"
 
 	"pkb-agent/tests/testlib"
@@ -13,7 +13,7 @@ import (
 
 func TestDescend(t *testing.T) {
 	t.Run("Matching", func(t *testing.T) {
-		builder := graph.NewBuilder()
+		builder := pkg.NewBuilder()
 		builder.AddNode(&testlib.TestNode{
 			Name:     "a",
 			Keywords: []string{"a"},
@@ -34,7 +34,7 @@ func TestDescend(t *testing.T) {
 	})
 
 	t.Run("Matching 2", func(t *testing.T) {
-		builder := graph.NewBuilder()
+		builder := pkg.NewBuilder()
 		builder.AddNode(&testlib.TestNode{
 			Name:     "aaa",
 			Keywords: []string{"aaa"},

@@ -4,7 +4,7 @@ package trie
 
 import (
 	"fmt"
-	"pkb-agent/graph"
+	"pkb-agent/pkg"
 	"pkb-agent/tests/testlib"
 	"strings"
 	"testing"
@@ -54,7 +54,7 @@ func TestGraphSearch(t *testing.T) {
 }
 
 func (tc matchTestCase) test(t *testing.T) {
-	builder := graph.NewBuilder()
+	builder := pkg.NewBuilder()
 
 	for _, node := range tc.nodes {
 		builder.AddNode(&testlib.TestNode{

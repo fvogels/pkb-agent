@@ -1,7 +1,7 @@
 package nodeselectionview
 
 import (
-	"pkb-agent/graph"
+	"pkb-agent/pkg"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -24,7 +24,7 @@ type msgSelectedNodesWrapper struct {
 }
 
 type MsgRemainingNodeHighlighted struct {
-	Node *graph.Node
+	Node *pkg.Node
 }
 
 type MsgHighlightRemainingNode struct {

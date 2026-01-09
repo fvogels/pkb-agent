@@ -2,7 +2,7 @@ package nodeselectionview
 
 import (
 	"log/slog"
-	"pkb-agent/graph"
+	"pkb-agent/pkg"
 	"pkb-agent/ui/components/listview"
 	"pkb-agent/ui/debug"
 	"pkb-agent/util"
@@ -17,18 +17,18 @@ type Model struct {
 	remainingNodes List
 	selectedNodes  List
 
-	remainingNodesView listview.Model[*graph.Node]
-	selectedNodesView  listview.Model[*graph.Node]
+	remainingNodesView listview.Model[*pkg.Node]
+	selectedNodesView  listview.Model[*pkg.Node]
 }
 
 type List interface {
-	At(index int) *graph.Node
+	At(index int) *pkg.Node
 	Length() int
 }
 
 type emptyList struct{}
 
-func (emptyList *emptyList) At(index int) *graph.Node {
+func (emptyList *emptyList) At(index int) *pkg.Node {
 	panic("invalid operation")
 }
 
@@ -37,7 +37,7 @@ func (emptyList *emptyList) Length() int {
 }
 
 func New() Model {
-	dummyRenderer := func(node *graph.Node) string { return "" }
+	dummyRenderer := func(node *pkg.Node) string { return "" }
 
 	remainingNodesView := listview.New(dummyRenderer, true, wrapRemainingNodesViewMessage)
 
@@ -73,7 +73,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 	case MsgSetRemainingNodes:
 		model.remainingNodes = message.RemainingNodes
 
-		return util.UpdateSingleChild(&model, &model.remainingNodesView, listview.MsgSetItems[*graph.Node]{
+		return util.UpdateSingleChild(&model, &model.remainingNodesView, listview.MsgSetItems[*pkg.Node]{
 			Items:          message.RemainingNodes,
 			SelectionIndex: message.SelectionIndex,
 		})
@@ -82,7 +82,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		model.selectedNodes = message.SelectedNodes
 
 		commands := []tea.Cmd{}
-		util.UpdateChild(&model.selectedNodesView, listview.MsgSetItems[*graph.Node]{
+		util.UpdateChild(&model.selectedNodesView, listview.MsgSetItems[*pkg.Node]{
 			Items: message.SelectedNodes,
 		}, &commands)
 
@@ -104,7 +104,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 
 	case msgRemainingNodesWrapper:
 		switch message := message.wrapped.(type) {
-		case listview.MsgItemSelected[*graph.Node]:
+		case listview.MsgItemSelected[*pkg.Node]:
 			return model, model.signalRemainingNodeHighlighted(message.Item)
 
 		case listview.MsgNoItemSelected:
@@ -154,7 +154,7 @@ func (model *Model) GetSelectedRemainingNodeIndex() int {
 	return model.remainingNodesView.GetSelectedIndex()
 }
 
-func (model *Model) GetSelectedRemainingNode() *graph.Node {
+func (model *Model) GetSelectedRemainingNode() *pkg.Node {
 	selected, ok := model.remainingNodesView.GetSelectedItem()
 
 	if !ok {
@@ -176,7 +176,7 @@ func (model Model) updateChildSizes() (Model, tea.Cmd) {
 		Height: model.selectedNodes.Length(),
 	}, &commands)
 
-	util.UpdateChild(&model.selectedNodesView, listview.MsgSetItemRenderer[*graph.Node]{
+	util.UpdateChild(&model.selectedNodesView, listview.MsgSetItemRenderer[*pkg.Node]{
 		Renderer: model.createRenderer(),
 	}, &commands)
 
@@ -185,14 +185,14 @@ func (model Model) updateChildSizes() (Model, tea.Cmd) {
 		Height: model.size.Height - model.selectedNodes.Length(),
 	}, &commands)
 
-	util.UpdateChild(&model.remainingNodesView, listview.MsgSetItemRenderer[*graph.Node]{
+	util.UpdateChild(&model.remainingNodesView, listview.MsgSetItemRenderer[*pkg.Node]{
 		Renderer: model.createRenderer(),
 	}, &commands)
 
 	return model, tea.Batch(commands...)
 }
 
-func (model Model) signalRemainingNodeHighlighted(node *graph.Node) tea.Cmd {
+func (model Model) signalRemainingNodeHighlighted(node *pkg.Node) tea.Cmd {
 	return func() tea.Msg {
 		return MsgRemainingNodeHighlighted{
 			Node: node,
@@ -200,8 +200,8 @@ func (model Model) signalRemainingNodeHighlighted(node *graph.Node) tea.Cmd {
 	}
 }
 
-func (model Model) createRenderer() func(*graph.Node) string {
-	return func(node *graph.Node) string {
+func (model Model) createRenderer() func(*pkg.Node) string {
+	return func(node *pkg.Node) string {
 		isLeaf := len(node.GetBacklinks()) == 0
 		leafSymbol := "*"
 		treeSymbol := " "

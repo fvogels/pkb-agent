@@ -1,13 +1,13 @@
 package mainscreen
 
 import (
-	"pkb-agent/graph"
+	"pkb-agent/pkg"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type msgGraphLoaded struct {
-	graph *graph.Graph
+	graph *pkg.Graph
 }
 
 type MsgUpdateNodeList struct{}
@@ -21,7 +21,7 @@ type msgToSelectedNodeView struct {
 }
 
 type msgRemainingNodesDetermined struct {
-	remainingNodes []*graph.Node
+	remainingNodes []*pkg.Node
 	selectionIndex int
 }
 

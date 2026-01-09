@@ -3,8 +3,8 @@ package graph
 import (
 	"errors"
 	"fmt"
-	"pkb-agent/graph"
 	"pkb-agent/graph/loaders/metaloader"
+	"pkb-agent/pkg"
 	pathlib "pkb-agent/util/pathlib"
 
 	"github.com/spf13/cobra"
@@ -38,7 +38,7 @@ func (c *verifyGraphCommand) execute() error {
 	loader := metaloader.New()
 	path := pathlib.New(`F:\repos\pkb\pkb-data\root.yaml`)
 
-	g, err := graph.LoadGraph(path, loader)
+	g, err := pkg.LoadGraph(path, loader)
 	if err != nil {
 		return err
 	}
@@ -55,8 +55,8 @@ func (c *verifyGraphCommand) execute() error {
 	return nil
 }
 
-func (c *verifyGraphCommand) lookForCycles(g *graph.Graph) bool {
-	if graph.ContainsCycles(g) {
+func (c *verifyGraphCommand) lookForCycles(g *pkg.Graph) bool {
+	if pkg.ContainsCycles(g) {
 		fmt.Println("Error: cycle detected")
 		return true
 	}
@@ -64,7 +64,7 @@ func (c *verifyGraphCommand) lookForCycles(g *graph.Graph) bool {
 	return false
 }
 
-func (c *verifyGraphCommand) lookForDuplicateLinks(g *graph.Graph) bool {
+func (c *verifyGraphCommand) lookForDuplicateLinks(g *pkg.Graph) bool {
 	result := false
 
 	for _, node := range g.ListNodes() {

@@ -1,7 +1,7 @@
 package application
 
 import (
-	"pkb-agent/graph"
+	"pkb-agent/pkg"
 	"pkb-agent/util"
 	"pkb-agent/util/set"
 	"slices"
@@ -10,15 +10,15 @@ import (
 )
 
 // determineIntersectionNodes computes which nodes are compatible with the selected nodes and the search filter.
-func determineIntersectionNodes(input string, g *graph.Graph, selectedNodes []*graph.Node, includeLinked bool, includeIndirectAncestors bool) []*graph.Node {
+func determineIntersectionNodes(input string, g *pkg.Graph, selectedNodes []*pkg.Node, includeLinked bool, includeIndirectAncestors bool) []*pkg.Node {
 	if len(selectedNodes) == 0 {
 		// Deal with this case separately for efficiency reasons
 		iterator := g.FindMatchingNodes(input)
 
 		// nameSet is used to prevent duplicates
 		// Adding the selected nodes ensures that already selected nodes do not appear as remaining choices
-		nameSet := set.FromSlice(util.Map(selectedNodes, func(node *graph.Node) string { return node.GetName() }))
-		remaining := []*graph.Node{}
+		nameSet := set.FromSlice(util.Map(selectedNodes, func(node *pkg.Node) string { return node.GetName() }))
+		remaining := []*pkg.Node{}
 
 		for iterator.Current() != nil {
 			// The same node can occur more than once during iteration
@@ -86,15 +86,15 @@ func determineIntersectionNodes(input string, g *graph.Graph, selectedNodes []*g
 	result := remainingNodeSet.ToSlice()
 	slices.Sort(result)
 
-	return util.Map(result, func(index int) *graph.Node {
+	return util.Map(result, func(index int) *pkg.Node {
 		return g.FindNodeByIndex(index)
 	})
 }
 
 // collectDescendants collects the names of all backlinked nodes
-func collectDescendants(g *graph.Graph, node *graph.Node, includeIndirect bool) set.Set[int] {
+func collectDescendants(g *pkg.Graph, node *pkg.Node, includeIndirect bool) set.Set[int] {
 	result := set.New[int]()
-	queue := make([]*graph.Node, 1, 20)
+	queue := make([]*pkg.Node, 1, 20)
 	queue[0] = node
 
 	for len(queue) > 0 {

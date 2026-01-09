@@ -2,9 +2,9 @@ package mainscreen
 
 import (
 	"log/slog"
-	"pkb-agent/graph"
 	"pkb-agent/graph/loaders/sequence"
 	"pkb-agent/graph/node"
+	"pkb-agent/pkg"
 	"pkb-agent/ui/components/helpbar"
 	"pkb-agent/ui/components/nodeselectionview"
 	"pkb-agent/ui/components/nodeviewer"
@@ -21,15 +21,15 @@ import (
 )
 
 type Model struct {
-	graph                    *graph.Graph
+	graph                    *pkg.Graph
 	size                     util.Size
 	mode                     mode
 	includeLinkedNodes       bool
 	includeIndirectAncestors bool
 	nodeViewerKeyBindings    []key.Binding
 
-	remainingNodes []*graph.Node
-	selectedNodes  []*graph.Node
+	remainingNodes []*pkg.Node
+	selectedNodes  []*pkg.Node
 
 	nodeSelectionView nodeselectionview.Model
 	nodeViewer        nodeviewer.Model
@@ -106,7 +106,7 @@ func (model Model) TypedUpdate(message tea.Msg) (Model, tea.Cmd) {
 		commands := []tea.Cmd{}
 
 		util.UpdateChild(&model.nodeSelectionView, nodeselectionview.MsgSetRemainingNodes{
-			RemainingNodes: &SliceAdapter[*graph.Node]{
+			RemainingNodes: &SliceAdapter[*pkg.Node]{
 				slice: model.remainingNodes,
 			},
 			SelectionIndex: message.selectionIndex,
@@ -183,11 +183,11 @@ func (model *Model) signalLoadGraph() tea.Cmd {
 	}
 }
 
-func loadGraph() (*graph.Graph, error) {
+func loadGraph() (*pkg.Graph, error) {
 	loader := sequence.New()
 	path := pathlib.New(`F:\repos\pkb\pkb-data\root.yaml`)
 
-	g, err := graph.LoadGraph(path, loader)
+	g, err := pkg.LoadGraph(path, loader)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func (model Model) signalRefreshRemainingNodes(keepSameNodeHighlighted bool) tea
 		bestMatchIndex, found := slices.BinarySearchFunc(
 			remainingNodes,
 			target,
-			func(node *graph.Node, target string) int {
+			func(node *pkg.Node, target string) int {
 				nodeName := strings.ToLower(node.GetName())
 				if strings.HasPrefix(nodeName, target) {
 					return 0
@@ -371,7 +371,7 @@ func (model Model) onUnselectLast() (Model, tea.Cmd) {
 	}
 }
 
-func (model Model) setSelectedNodes(selectedNodes []*graph.Node) (Model, tea.Cmd) {
+func (model Model) setSelectedNodes(selectedNodes []*pkg.Node) (Model, tea.Cmd) {
 	model.selectedNodes = selectedNodes
 
 	commands := []tea.Cmd{}
@@ -391,7 +391,7 @@ func (model Model) onNodeHighlighted(message nodeselectionview.MsgRemainingNodeH
 	// Reset key bindings, the specialized node viewer will update it again later
 	model.nodeViewerKeyBindings = nil
 
-	var shownNode *graph.Node
+	var shownNode *pkg.Node
 
 	if highlightedNode == nil {
 		// No node was highlighted, so take the last selected node
@@ -414,7 +414,7 @@ func (model Model) onNodeHighlighted(message nodeselectionview.MsgRemainingNodeH
 	return model, tea.Batch(command1, command2)
 }
 
-func (model Model) showNode(node *graph.Node) (Model, tea.Cmd) {
+func (model Model) showNode(node *pkg.Node) (Model, tea.Cmd) {
 	commands := []tea.Cmd{}
 
 	util.UpdateChild(&model.nodeViewer, nodeviewer.MsgSetNode{Node: node}, &commands)

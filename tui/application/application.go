@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"pkb-agent/graph"
 	"pkb-agent/graph/loaders/sequence"
+	"pkb-agent/pkg"
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/stringlist"
 	"pkb-agent/tui/component/stringsview"
@@ -95,8 +95,8 @@ func (application *Application) eventLoop() {
 
 	// Data
 	input := data.NewVariable("")
-	selectedNodes := data.NewSliceList[*graph.Node](nil)
-	intersectionNodes := data.NewSliceList[*graph.Node](nil)
+	selectedNodes := data.NewSliceList[*pkg.Node](nil)
+	intersectionNodes := data.NewSliceList[*pkg.Node](nil)
 	updateIntersectionNodes := func() {
 		nodes := determineIntersectionNodes(input.Get(), g, data.CopyListToSlice(selectedNodes), true, true)
 		intersectionNodes.SetSlice(nodes)
@@ -104,7 +104,7 @@ func (application *Application) eventLoop() {
 	updateIntersectionNodes()
 	data.DefineReaction(updateIntersectionNodes, input, selectedNodes)
 	selectedItemIndex := data.NewVariable(0)
-	intersectionNodeNames := data.MapList(intersectionNodes, func(node *graph.Node) string { return node.GetName() })
+	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
 
 	// Views
 	intersectionNodeView := stringlist.New(intersectionNodeNames, selectedItemIndex)
@@ -229,12 +229,12 @@ func (list ItemList) At(index int) stringsview.Item {
 	}
 }
 
-func loadGraph() (*graph.Graph, error) {
+func loadGraph() (*pkg.Graph, error) {
 	before := time.Now()
 	loader := sequence.New()
 	path := pathlib.New(`F:\repos\pkb\pkb-data\root.yaml`)
 
-	g, err := graph.LoadGraph(path, loader)
+	g, err := pkg.LoadGraph(path, loader)
 	if err != nil {
 		return nil, err
 	}

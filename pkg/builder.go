@@ -1,4 +1,4 @@
-package graph
+package pkg
 
 import (
 	"errors"
