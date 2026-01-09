@@ -108,7 +108,10 @@ func (component *Component) onKey(message tui.MsgKey) {
 		if index < 0 {
 			index = 0
 		}
-		component.onSelectionChanged(index)
+
+		if component.onSelectionChanged != nil {
+			component.onSelectionChanged(index)
+		}
 	}
 
 	switch message.Key {
