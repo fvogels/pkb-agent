@@ -23,6 +23,7 @@ type Application struct {
 	screen  tcell.Screen
 	graph   *pkg.Graph
 	model   Model
+	view    View
 }
 
 type Model struct {
@@ -64,7 +65,8 @@ func (application *Application) Start() error {
 		return err
 	}
 
-	application.model = application.createModel()
+	application.createModel()
+	application.createView()
 
 	application.eventLoop()
 
@@ -104,29 +106,23 @@ func (application *Application) initializeScreen() error {
 	return nil
 }
 
-func createViews(model *Model) *View {
+func (application *Application) createView() {
+	model := &application.model
+
 	intersectionNodeView := stringlist.New(model.intersectionNodeNames, model.selectedItemIndex)
 	intersectionNodeView.SetOnSelectionChanged(func(value int) { model.selectedItemIndex.Set(value) })
 	root := intersectionNodeView
 
-	view := View{
+	application.view = View{
 		intersectionNodeView: intersectionNodeView,
 		root:                 root,
 	}
-
-	return &view
 }
 
 func (application *Application) eventLoop() {
 	// style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	screen := application.screen
-	model := &application.model
-
-	// Views
-	intersectionNodeView := stringlist.New(model.intersectionNodeNames, model.selectedItemIndex)
-	intersectionNodeView.SetOnSelectionChanged(func(value int) { model.selectedItemIndex.Set(value) })
-
-	root := intersectionNodeView
+	root := application.view.root
 
 	for {
 		// Update screen
@@ -203,7 +199,7 @@ func (application *Application) eventLoop() {
 	}
 }
 
-func (application *Application) createModel() Model {
+func (application *Application) createModel() {
 	graph := application.graph
 
 	input := data.NewVariable("")
@@ -218,13 +214,15 @@ func (application *Application) createModel() Model {
 	selectedItemIndex := data.NewVariable(0)
 	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
 
-	return Model{
+	model := Model{
 		input:                 input,
 		selectedNodes:         selectedNodes,
 		intersectionNodes:     intersectionNodes,
 		selectedItemIndex:     selectedItemIndex,
 		intersectionNodeNames: intersectionNodeNames,
 	}
+
+	application.model = model
 }
 
 func (application *Application) initializeLogging() error {
