@@ -92,7 +92,7 @@ func determineIntersectionNodes(input string, graph *pkg.Graph, selectedNodes []
 }
 
 // collectDescendants collects the names of all backlinked nodes
-func collectDescendants(g *pkg.Graph, node *pkg.Node, includeIndirect bool) set.Set[int] {
+func collectDescendants(graph *pkg.Graph, node *pkg.Node, includeIndirect bool) set.Set[int] {
 	result := set.New[int]()
 	queue := make([]*pkg.Node, 1, 20)
 	queue[0] = node
@@ -106,7 +106,7 @@ func collectDescendants(g *pkg.Graph, node *pkg.Node, includeIndirect bool) set.
 			result.Add(backlinkedIndex)
 
 			if includeIndirect {
-				descendant := g.FindNodeByIndex(backlinkedIndex)
+				descendant := graph.FindNodeByIndex(backlinkedIndex)
 				queue = append(queue, descendant)
 			}
 		}

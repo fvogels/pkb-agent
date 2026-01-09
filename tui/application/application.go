@@ -21,6 +21,16 @@ type Application struct {
 	verbose bool
 	logFile *os.File
 	screen  tcell.Screen
+	graph   *pkg.Graph
+	model   Model
+}
+
+type Model struct {
+	input                 *data.Variable[string]
+	selectedNodes         *data.SliceList[*pkg.Node]
+	intersectionNodes     *data.SliceList[*pkg.Node]
+	selectedItemIndex     *data.Variable[int]
+	intersectionNodeNames data.List[string]
 }
 
 func NewApplication(verbose bool) *Application {
@@ -45,6 +55,15 @@ func (application *Application) Start() error {
 		return err
 	}
 
+	graph, err := loadGraph()
+	if err != nil {
+		panic("failed to load graph")
+	}
+	slog.Debug("Loaded graph", slog.Int("nodeCount", graph.GetNodeCount()))
+	application.graph = graph
+
+	application.model = createModel(graph)
+
 	// Event loop
 	application.eventLoop()
 
@@ -68,6 +87,7 @@ func (application *Application) initializeScreen() error {
 	if err != nil {
 		return err
 	}
+
 	if err := screen.Init(); err != nil {
 		return err
 	}
@@ -86,29 +106,11 @@ func (application *Application) initializeScreen() error {
 func (application *Application) eventLoop() {
 	// style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	screen := application.screen
-
-	g, err := loadGraph()
-	if err != nil {
-		panic("failed to load graph")
-	}
-	slog.Debug("Loaded graph", slog.Int("nodeCount", g.GetNodeCount()))
-
-	// Data
-	input := data.NewVariable("")
-	selectedNodes := data.NewSliceList[*pkg.Node](nil)
-	intersectionNodes := data.NewSliceList[*pkg.Node](nil)
-	updateIntersectionNodes := func() {
-		nodes := determineIntersectionNodes(input.Get(), g, data.CopyListToSlice(selectedNodes), true, true)
-		intersectionNodes.SetSlice(nodes)
-	}
-	updateIntersectionNodes()
-	data.DefineReaction(updateIntersectionNodes, input, selectedNodes)
-	selectedItemIndex := data.NewVariable(0)
-	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
+	model := &application.model
 
 	// Views
-	intersectionNodeView := stringlist.New(intersectionNodeNames, selectedItemIndex)
-	intersectionNodeView.SetOnSelectionChanged(func(value int) { selectedItemIndex.Set(value) })
+	intersectionNodeView := stringlist.New(model.intersectionNodeNames, model.selectedItemIndex)
+	intersectionNodeView.SetOnSelectionChanged(func(value int) { model.selectedItemIndex.Set(value) })
 
 	root := intersectionNodeView
 
@@ -184,6 +186,28 @@ func (application *Application) eventLoop() {
 
 			// }
 		}
+	}
+}
+
+func createModel(graph *pkg.Graph) Model {
+	input := data.NewVariable("")
+	selectedNodes := data.NewSliceList[*pkg.Node](nil)
+	intersectionNodes := data.NewSliceList[*pkg.Node](nil)
+	updateIntersectionNodes := func() {
+		nodes := determineIntersectionNodes(input.Get(), graph, data.CopyListToSlice(selectedNodes), true, true)
+		intersectionNodes.SetSlice(nodes)
+	}
+	updateIntersectionNodes()
+	data.DefineReaction(updateIntersectionNodes, input, selectedNodes)
+	selectedItemIndex := data.NewVariable(0)
+	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
+
+	return Model{
+		input:                 input,
+		selectedNodes:         selectedNodes,
+		intersectionNodes:     intersectionNodes,
+		selectedItemIndex:     selectedItemIndex,
+		intersectionNodeNames: intersectionNodeNames,
 	}
 }
 

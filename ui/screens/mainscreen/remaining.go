@@ -10,10 +10,10 @@ import (
 )
 
 // determineRemainingNodes computes which nodes are compatible with the selected nodes and the search filter.
-func determineRemainingNodes(input string, g *pkg.Graph, selectedNodes []*pkg.Node, includeLinked bool, includeIndirectAncestors bool) []*pkg.Node {
+func determineRemainingNodes(input string, graph *pkg.Graph, selectedNodes []*pkg.Node, includeLinked bool, includeIndirectAncestors bool) []*pkg.Node {
 	if len(selectedNodes) == 0 {
 		// Deal with this case separately for efficiency reasons
-		iterator := g.FindMatchingNodes(input)
+		iterator := graph.FindMatchingNodes(input)
 
 		// nameSet is used to prevent duplicates
 		// Adding the selected nodes ensures that already selected nodes do not appear as remaining choices
@@ -42,10 +42,10 @@ func determineRemainingNodes(input string, g *pkg.Graph, selectedNodes []*pkg.No
 	}
 
 	// Step 1: collect the intersection of the descendants of the selected nodes
-	remainingNodeSet := collectDescendants(g, selectedNodes[0], includeIndirectAncestors)
+	remainingNodeSet := collectDescendants(graph, selectedNodes[0], includeIndirectAncestors)
 
 	for _, selectedNode := range selectedNodes[1:] {
-		remainingNodeSet.Intersect(collectDescendants(g, selectedNode, includeIndirectAncestors))
+		remainingNodeSet.Intersect(collectDescendants(graph, selectedNode, includeIndirectAncestors))
 	}
 
 	// Step 2: optionally collect all ancestors of the remaining nodes
@@ -53,7 +53,7 @@ func determineRemainingNodes(input string, g *pkg.Graph, selectedNodes []*pkg.No
 	// This could be improved to also include indirect ancestors
 	if includeLinked {
 		for _, node := range remainingNodeSet.ToSlice() {
-			for _, linkedNode := range g.FindNodeByIndex(node).GetLinks() {
+			for _, linkedNode := range graph.FindNodeByIndex(node).GetLinks() {
 				linkedNodeIndex := linkedNode.GetIndex()
 				if !remainingNodeSet.Contains(linkedNodeIndex) {
 					remainingNodeSet.Add(linkedNodeIndex)
@@ -66,7 +66,7 @@ func determineRemainingNodes(input string, g *pkg.Graph, selectedNodes []*pkg.No
 	if len(input) != 0 {
 		subselection := set.New[int]()
 
-		iterator := g.FindMatchingNodes(input)
+		iterator := graph.FindMatchingNodes(input)
 
 		for iterator.Current() != nil {
 			if remainingNodeSet.Contains(iterator.Current().GetIndex()) {
@@ -87,12 +87,12 @@ func determineRemainingNodes(input string, g *pkg.Graph, selectedNodes []*pkg.No
 	slices.Sort(result)
 
 	return util.Map(result, func(index int) *pkg.Node {
-		return g.FindNodeByIndex(index)
+		return graph.FindNodeByIndex(index)
 	})
 }
 
 // collectDescendants collects the names of all backlinked nodes
-func collectDescendants(g *pkg.Graph, node *pkg.Node, includeIndirect bool) set.Set[int] {
+func collectDescendants(graph *pkg.Graph, node *pkg.Node, includeIndirect bool) set.Set[int] {
 	result := set.New[int]()
 	queue := make([]*pkg.Node, 1, 20)
 	queue[0] = node
@@ -106,7 +106,7 @@ func collectDescendants(g *pkg.Graph, node *pkg.Node, includeIndirect bool) set.
 			result.Add(backlinkedIndex)
 
 			if includeIndirect {
-				descendant := g.FindNodeByIndex(backlinkedIndex)
+				descendant := graph.FindNodeByIndex(backlinkedIndex)
 				queue = append(queue, descendant)
 			}
 		}

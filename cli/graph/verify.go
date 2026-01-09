@@ -55,8 +55,8 @@ func (c *verifyGraphCommand) execute() error {
 	return nil
 }
 
-func (c *verifyGraphCommand) lookForCycles(g *pkg.Graph) bool {
-	if pkg.ContainsCycles(g) {
+func (c *verifyGraphCommand) lookForCycles(graph *pkg.Graph) bool {
+	if pkg.ContainsCycles(graph) {
 		fmt.Println("Error: cycle detected")
 		return true
 	}
@@ -64,17 +64,17 @@ func (c *verifyGraphCommand) lookForCycles(g *pkg.Graph) bool {
 	return false
 }
 
-func (c *verifyGraphCommand) lookForDuplicateLinks(g *pkg.Graph) bool {
+func (c *verifyGraphCommand) lookForDuplicateLinks(graph *pkg.Graph) bool {
 	result := false
 
-	for _, node := range g.ListNodes() {
-		duplicates := g.FindRedundantLinks(node)
+	for _, node := range graph.ListNodes() {
+		duplicates := graph.FindRedundantLinks(node)
 
 		if duplicates.Size() > 0 {
 			fmt.Printf("Node \"%s\" has redundant links:\n", node.GetName())
 
 			for _, link := range duplicates.ToSlice() {
-				fmt.Printf("  %s\n", g.FindNodeByIndex(link).GetName())
+				fmt.Printf("  %s\n", graph.FindNodeByIndex(link).GetName())
 			}
 
 			result = true
