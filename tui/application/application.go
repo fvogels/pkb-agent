@@ -20,6 +20,7 @@ import (
 type Application struct {
 	verbose bool
 	logFile *os.File
+	screen  tcell.Screen
 }
 
 func NewApplication(verbose bool) *Application {
@@ -40,42 +41,35 @@ func (application *Application) Start() error {
 		return err
 	}
 
-	screen, err := application.initializeScreen()
-	if err != nil {
+	if err := application.initializeScreen(); err != nil {
 		return err
 	}
 
-	quit := func() {
-		// You have to catch panics in a defer, clean up, and
-		// re-raise them - otherwise your application can
-		// die without leaving any diagnostic trace.
-		maybePanic := recover()
-		screen.Fini()
-		if maybePanic != nil {
-			panic(maybePanic)
-		}
-	}
-	defer quit()
-
 	// Event loop
-	eventLoop(screen)
+	application.eventLoop()
 
 	return nil
 }
 
 func (application *Application) Close() {
+	maybePanic := recover()
+	application.screen.Fini()
+	if maybePanic != nil {
+		panic(maybePanic)
+	}
+
 	if application.logFile != nil {
 		application.logFile.Close()
 	}
 }
 
-func (application *Application) initializeScreen() (tcell.Screen, error) {
+func (application *Application) initializeScreen() error {
 	screen, err := tcell.NewScreen()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if err := screen.Init(); err != nil {
-		return nil, err
+		return err
 	}
 
 	defStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
@@ -84,11 +78,14 @@ func (application *Application) initializeScreen() (tcell.Screen, error) {
 	// s.EnablePaste()
 	screen.Clear()
 
-	return screen, nil
+	application.screen = screen
+
+	return nil
 }
 
-func eventLoop(screen tcell.Screen) {
+func (application *Application) eventLoop() {
 	// style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
+	screen := application.screen
 
 	g, err := loadGraph()
 	if err != nil {
