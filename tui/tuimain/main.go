@@ -6,13 +6,10 @@ import (
 	"log/slog"
 	"os"
 	"pkb-agent/tui"
-	"pkb-agent/tui/component/border"
-	"pkb-agent/tui/component/cache"
-	"pkb-agent/tui/component/docksouth"
-	"pkb-agent/tui/component/input"
-	"pkb-agent/tui/component/stringlist"
+	"pkb-agent/tui/component/ansiview"
 	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
+	"pkb-agent/util/syntaxhighlighting"
 	"time"
 
 	"github.com/gdamore/tcell/v3"
@@ -65,28 +62,19 @@ func Start(verbose bool) error {
 }
 
 func eventLoop(screen tcell.Screen) {
-	style := tcell.StyleDefault.Background(color.Green).Foreground(color.Reset)
-	statusStyle := tcell.StyleDefault.Background(color.Red).Foreground(color.Reset)
+	// style := tcell.StyleDefault.Background(color.Green).Foreground(color.Reset)
 
-	strings := []string{"a", "bb", "ccc", "dddd", "eeeee", "ffffff", "ggggggg", "hhhhhhhh", "a", "bb", "ccc", "dddd", "eeeee", "ffffff", "ggggggg", "hhhhhhhh", "a", "bb", "ccc", "dddd", "eeeee", "ffffff", "ggggggg", "hhhhhhhh", "a", "bb", "ccc", "dddd", "eeeee", "ffffff", "ggggggg", "hhhhhhhh"}
-	// runes := util.Map(strings, func(s string) []rune { return []rune(s) })
-	// items := data.NewSliceList(strings)
-	// runedItems := ItemList{
-	// 	items: runes,
-	// 	style: &style,
-	// }
-	// selectedItem := data.NewVariable(0)
+	source := `
+def foo():
+	return 5
+	`
+	formattedSource, err := syntaxhighlighting.Highlight(source, "python")
+	if err != nil {
+		panic("failed to format source")
+	}
 
-	text := data.NewVariable("")
-	selectedItem := data.NewVariable(0)
-
-	list := stringlist.New(data.NewSliceList(strings), selectedItem)
-	list.SetOnSelectionChanged(func(index int) { selectedItem.Set(index) })
-
-	mainView := border.New(cache.New(list, selectedItem), style)
-
-	statusBar := input.New(text, statusStyle, func(s string) { text.Set(s) })
-	root := docksouth.New(mainView, statusBar, 1)
+	contents := data.NewVariable(formattedSource)
+	root := ansiview.New(contents)
 
 	for {
 		// Update screen
