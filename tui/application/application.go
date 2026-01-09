@@ -13,6 +13,7 @@ import (
 	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
 	"pkb-agent/util/pathlib"
+	"slices"
 	"strings"
 	"time"
 
@@ -213,15 +214,38 @@ func (application *Application) createModel() {
 	graph := application.graph
 
 	input := data.NewVariable("")
+	selectedItemIndex := data.NewVariable(0)
 	selectedNodes := data.NewSliceList[*pkg.Node](nil)
 	intersectionNodes := data.NewSliceList[*pkg.Node](nil)
 	updateIntersectionNodes := func() {
 		nodes := determineIntersectionNodes(input.Get(), graph, data.CopyListToSlice(selectedNodes), true, true)
 		intersectionNodes.SetSlice(nodes)
+
+		target := input.Get()
+		bestMatchIndex, found := slices.BinarySearchFunc(
+			nodes,
+			target,
+			func(node *pkg.Node, target string) int {
+				nodeName := strings.ToLower(node.GetName())
+				if strings.HasPrefix(nodeName, target) {
+					return 0
+				}
+				if nodeName < target {
+					return -1
+				}
+				return 1
+			},
+		)
+
+		if !found {
+			bestMatchIndex = 0
+		}
+
+		selectedItemIndex.Set(bestMatchIndex)
 	}
 	updateIntersectionNodes()
 	data.DefineReaction(updateIntersectionNodes, input, selectedNodes)
-	selectedItemIndex := data.NewVariable(0)
+
 	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
 
 	model := Model{
