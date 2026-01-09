@@ -5,11 +5,13 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"pkb-agent/graph"
+	"pkb-agent/graph/loaders/sequence"
 	"pkb-agent/tui"
-	"pkb-agent/tui/component/ansiview"
+	"pkb-agent/tui/component/stringlist"
 	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
-	"pkb-agent/util/syntaxhighlighting"
+	"pkb-agent/util/pathlib"
 	"time"
 
 	"github.com/gdamore/tcell/v3"
@@ -62,19 +64,32 @@ func Start(verbose bool) error {
 }
 
 func eventLoop(screen tcell.Screen) {
-	// style := tcell.StyleDefault.Background(color.Green).Foreground(color.Reset)
+	// style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 
-	source := `
-def foo():
-	return 5
-	`
-	formattedSource, err := syntaxhighlighting.Highlight(source, "python")
+	g, err := loadGraph()
 	if err != nil {
-		panic("failed to format source")
+		panic("failed to load graph")
 	}
+	slog.Debug("Loaded graph", slog.Int("nodeCount", g.GetNodeCount()))
 
-	contents := data.NewVariable(formattedSource)
-	root := ansiview.New(contents)
+	// Data
+	input := data.NewVariable("")
+	selectedNodes := data.NewSliceList[*graph.Node](nil)
+	intersectionNodes := data.NewSliceList[*graph.Node](nil)
+	updateIntersectionNodes := func() {
+		nodes := determineIntersectionNodes(input.Get(), g, data.CopyListToSlice(selectedNodes), true, true)
+		intersectionNodes.SetSlice(nodes)
+	}
+	updateIntersectionNodes()
+	data.DefineReaction(updateIntersectionNodes, input, selectedNodes)
+	selectedItemIndex := data.NewVariable(0)
+	intersectionNodeNames := data.MapList(intersectionNodes, func(node *graph.Node) string { return node.GetName() })
+
+	// Views
+	intersectionNodeView := stringlist.New(intersectionNodeNames, selectedItemIndex)
+	intersectionNodeView.SetOnSelectionChanged(func(value int) { selectedItemIndex.Set(value) })
+
+	root := intersectionNodeView
 
 	for {
 		// Update screen
@@ -96,7 +111,7 @@ def foo():
 		}
 
 		screen.Show()
-		slog.Debug("stringlist", slog.String("duration", time.Since(timeBeforeUpdate).String()))
+		slog.Debug("Screen updated", slog.String("duration", time.Since(timeBeforeUpdate).String()))
 
 		// Poll event (this can be in a select statement as well)
 		ev := <-screen.EventQ()
@@ -190,4 +205,18 @@ func (list ItemList) At(index int) stringsview.Item {
 		Runes: list.items[index],
 		Style: list.style,
 	}
+}
+
+func loadGraph() (*graph.Graph, error) {
+	before := time.Now()
+	loader := sequence.New()
+	path := pathlib.New(`F:\repos\pkb\pkb-data\root.yaml`)
+
+	g, err := graph.LoadGraph(path, loader)
+	if err != nil {
+		return nil, err
+	}
+	slog.Debug("Graph loaded", slog.String("loadTime", time.Since(before).String()))
+
+	return g, nil
 }
