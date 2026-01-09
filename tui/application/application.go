@@ -1,8 +1,7 @@
-package tuimain
+package application
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"os"
 	"pkb-agent/graph"
@@ -18,32 +17,33 @@ import (
 	"github.com/gdamore/tcell/v3/color"
 )
 
-func Start(verbose bool) error {
+type Application struct {
+	verbose bool
+	logFile *os.File
+}
+
+func NewApplication(verbose bool) *Application {
+	application := Application{
+		verbose: verbose,
+	}
+
+	return &application
+}
+
+func (application *Application) Start() error {
 	// out, _ := os.Create("profile.txt")
 	// pprof.StartCPUProfile(out)
 	// defer pprof.StopCPUProfile()
 
-	closeLog, err := initializeLogging(verbose)
+	err := application.initializeLogging()
 	if err != nil {
 		return err
 	}
-	defer closeLog()
 
-	defStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
-	// boxStyle := tcell.StyleDefault.Foreground(color.White).Background(color.Purple)
-
-	// Initialize screen
-	screen, err := tcell.NewScreen()
+	screen, err := application.initializeScreen()
 	if err != nil {
-		log.Fatalf("%+v", err)
+		return err
 	}
-	if err := screen.Init(); err != nil {
-		log.Fatalf("%+v", err)
-	}
-	screen.SetStyle(defStyle)
-	screen.EnableMouse()
-	// s.EnablePaste()
-	screen.Clear()
 
 	quit := func() {
 		// You have to catch panics in a defer, clean up, and
@@ -61,6 +61,30 @@ func Start(verbose bool) error {
 	eventLoop(screen)
 
 	return nil
+}
+
+func (application *Application) Close() {
+	if application.logFile != nil {
+		application.logFile.Close()
+	}
+}
+
+func (application *Application) initializeScreen() (tcell.Screen, error) {
+	screen, err := tcell.NewScreen()
+	if err != nil {
+		return nil, err
+	}
+	if err := screen.Init(); err != nil {
+		return nil, err
+	}
+
+	defStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
+	screen.SetStyle(defStyle)
+	screen.EnableMouse()
+	// s.EnablePaste()
+	screen.Clear()
+
+	return screen, nil
 }
 
 func eventLoop(screen tcell.Screen) {
@@ -166,21 +190,22 @@ func eventLoop(screen tcell.Screen) {
 	}
 }
 
-func initializeLogging(verbose bool) (func(), error) {
-	if verbose {
+func (application *Application) initializeLogging() error {
+	if application.verbose {
 		logFile, err := os.Create("ui.log")
 		if err != nil {
 			fmt.Println("Failed to create log")
-			return nil, err
+			return err
 		}
+		application.logFile = logFile
 
 		logger := slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug}))
 		slog.SetDefault(logger)
 
-		return func() { logFile.Close() }, nil
+		return nil
 	}
 
-	return func() {}, nil
+	return nil
 }
 
 func translateKey(event *tcell.EventKey) string {

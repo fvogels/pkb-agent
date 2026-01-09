@@ -1,4 +1,4 @@
-package tuimain
+package application
 
 import (
 	"pkb-agent/graph"

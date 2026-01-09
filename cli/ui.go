@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"pkb-agent/tui/tuimain"
+	"pkb-agent/tui/application"
 
 	"github.com/spf13/cobra"
 )
@@ -36,5 +36,8 @@ func (c *startUserInterfaceCommand) execute() error {
 		verbose = verboseFlag.Value.String() == "true"
 	}
 
-	return tuimain.Start(verbose)
+	app := application.NewApplication(verbose)
+	defer app.Close()
+
+	return app.Start()
 }
