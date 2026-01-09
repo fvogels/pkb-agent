@@ -35,8 +35,8 @@ type Model struct {
 }
 
 type View struct {
-	intersectionNodeView *stringlist.Component
-	root                 tui.Component
+	intersectionNodes *stringlist.Component
+	root              tui.Component
 }
 
 func NewApplication(verbose bool) *Application {
@@ -114,8 +114,8 @@ func (application *Application) createView() {
 	root := intersectionNodeView
 
 	application.view = View{
-		intersectionNodeView: intersectionNodeView,
-		root:                 root,
+		intersectionNodes: intersectionNodeView,
+		root:              root,
 	}
 }
 
