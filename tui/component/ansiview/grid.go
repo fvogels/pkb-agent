@@ -8,10 +8,11 @@ type grid struct {
 	emptyStyle *tui.Style
 }
 
-func newGrid(size tui.Size, ansiGrid tui.Grid) tui.Grid {
+func newGrid(size tui.Size, ansiGrid tui.Grid, emptyStyle *tui.Style) tui.Grid {
 	return &grid{
-		size:     size,
-		ansiGrid: ansiGrid,
+		size:       size,
+		ansiGrid:   ansiGrid,
+		emptyStyle: emptyStyle,
 	}
 }
 
