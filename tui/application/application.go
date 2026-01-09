@@ -33,6 +33,11 @@ type Model struct {
 	intersectionNodeNames data.List[string]
 }
 
+type View struct {
+	intersectionNodeView *stringlist.Component
+	root                 tui.Component
+}
+
 func NewApplication(verbose bool) *Application {
 	application := Application{
 		verbose: verbose,
@@ -101,6 +106,19 @@ func (application *Application) initializeScreen() error {
 	application.screen = screen
 
 	return nil
+}
+
+func createViews(model *Model) *View {
+	intersectionNodeView := stringlist.New(model.intersectionNodeNames, model.selectedItemIndex)
+	intersectionNodeView.SetOnSelectionChanged(func(value int) { model.selectedItemIndex.Set(value) })
+	root := intersectionNodeView
+
+	view := View{
+		intersectionNodeView: intersectionNodeView,
+		root:                 root,
+	}
+
+	return &view
 }
 
 func (application *Application) eventLoop() {
