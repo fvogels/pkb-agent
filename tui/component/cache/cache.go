@@ -64,5 +64,5 @@ func (component *Component) Invalidate() {
 
 // rerender asks the child component to rerender itself, which overwrites the cache
 func (component *Component) rerender() {
-	component.cached = tui.FreezeGrid(component.child.Render())
+	component.cached = tui.MaterializeGrid(component.child.Render())
 }

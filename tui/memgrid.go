@@ -5,7 +5,7 @@ type MemoryGrid struct {
 	size  Size
 }
 
-func FreezeGrid(grid Grid) Grid {
+func MaterializeGrid(grid Grid) Grid {
 	size := grid.GetSize()
 	items := make([]Cell, size.Width*size.Height)
 
