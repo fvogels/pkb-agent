@@ -18,12 +18,14 @@ type Component struct {
 
 func New(contents data.Value[string]) *Component {
 	style := tcell.StyleDefault
+	subComponent := label.New(contents)
+	subComponent.SetStyle(&style)
 
 	return &Component{
 		contents: contents,
 		style:    &style,
 		onChange: nil,
-		label:    label.New(contents, style),
+		label:    subComponent,
 	}
 }
 
