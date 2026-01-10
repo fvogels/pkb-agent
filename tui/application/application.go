@@ -21,6 +21,10 @@ import (
 	"github.com/gdamore/tcell/v3/color"
 )
 
+const (
+	logFileName = "ui.log"
+)
+
 type Application struct {
 	verbose bool
 	logFile *os.File
@@ -272,7 +276,7 @@ func (application *Application) createModel() {
 
 func (application *Application) initializeLogging() error {
 	if application.verbose {
-		logFile, err := os.Create("ui.log")
+		logFile, err := os.Create(logFileName)
 		if err != nil {
 			fmt.Println("Failed to create log")
 			return err
