@@ -201,6 +201,8 @@ func (application *Application) eventLoop() {
 					Key: translateKey(event),
 				}
 				root.Handle(message)
+
+				application.updateIntersectionNodeSelection()
 			}
 
 		case *tcell.EventMouse:
@@ -232,28 +234,6 @@ func (application *Application) createModel() {
 	updateIntersectionNodes := func() {
 		nodes := determineIntersectionNodes(input.Get(), graph, data.CopyListToSlice(selectedNodes), true, true)
 		intersectionNodes.SetSlice(nodes)
-
-		target := input.Get()
-		bestMatchIndex, found := slices.BinarySearchFunc(
-			nodes,
-			target,
-			func(node *pkg.Node, target string) int {
-				nodeName := strings.ToLower(node.GetName())
-				if strings.HasPrefix(nodeName, target) {
-					return 0
-				}
-				if nodeName < target {
-					return -1
-				}
-				return 1
-			},
-		)
-
-		if !found {
-			bestMatchIndex = 0
-		}
-
-		selectedItemIndex.Set(bestMatchIndex)
 	}
 	updateIntersectionNodes()
 	data.DefineReaction(updateIntersectionNodes, input, selectedNodes)
@@ -327,4 +307,30 @@ func (application *Application) loadGraph() error {
 	application.graph = graph
 
 	return nil
+}
+
+func (application *Application) updateIntersectionNodeSelection() {
+	target := application.model.input.Get()
+	nodes := data.CopyListToSlice(application.model.intersectionNodes)
+
+	bestMatchIndex, found := slices.BinarySearchFunc(
+		nodes,
+		target,
+		func(node *pkg.Node, target string) int {
+			nodeName := strings.ToLower(node.GetName())
+			if strings.HasPrefix(nodeName, target) {
+				return 0
+			}
+			if nodeName < target {
+				return -1
+			}
+			return 1
+		},
+	)
+
+	if !found {
+		bestMatchIndex = 0
+	}
+
+	application.model.selectedItemIndex.Set(bestMatchIndex)
 }
