@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	logFileName = "ui.log"
+	logFilename = "ui.log"
 )
 
 type Application struct {
@@ -276,7 +276,7 @@ func (application *Application) createModel() {
 
 func (application *Application) initializeLogging() error {
 	if application.verbose {
-		logFile, err := os.Create(logFileName)
+		logFile, err := os.Create(logFilename)
 		if err != nil {
 			fmt.Println("Failed to create log")
 			return err
