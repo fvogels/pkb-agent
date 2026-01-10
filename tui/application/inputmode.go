@@ -1,7 +1,6 @@
 package application
 
 import (
-	"log/slog"
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/input"
@@ -42,7 +41,6 @@ func newInputMode(application *Application) *inputMode {
 }
 
 func (mode *inputMode) Render() tui.Grid {
-	slog.Debug("rendering input mode")
 	return mode.root.Render()
 }
 

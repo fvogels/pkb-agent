@@ -1,7 +1,6 @@
 package application
 
 import (
-	"log/slog"
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/label"
@@ -37,7 +36,6 @@ func newViewMode(application *Application) *viewMode {
 }
 
 func (mode *viewMode) Render() tui.Grid {
-	slog.Debug("rendering view mode")
 	return mode.root.Render()
 }
 
