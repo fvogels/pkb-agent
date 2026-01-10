@@ -196,13 +196,14 @@ func (application *Application) eventLoop() {
 					}
 				})
 
+			case "Esc":
+				application.model.input.Set("")
+
 			default:
 				message := tui.MsgKey{
 					Key: translateKey(event),
 				}
 				root.Handle(message)
-
-				application.updateIntersectionNodeSelection()
 			}
 
 		case *tcell.EventMouse:
@@ -227,10 +228,14 @@ func (application *Application) eventLoop() {
 func (application *Application) createModel() {
 	graph := application.graph
 
+	// Create data sources
 	input := data.NewVariable("")
 	selectedItemIndex := data.NewVariable(0)
 	selectedNodes := data.NewSliceList[*pkg.Node](nil)
 	intersectionNodes := data.NewSliceList[*pkg.Node](nil)
+	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
+
+	// Cause intersection node list to be updated whenever the input or the selected nodes change
 	updateIntersectionNodes := func() {
 		nodes := determineIntersectionNodes(input.Get(), graph, data.CopyListToSlice(selectedNodes), true, true)
 		intersectionNodes.SetSlice(nodes)
@@ -238,7 +243,11 @@ func (application *Application) createModel() {
 	updateIntersectionNodes()
 	data.DefineReaction(updateIntersectionNodes, input, selectedNodes)
 
-	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
+	input.Observe(func() {
+		if len(input.Get()) > 0 {
+			application.updateIntersectionNodeSelection(input.Get())
+		}
+	})
 
 	model := Model{
 		input:                 input,
@@ -309,8 +318,7 @@ func (application *Application) loadGraph() error {
 	return nil
 }
 
-func (application *Application) updateIntersectionNodeSelection() {
-	target := application.model.input.Get()
+func (application *Application) updateIntersectionNodeSelection(target string) {
 	nodes := data.CopyListToSlice(application.model.intersectionNodes)
 
 	bestMatchIndex, found := slices.BinarySearchFunc(
