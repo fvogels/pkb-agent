@@ -19,6 +19,11 @@ func New(dockedChild tui.Component, mainChild tui.Component, dockedChildHeight i
 	}
 }
 
+func (component *Component) SetDockerChildHeight(height int) {
+	component.dockedChildHeight = height
+	component.updateLayout()
+}
+
 func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgResize:
@@ -42,9 +47,13 @@ func (component *Component) Render() tui.Grid {
 func (component *Component) onResize(message tui.MsgResize) {
 	component.size = message.Size
 
+	component.updateLayout()
+}
+
+func (component *Component) updateLayout() {
 	dockedChildSizeMessage := tui.MsgResize{
 		Size: tui.Size{
-			Width:  message.Size.Width,
+			Width:  component.size.Width,
 			Height: component.dockedChildHeight,
 		},
 	}
@@ -52,7 +61,7 @@ func (component *Component) onResize(message tui.MsgResize) {
 
 	mainChildSizeMessage := tui.MsgResize{
 		Size: tui.Size{
-			Width:  message.Size.Width,
+			Width:  component.size.Width,
 			Height: component.size.Height - component.dockedChildHeight,
 		},
 	}
