@@ -32,6 +32,7 @@ func New(selectedNodes data.List[*pkg.Node], nodeIntersection data.List[*pkg.Nod
 		}
 		return item
 	})
+
 	selectedNodesView := stringsview.New(selectedNodesNames)
 
 	nodeIntersectionItems := data.MapList(nodeIntersection, func(node *pkg.Node) string {
@@ -39,9 +40,9 @@ func New(selectedNodes data.List[*pkg.Node], nodeIntersection data.List[*pkg.Nod
 	})
 	nodeIntersectionView := stringlist.New(nodeIntersectionItems, selectedIndex)
 
-	root := docknorth.New(selectedNodesView, nodeIntersectionView, 10)
+	root := docknorth.New(selectedNodesView, nodeIntersectionView, 0)
 
-	return &Component{
+	component := Component{
 		selectedNodes:        selectedNodes,
 		nodeIntersection:     nodeIntersection,
 		selectedIndex:        selectedIndex,
@@ -49,6 +50,11 @@ func New(selectedNodes data.List[*pkg.Node], nodeIntersection data.List[*pkg.Nod
 		nodeIntersectionView: nodeIntersectionView,
 		root:                 root,
 	}
+
+	component.updateLayout()
+	selectedNodes.Observe(func() { component.updateLayout() })
+
+	return &component
 }
 
 func (component *Component) SetOnSelectionChanged(callback func(int)) {
@@ -72,4 +78,9 @@ func (component *Component) Render() tui.Grid {
 func (component *Component) onResize(message tui.MsgResize) {
 	component.size = message.Size
 	component.root.Handle(message)
+}
+
+func (component *Component) updateLayout() {
+	selectedNodeCount := component.selectedNodes.Size()
+	component.root.SetDockerChildHeight(selectedNodeCount)
 }
