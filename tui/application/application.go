@@ -301,11 +301,13 @@ func (application *Application) updateIntersectionNodeSelection(target string) {
 }
 
 func (application *Application) selectHighlightedNode() {
-	highlightedNodeIndex := application.model.highlightedNodeIndex.Get()
-	highlightedNode := application.model.intersectionNodes.At(highlightedNodeIndex)
-	application.model.selectedNodes.Update(func(ns []*pkg.Node) []*pkg.Node {
-		return append(ns, highlightedNode)
-	})
+	if application.model.intersectionNodes.Size() > 0 {
+		highlightedNodeIndex := application.model.highlightedNodeIndex.Get()
+		highlightedNode := application.model.intersectionNodes.At(highlightedNodeIndex)
+		application.model.selectedNodes.Update(func(ns []*pkg.Node) []*pkg.Node {
+			return append(ns, highlightedNode)
+		})
+	}
 }
 
 func (application *Application) unselectLastNode() {
