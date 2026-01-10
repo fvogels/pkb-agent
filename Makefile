@@ -13,5 +13,5 @@ bench:
 	go test -tags=test -bench=. ./...
 
 profile:
-	echo "Don't forget to enable profiling in the code and run it before profiling!"
-	go tool pprof pkb-agent.exe ./ui.prof
+	echo "Don't forget to run the application with profiling enabled (-b)!"
+	go tool pprof pkb-agent.exe ./pkb-agent.prof

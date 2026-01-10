@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	profilingFilename = "ui.prof"
+	profilingFilename = "pkb-agent.prof"
 )
 
 func RunCLI() {
