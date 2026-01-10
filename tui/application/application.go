@@ -27,6 +27,7 @@ const (
 
 type Application struct {
 	verbose bool
+	profile bool
 	logFile *os.File
 	screen  tcell.Screen
 	graph   *pkg.Graph
@@ -57,10 +58,6 @@ func NewApplication(verbose bool) *Application {
 }
 
 func (application *Application) Start() error {
-	// out, _ := os.Create("profile.txt")
-	// pprof.StartCPUProfile(out)
-	// defer pprof.StopCPUProfile()
-
 	err := application.initializeLogging()
 	if err != nil {
 		return err
