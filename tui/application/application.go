@@ -174,21 +174,18 @@ func (application *Application) eventLoop() {
 			screen.Sync()
 
 		case *tcell.EventKey:
-			if event.Str() == "q" {
+			translation := translateKey(event)
+			slog.Debug("Key pressed", slog.String("key", translation))
+
+			switch translation {
+			case "q":
 				return
-			} else {
-				translation := translateKey(event)
 
-				slog.Debug("Key pressed", slog.String("key", translation))
-
-				switch translation {
-				default:
-					message := tui.MsgKey{
-						Key: translateKey(event),
-					}
-
-					root.Handle(message)
+			default:
+				message := tui.MsgKey{
+					Key: translateKey(event),
 				}
+				root.Handle(message)
 			}
 
 		case *tcell.EventMouse:
