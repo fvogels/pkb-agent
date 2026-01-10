@@ -28,6 +28,11 @@ func (list *SliceList[T]) SetSlice(items []T) {
 	list.notifyObservers()
 }
 
+func (list *SliceList[T]) Update(f func([]T) []T) {
+	list.items = f(list.items)
+	list.notifyObservers()
+}
+
 func (list *SliceList[T]) notifyObservers() {
 	for _, observer := range list.observers {
 		observer()
