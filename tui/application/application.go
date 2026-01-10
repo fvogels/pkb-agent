@@ -186,6 +186,15 @@ func (application *Application) eventLoop() {
 				selectedNode := model.intersectionNodes.At(model.selectedItemIndex.Get())
 				model.selectedNodes.Update(func(ns []*pkg.Node) []*pkg.Node { return append(ns, selectedNode) })
 
+			case "Delete":
+				model.selectedNodes.Update(func(ns []*pkg.Node) []*pkg.Node {
+					if len(ns) > 0 {
+						return ns[:len(ns)-1]
+					} else {
+						return ns
+					}
+				})
+
 			default:
 				message := tui.MsgKey{
 					Key: translateKey(event),
