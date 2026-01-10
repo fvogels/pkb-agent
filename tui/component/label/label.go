@@ -3,19 +3,25 @@ package label
 import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
+
+	"github.com/gdamore/tcell/v3"
 )
 
 type Component struct {
 	size     tui.Size
 	contents data.Value[string]
-	style    tui.Style
+	style    *tui.Style
 }
 
-func New(contents data.Value[string], style tui.Style) *Component {
+func New(contents data.Value[string]) *Component {
 	return &Component{
 		contents: contents,
-		style:    style,
+		style:    &tcell.StyleDefault,
 	}
+}
+
+func (component *Component) SetStyle(style *tui.Style) {
+	component.style = style
 }
 
 func (component *Component) Handle(message tui.Message) {
@@ -28,7 +34,7 @@ func (component *Component) Handle(message tui.Message) {
 func (component *Component) Render() tui.Grid {
 	return &grid{
 		contents: []rune(component.contents.Get()),
-		style:    &component.style,
+		style:    component.style,
 		size:     component.size,
 	}
 }
