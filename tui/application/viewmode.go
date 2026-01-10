@@ -19,8 +19,8 @@ type viewMode struct {
 func newViewMode(application *Application) *viewMode {
 	model := &application.model
 
-	nodesView := nodeselection.New(model.selectedNodes, model.intersectionNodes, model.selectedItemIndex)
-	nodesView.SetOnSelectionChanged(func(value int) { model.selectedItemIndex.Set(value) })
+	nodesView := nodeselection.New(model.selectedNodes, model.intersectionNodes, model.highlightedNodeIndex)
+	nodesView.SetOnSelectionChanged(func(value int) { model.highlightedNodeIndex.Set(value) })
 
 	caption := data.NewConstant("hello")
 	statusBar := label.New(caption)

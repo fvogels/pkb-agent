@@ -39,7 +39,7 @@ type Model struct {
 	input                 *data.Variable[string]
 	selectedNodes         *data.SliceList[*pkg.Node]
 	intersectionNodes     *data.SliceList[*pkg.Node]
-	selectedItemIndex     *data.Variable[int]
+	highlightedNodeIndex  *data.Variable[int]
 	intersectionNodeNames data.List[string]
 }
 
@@ -187,7 +187,7 @@ func (application *Application) createModel() {
 
 	// Create data sources
 	input := data.NewVariable("")
-	selectedItemIndex := data.NewVariable(0)
+	highlightedNodeIndex := data.NewVariable(0)
 	selectedNodes := data.NewSliceList[*pkg.Node](nil)
 	intersectionNodes := data.NewSliceList[*pkg.Node](nil)
 	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
@@ -210,7 +210,7 @@ func (application *Application) createModel() {
 		input:                 input,
 		selectedNodes:         selectedNodes,
 		intersectionNodes:     intersectionNodes,
-		selectedItemIndex:     selectedItemIndex,
+		highlightedNodeIndex:  highlightedNodeIndex,
 		intersectionNodeNames: intersectionNodeNames,
 	}
 
@@ -297,11 +297,11 @@ func (application *Application) updateIntersectionNodeSelection(target string) {
 		bestMatchIndex = 0
 	}
 
-	application.model.selectedItemIndex.Set(bestMatchIndex)
+	application.model.highlightedNodeIndex.Set(bestMatchIndex)
 }
 
 func (application *Application) selectHighlightedNode() {
-	highlightedNodeIndex := application.model.selectedItemIndex.Get()
+	highlightedNodeIndex := application.model.highlightedNodeIndex.Get()
 	highlightedNode := application.model.intersectionNodes.At(highlightedNodeIndex)
 	application.model.selectedNodes.Update(func(ns []*pkg.Node) []*pkg.Node {
 		return append(ns, highlightedNode)

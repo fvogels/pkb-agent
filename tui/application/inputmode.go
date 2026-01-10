@@ -22,8 +22,8 @@ type inputMode struct {
 func newInputMode(application *Application) *inputMode {
 	model := &application.model
 
-	nodesView := nodeselection.New(model.selectedNodes, model.intersectionNodes, model.selectedItemIndex)
-	nodesView.SetOnSelectionChanged(func(value int) { model.selectedItemIndex.Set(value) })
+	nodesView := nodeselection.New(model.selectedNodes, model.intersectionNodes, model.highlightedNodeIndex)
+	nodesView.SetOnSelectionChanged(func(value int) { model.highlightedNodeIndex.Set(value) })
 
 	inputField := input.New(model.input)
 	style := tcell.StyleDefault.Background(color.Red)
