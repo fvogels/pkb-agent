@@ -133,6 +133,7 @@ func (application *Application) createView() {
 func (application *Application) eventLoop() {
 	// style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	screen := application.screen
+	model := &application.model
 	root := application.view.root
 
 	for {
@@ -180,6 +181,10 @@ func (application *Application) eventLoop() {
 			switch translation {
 			case "q":
 				return
+
+			case "Enter":
+				selectedNode := model.intersectionNodes.At(model.selectedItemIndex.Get())
+				model.selectedNodes.Update(func(ns []*pkg.Node) []*pkg.Node { return append(ns, selectedNode) })
 
 			default:
 				message := tui.MsgKey{
