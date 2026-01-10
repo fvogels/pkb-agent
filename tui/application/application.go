@@ -7,9 +7,6 @@ import (
 	"pkb-agent/graph/loaders/sequence"
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
-	"pkb-agent/tui/component/docksouth"
-	"pkb-agent/tui/component/input"
-	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
 	"pkb-agent/util/pathlib"
@@ -26,13 +23,16 @@ const (
 )
 
 type Application struct {
-	verbose bool
-	profile bool
-	logFile *os.File
-	screen  tcell.Screen
-	graph   *pkg.Graph
-	model   Model
-	view    View
+	verbose    bool
+	running    bool
+	logFile    *os.File
+	screen     tcell.Screen
+	size       tui.Size
+	graph      *pkg.Graph
+	model      Model
+	viewMode   *viewMode
+	inputMode  *inputMode
+	activeMode mode
 }
 
 type Model struct {
@@ -43,15 +43,10 @@ type Model struct {
 	intersectionNodeNames data.List[string]
 }
 
-type View struct {
-	inputField *input.Component
-	nodes      *nodeselection.Component
-	root       tui.Component
-}
-
 func NewApplication(verbose bool) *Application {
 	application := Application{
 		verbose: verbose,
+		running: true,
 	}
 
 	return &application
@@ -72,7 +67,9 @@ func (application *Application) Start() error {
 	}
 
 	application.createModel()
-	application.createView()
+	application.viewMode = newViewMode(application)
+	application.inputMode = newInputMode(application)
+	application.activeMode = application.viewMode
 
 	application.eventLoop()
 
@@ -112,52 +109,14 @@ func (application *Application) initializeScreen() error {
 	return nil
 }
 
-func (application *Application) createView() {
-	model := &application.model
-
-	nodesView := nodeselection.New(model.selectedNodes, model.intersectionNodes, model.selectedItemIndex)
-	nodesView.SetOnSelectionChanged(func(value int) { model.selectedItemIndex.Set(value) })
-
-	inputTextField := input.New(model.input)
-	style := tcell.StyleDefault.Background(color.Red)
-	inputTextField.SetStyle(&style)
-	inputTextField.SetOnChange(func(s string) { model.input.Set(strings.ToLower(s)) })
-
-	root := docksouth.New(nodesView, inputTextField, 1)
-
-	application.view = View{
-		nodes: nodesView,
-		root:  root,
-	}
-}
-
 func (application *Application) eventLoop() {
 	// style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	screen := application.screen
-	model := &application.model
-	root := application.view.root
 
-	for {
-		// Update screen
-		screen.Clear()
+	for application.running {
+		activeMode := application.activeMode
 
-		grid := root.Render()
-		gridSize := grid.GetSize()
-		runes := make([]rune, 1)
-
-		timeBeforeUpdate := time.Now()
-
-		for y := range gridSize.Height {
-			for x := range gridSize.Width {
-				position := tui.Position{X: x, Y: y}
-				cell := grid.Get(position)
-				runes[0] = cell.Contents
-				screen.Put(x, y, string(runes), *cell.Style)
-			}
-		}
-
-		screen.Show()
-		slog.Debug("Screen updated", slog.String("duration", time.Since(timeBeforeUpdate).String()))
+		application.Render()
 
 		// Poll event (this can be in a select statement as well)
 		ev := <-screen.EventQ()
@@ -167,11 +126,13 @@ func (application *Application) eventLoop() {
 		case *tcell.EventResize:
 			width, height := event.Size()
 
-			root.Handle(tui.MsgResize{
-				Size: tui.Size{
-					Width:  width,
-					Height: height,
-				},
+			application.size = tui.Size{
+				Width:  width,
+				Height: height,
+			}
+
+			activeMode.Handle(tui.MsgResize{
+				Size: application.size,
 			})
 			screen.Sync()
 
@@ -179,50 +140,46 @@ func (application *Application) eventLoop() {
 			translation := translateKey(event)
 			slog.Debug("Key pressed", slog.String("key", translation))
 
-			switch translation {
-			case "q":
-				return
-
-			case "Enter":
-				selectedNode := model.intersectionNodes.At(model.selectedItemIndex.Get())
-				model.selectedNodes.Update(func(ns []*pkg.Node) []*pkg.Node { return append(ns, selectedNode) })
-
-			case "Delete":
-				model.selectedNodes.Update(func(ns []*pkg.Node) []*pkg.Node {
-					if len(ns) > 0 {
-						return ns[:len(ns)-1]
-					} else {
-						return ns
-					}
-				})
-
-			case "Esc":
-				application.model.input.Set("")
-
-			default:
-				message := tui.MsgKey{
-					Key: translateKey(event),
-				}
-				root.Handle(message)
+			message := tui.MsgKey{
+				Key: translateKey(event),
 			}
+			activeMode.Handle(message)
 
-		case *tcell.EventMouse:
-			x, y := event.Position()
-			position := tui.Position{X: x, Y: y}
-			clickHandler := grid.Get(position).OnClick
+			// case *tcell.EventMouse:
+			// 	x, y := event.Position()
+			// 	position := tui.Position{X: x, Y: y}
+			// 	clickHandler := grid.Get(position).OnClick
 
-			if clickHandler != nil && event.Buttons() == tcell.Button1 {
-				clickHandler()
-			}
-
-			// switch ev.Buttons() {
-			// case tcell.Button1, tcell.Button2:
-
-			// case tcell.ButtonNone:
-
-			// }
+			// 	if clickHandler != nil && event.Buttons() == tcell.Button1 {
+			// 		clickHandler()
+			// 	}
 		}
 	}
+}
+
+func (application *Application) Render() {
+	screen := application.screen
+	activeMode := application.activeMode
+
+	screen.Clear()
+
+	grid := activeMode.Render()
+	gridSize := grid.GetSize()
+	runes := make([]rune, 1)
+
+	timeBeforeUpdate := time.Now()
+
+	for y := range gridSize.Height {
+		for x := range gridSize.Width {
+			position := tui.Position{X: x, Y: y}
+			cell := grid.Get(position)
+			runes[0] = cell.Contents
+			screen.Put(x, y, string(runes), *cell.Style)
+		}
+	}
+
+	screen.Show()
+	slog.Debug("Screen updated", slog.String("duration", time.Since(timeBeforeUpdate).String()))
 }
 
 func (application *Application) createModel() {
@@ -341,4 +298,25 @@ func (application *Application) updateIntersectionNodeSelection(target string) {
 	}
 
 	application.model.selectedItemIndex.Set(bestMatchIndex)
+}
+
+func (application *Application) selectHighlightedNode() {
+	highlightedNodeIndex := application.model.selectedItemIndex.Get()
+	highlightedNode := application.model.intersectionNodes.At(highlightedNodeIndex)
+	application.model.selectedNodes.Update(func(ns []*pkg.Node) []*pkg.Node {
+		return append(ns, highlightedNode)
+	})
+}
+
+func (application *Application) unselectLastNode() {
+	if application.model.selectedNodes.Size() > 0 {
+		application.model.selectedNodes.Update(func(ns []*pkg.Node) []*pkg.Node {
+			return ns[:len(ns)-1]
+		})
+	}
+}
+
+func (application *Application) switchMode(mode mode) {
+	application.activeMode = mode
+	application.activeMode.Handle(tui.MsgResize{Size: application.size})
 }
