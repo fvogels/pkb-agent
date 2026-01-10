@@ -9,7 +9,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/input"
-	"pkb-agent/tui/component/stringlist"
+	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
 	"pkb-agent/util/pathlib"
@@ -39,9 +39,9 @@ type Model struct {
 }
 
 type View struct {
-	inputField        *input.Component
-	intersectionNodes *stringlist.Component
-	root              tui.Component
+	inputField *input.Component
+	nodes      *nodeselection.Component
+	root       tui.Component
 }
 
 func NewApplication(verbose bool) *Application {
@@ -114,19 +114,19 @@ func (application *Application) initializeScreen() error {
 func (application *Application) createView() {
 	model := &application.model
 
-	intersectionNodeView := stringlist.New(model.intersectionNodeNames, model.selectedItemIndex)
-	intersectionNodeView.SetOnSelectionChanged(func(value int) { model.selectedItemIndex.Set(value) })
+	nodesView := nodeselection.New(model.selectedNodes, model.intersectionNodes, model.selectedItemIndex)
+	nodesView.SetOnSelectionChanged(func(value int) { model.selectedItemIndex.Set(value) })
 
 	inputTextField := input.New(model.input)
 	style := tcell.StyleDefault.Background(color.Red)
 	inputTextField.SetStyle(&style)
 	inputTextField.SetOnChange(func(s string) { model.input.Set(strings.ToLower(s)) })
 
-	root := docksouth.New(intersectionNodeView, inputTextField, 1)
+	root := docksouth.New(nodesView, inputTextField, 1)
 
 	application.view = View{
-		intersectionNodes: intersectionNodeView,
-		root:              root,
+		nodes: nodesView,
+		root:  root,
 	}
 }
 
