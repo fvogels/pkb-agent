@@ -9,13 +9,14 @@ import (
 	"pkb-agent/graph/node/hybrid/actions/www"
 	markdownpage "pkb-agent/graph/node/hybrid/pages/markdown"
 	snippetpage "pkb-agent/graph/node/hybrid/pages/snippet"
+	"pkb-agent/tui"
+	"pkb-agent/tui/component/label"
+	"pkb-agent/tui/data"
 	"pkb-agent/util"
 	"pkb-agent/util/multifile"
 	"pkb-agent/util/pathlib"
 	"strings"
 	"weak"
-
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 const TypeID uint32 = 4
@@ -34,7 +35,7 @@ type nodeData struct {
 
 type Page interface {
 	GetCaption() string
-	CreateViewer() tea.Model
+	CreateViewer() tui.Component
 	GetActions() []node.Action
 }
 
@@ -83,14 +84,18 @@ func (rawNode *RawNode) getData() (*nodeData, error) {
 	return data, nil
 }
 
-func (rawNode *RawNode) GetViewer() tea.Model {
-	data, err := rawNode.getData()
-	if err != nil {
-		panic("error loading data")
-	}
-
-	return NewViewer(rawNode, data)
+func (node *RawNode) GetViewer() tui.Component {
+	return label.New(data.NewConstant("abc"))
 }
+
+// func (rawNode *RawNode) GetViewer() tea.Model {
+// 	data, err := rawNode.getData()
+// 	if err != nil {
+// 		panic("error loading data")
+// 	}
+
+// 	return NewViewer(rawNode, data)
+// }
 
 func (rawNode *RawNode) Serialize(writer io.Writer) error {
 	// bufferSize := 0

@@ -2,8 +2,7 @@ package pkg
 
 import (
 	"pkb-agent/graph/node"
-
-	tea "github.com/charmbracelet/bubbletea"
+	"pkb-agent/tui"
 )
 
 type Node struct {
@@ -29,6 +28,6 @@ func (node *Node) GetIndex() int {
 	return node.id
 }
 
-func (node *Node) GetViewer() tea.Model {
+func (node *Node) GetViewer() tui.Component {
 	return node.rawNode.GetViewer()
 }

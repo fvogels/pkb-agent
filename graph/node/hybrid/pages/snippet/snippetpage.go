@@ -3,8 +3,9 @@ package snippetpage
 import (
 	"pkb-agent/graph/node"
 	"pkb-agent/graph/node/hybrid/actions/clipboard"
-
-	tea "github.com/charmbracelet/bubbletea"
+	"pkb-agent/tui"
+	"pkb-agent/tui/component/label"
+	"pkb-agent/tui/data"
 )
 
 type Page struct {
@@ -25,8 +26,8 @@ func New(caption string, source string, language string) *Page {
 	}
 }
 
-func (page *Page) CreateViewer() tea.Model {
-	return NewModel(page.source, page.language)
+func (page *Page) CreateViewer() tui.Component {
+	return label.New(data.NewConstant("abc"))
 }
 
 func (page *Page) GetCaption() string {

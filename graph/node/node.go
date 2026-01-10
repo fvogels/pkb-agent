@@ -2,10 +2,10 @@ package node
 
 import (
 	"io"
+	"pkb-agent/tui"
 	"pkb-agent/util/pathlib"
 
 	"github.com/charmbracelet/bubbles/key"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Deserializer interface {
@@ -16,7 +16,7 @@ type RawNode interface {
 	GetName() string
 	GetSearchStrings() []string
 	GetLinks() []string
-	GetViewer() tea.Model
+	GetViewer() tui.Component
 	Serialize(io.Writer) error
 }
 

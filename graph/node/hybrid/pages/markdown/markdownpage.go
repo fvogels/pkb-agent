@@ -2,8 +2,9 @@ package markdownpage
 
 import (
 	"pkb-agent/graph/node"
-
-	tea "github.com/charmbracelet/bubbletea"
+	"pkb-agent/tui"
+	"pkb-agent/tui/component/label"
+	"pkb-agent/tui/data"
 )
 
 type Page struct {
@@ -18,8 +19,8 @@ func New(caption string, source string) *Page {
 	}
 }
 
-func (page *Page) CreateViewer() tea.Model {
-	return NewModel(page.source)
+func (page *Page) CreateViewer() tui.Component {
+	return label.New(data.NewConstant("abc"))
 }
 
 func (page *Page) GetCaption() string {

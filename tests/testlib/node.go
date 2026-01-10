@@ -2,8 +2,7 @@ package testlib
 
 import (
 	"io"
-
-	tea "github.com/charmbracelet/bubbletea"
+	"pkb-agent/tui"
 )
 
 type TestNode struct {
@@ -24,7 +23,7 @@ func (node *TestNode) GetLinks() []string {
 	return node.Links
 }
 
-func (node *TestNode) GetViewer() tea.Model {
+func (node *TestNode) GetViewer() tui.Component {
 	return nil
 }
 

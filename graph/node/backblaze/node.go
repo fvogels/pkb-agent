@@ -3,10 +3,11 @@ package backblaze
 import (
 	"encoding/binary"
 	"io"
+	"pkb-agent/tui"
+	"pkb-agent/tui/component/label"
+	"pkb-agent/tui/data"
 	"pkb-agent/util"
 	"strings"
-
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 const TypeID uint32 = 3
@@ -30,8 +31,8 @@ func (node *RawNode) GetLinks() []string {
 	return node.links
 }
 
-func (node *RawNode) GetViewer() tea.Model {
-	return NewViewer(node)
+func (node *RawNode) GetViewer() tui.Component {
+	return label.New(data.NewConstant("abc"))
 }
 
 func (node *RawNode) Serialize(writer io.Writer) error {
