@@ -31,7 +31,7 @@ func (node *RawNode) GetLinks() []string {
 }
 
 func (node *RawNode) GetViewer() tui.Component {
-	return label.New(data.NewConstant("abc"))
+	return label.New(data.NewConstant("bookmark"))
 }
 
 func (node *RawNode) Serialize(writer io.Writer) error {

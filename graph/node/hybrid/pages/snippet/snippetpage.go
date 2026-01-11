@@ -27,7 +27,7 @@ func New(caption string, source string, language string) *Page {
 }
 
 func (page *Page) CreateViewer() tui.Component {
-	return label.New(data.NewConstant("abc"))
+	return label.New(data.NewConstant("snippet page"))
 }
 
 func (page *Page) GetCaption() string {

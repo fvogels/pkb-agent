@@ -20,7 +20,7 @@ func New(caption string, source string) *Page {
 }
 
 func (page *Page) CreateViewer() tui.Component {
-	return label.New(data.NewConstant("abc"))
+	return label.New(data.NewConstant("markdown page"))
 }
 
 func (page *Page) GetCaption() string {

@@ -85,7 +85,7 @@ func (rawNode *RawNode) getData() (*nodeData, error) {
 }
 
 func (node *RawNode) GetViewer() tui.Component {
-	return label.New(data.NewConstant("abc"))
+	return label.New(data.NewConstant("hybrid"))
 }
 
 // func (rawNode *RawNode) GetViewer() tea.Model {
