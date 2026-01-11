@@ -109,24 +109,28 @@ func (application *Application) initializeScreen() error {
 }
 
 func (application *Application) eventLoop() {
-	// style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	for application.running {
 		application.Render()
-		application.HandleEvents()
+
+		event := application.WaitForEvent()
+		for event != nil && application.running {
+			application.HandleEvent(event)
+			event = application.GetNextEvent()
+		}
 	}
 }
 
-func (application *Application) HandleEvents() {
-	continueLoop := true
+func (application *Application) WaitForEvent() tcell.Event {
+	return <-application.screen.EventQ()
+}
 
-	for continueLoop {
-		select {
-		case event := <-application.screen.EventQ():
-			application.HandleEvent(event)
+func (application *Application) GetNextEvent() tcell.Event {
+	select {
+	case event := <-application.screen.EventQ():
+		return event
 
-		default:
-			continueLoop = false
-		}
+	default:
+		return nil
 	}
 }
 
