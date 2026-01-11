@@ -2,7 +2,9 @@ package application
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/tui/component/docknorth"
 	"pkb-agent/tui/component/docksouth"
+	"pkb-agent/tui/component/holder"
 	"pkb-agent/tui/component/input"
 	"pkb-agent/tui/component/nodeselection"
 	"strings"
@@ -25,11 +27,20 @@ func newInputMode(application *Application) *inputMode {
 	nodesView.SetOnSelectionChanged(func(value int) { model.highlightedNodeIndex.Set(value) })
 
 	inputField := input.New(model.input)
+	activeNodeViewer := holder.New(application.model.highlightedNodeViewer)
 	style := tcell.StyleDefault.Background(color.Red)
 	inputField.SetStyle(&style)
 	inputField.SetOnChange(func(s string) { model.input.Set(strings.ToLower(s)) })
 
-	root := docksouth.New(nodesView, inputField, 1)
+	root := docksouth.New(
+		docknorth.New(
+			nodesView,
+			activeNodeViewer,
+			10,
+		),
+		inputField,
+		1,
+	)
 
 	result := inputMode{
 		application: application,

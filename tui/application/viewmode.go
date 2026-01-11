@@ -2,7 +2,9 @@ package application
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/tui/component/docknorth"
 	"pkb-agent/tui/component/docksouth"
+	"pkb-agent/tui/component/holder"
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/data"
@@ -19,12 +21,20 @@ func newViewMode(application *Application) *viewMode {
 	model := &application.model
 
 	nodesView := nodeselection.New(model.selectedNodes, model.intersectionNodes, model.highlightedNodeIndex)
-	nodesView.SetOnSelectionChanged(func(value int) { model.highlightedNodeIndex.Set(value) })
-
+	activeNodeViewer := holder.New(application.model.highlightedNodeViewer)
 	caption := data.NewConstant("hello")
 	statusBar := label.New(caption)
+	root := docksouth.New(
+		docknorth.New(
+			nodesView,
+			activeNodeViewer,
+			10,
+		),
+		statusBar,
+		1,
+	)
 
-	root := docksouth.New(nodesView, statusBar, 1)
+	nodesView.SetOnSelectionChanged(func(value int) { model.highlightedNodeIndex.Set(value) })
 
 	result := viewMode{
 		application: application,
@@ -69,3 +79,10 @@ func (mode *viewMode) onKey(message tui.MsgKey) {
 		mode.root.Handle(message)
 	}
 }
+
+// func (mode *viewMode) updateLayout() {
+// 	message := tui.MsgResize{
+// 		Size: mode.application.size,
+// 	}
+// 	mode.root.Handle(message)
+// }

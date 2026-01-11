@@ -7,7 +7,6 @@ import (
 	"pkb-agent/graph/loaders/sequence"
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
-	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
 	"pkb-agent/util/pathlib"
 	"slices"
@@ -41,6 +40,7 @@ type Model struct {
 	intersectionNodes     *data.SliceList[*pkg.Node]
 	highlightedNodeIndex  *data.Variable[int]
 	intersectionNodeNames data.List[string]
+	highlightedNodeViewer data.Value[tui.Component]
 }
 
 func NewApplication(verbose bool) *Application {
@@ -131,9 +131,13 @@ func (application *Application) eventLoop() {
 				Height: height,
 			}
 
-			activeMode.Handle(tui.MsgResize{
+			message := tui.MsgResize{
 				Size: application.size,
-			})
+			}
+
+			application.viewMode.Handle(message)
+			application.inputMode.Handle(message)
+
 			screen.Sync()
 
 		case *tcell.EventKey:
@@ -191,6 +195,7 @@ func (application *Application) createModel() {
 	selectedNodes := data.NewSliceList[*pkg.Node](nil)
 	intersectionNodes := data.NewSliceList[*pkg.Node](nil)
 	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
+	highlightedNodeViewer := data.NewVariable[tui.Component](nil)
 
 	// Cause intersection node list to be updated whenever the input or the selected nodes change
 	updateIntersectionNodes := func() {
@@ -199,6 +204,24 @@ func (application *Application) createModel() {
 	}
 	updateIntersectionNodes()
 	data.DefineReaction(updateIntersectionNodes, input, selectedNodes)
+
+	// Cause node viewer to be updated automatically
+	updateHighlightedNodeViewer := func() {
+		var viewer tui.Component
+
+		if intersectionNodes.Size() > 0 {
+			viewer = intersectionNodes.At(highlightedNodeIndex.Get()).GetViewer()
+		} else if selectedNodes.Size() > 0 {
+			viewer = selectedNodes.At(selectedNodes.Size() - 1).GetViewer()
+		} else {
+			// Should not happen
+			viewer = nil
+		}
+
+		highlightedNodeViewer.Set(viewer)
+	}
+	updateHighlightedNodeViewer()
+	data.DefineReaction(updateHighlightedNodeViewer, highlightedNodeIndex, selectedNodes)
 
 	input.Observe(func() {
 		if len(input.Get()) > 0 {
@@ -212,6 +235,7 @@ func (application *Application) createModel() {
 		intersectionNodes:     intersectionNodes,
 		highlightedNodeIndex:  highlightedNodeIndex,
 		intersectionNodeNames: intersectionNodeNames,
+		highlightedNodeViewer: highlightedNodeViewer,
 	}
 
 	application.model = model
@@ -240,22 +264,6 @@ func translateKey(event *tcell.EventKey) string {
 		return event.Str()
 	} else {
 		return tcell.KeyNames[event.Key()]
-	}
-}
-
-type ItemList struct {
-	items [][]rune
-	style *tui.Style
-}
-
-func (list ItemList) Size() int {
-	return len(list.items)
-}
-
-func (list ItemList) At(index int) stringsview.Item {
-	return stringsview.Item{
-		Runes: list.items[index],
-		Style: list.style,
 	}
 }
 
