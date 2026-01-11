@@ -25,6 +25,7 @@ func newViewMode(application *Application) *viewMode {
 	caption := data.NewConstant("hello")
 	statusBar := label.New("view:statusbar", caption)
 	root := docksouth.New(
+		"view:docksouth[main|statusbar]",
 		docknorth.New(
 			"view:docknorth[nodes|nodeviewer]",
 			nodesView,

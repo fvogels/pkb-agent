@@ -33,6 +33,7 @@ func newInputMode(application *Application) *inputMode {
 	inputField.SetOnChange(func(s string) { model.input.Set(strings.ToLower(s)) })
 
 	root := docksouth.New(
+		"input:[main|input]",
 		docknorth.New(
 			"input:docknorth[nodes|nodeviewer]",
 			nodesView,

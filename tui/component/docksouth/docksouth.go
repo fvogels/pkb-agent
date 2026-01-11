@@ -5,14 +5,16 @@ import (
 )
 
 type Component struct {
+	name              string
 	size              tui.Size
 	mainChild         tui.Component
 	dockedChild       tui.Component
 	dockedChildHeight int
 }
 
-func New(mainChild tui.Component, dockedChild tui.Component, dockedChildHeight int) *Component {
+func New(name string, mainChild tui.Component, dockedChild tui.Component, dockedChildHeight int) *Component {
 	return &Component{
+		name:              name,
 		mainChild:         mainChild,
 		dockedChild:       dockedChild,
 		dockedChildHeight: dockedChildHeight,
