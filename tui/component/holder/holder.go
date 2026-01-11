@@ -1,7 +1,6 @@
 package holder
 
 import (
-	"log/slog"
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
 )
@@ -18,7 +17,6 @@ func New(child data.Value[tui.Component]) *Component {
 
 	// Make sure that whenever a new component is put in, it is resized
 	child.Observe(func() {
-		slog.Debug("!!!", "w", component.size.Width, "h", component.size.Height)
 		c := child.Get()
 
 		if c != nil {
