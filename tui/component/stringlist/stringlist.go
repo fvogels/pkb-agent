@@ -25,6 +25,7 @@ func New(items data.List[string], selectedItem data.Value[int]) *Component {
 	defaultEmptyStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	defaultItemStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	defaultSelectedItemStyle := tcell.StyleDefault.Background(color.Gray).Foreground(color.Reset)
+
 	subComponentList := SubComponentList{
 		items:         items,
 		selectedIndex: selectedItem,
@@ -43,10 +44,16 @@ func New(items data.List[string], selectedItem data.Value[int]) *Component {
 		subComponent:      subComponent,
 	}
 
+	// update selection when item clicked
 	subComponent.SetOnItemClicked(func(index int) {
 		if component.onSelectionChanged != nil {
 			component.onSelectionChanged(index)
 		}
+	})
+
+	// ensure that selected item is visible at all times
+	selectedItem.Observe(func() {
+		component.ensureSelectedItemIsVisible()
 	})
 
 	return &component
@@ -133,8 +140,6 @@ func (component *Component) onKey(message tui.MsgKey) {
 	case "PgUp":
 		onSelectionChanged(selectedIndex - pageSize)
 	}
-
-	component.ensureSelectedItemIsVisible()
 }
 
 type SubComponentList struct {
