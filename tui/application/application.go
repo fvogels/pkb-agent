@@ -112,15 +112,26 @@ func (application *Application) eventLoop() {
 	// style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	for application.running {
 		application.Render()
-		application.HandleMessages()
+		application.HandleEvents()
 	}
 }
 
-func (application *Application) HandleMessages() {
-	ev := <-application.screen.EventQ()
+func (application *Application) HandleEvents() {
+	continueLoop := true
 
-	// Process event
-	switch event := ev.(type) {
+	for continueLoop {
+		select {
+		case event := <-application.screen.EventQ():
+			application.HandleEvent(event)
+
+		default:
+			continueLoop = false
+		}
+	}
+}
+
+func (application *Application) HandleEvent(event tcell.Event) {
+	switch event := event.(type) {
 	case *tcell.EventResize:
 		width, height := event.Size()
 
