@@ -225,7 +225,7 @@ func (application *Application) createModel() {
 
 	input.Observe(func() {
 		if len(input.Get()) > 0 {
-			application.updateIntersectionNodeSelection(input.Get())
+			application.updateHighlightedNode(input.Get())
 		}
 	})
 
@@ -283,7 +283,7 @@ func (application *Application) loadGraph() error {
 	return nil
 }
 
-func (application *Application) updateIntersectionNodeSelection(target string) {
+func (application *Application) updateHighlightedNode(target string) {
 	nodes := data.CopyListToSlice(application.model.intersectionNodes)
 
 	bestMatchIndex, found := slices.BinarySearchFunc(
