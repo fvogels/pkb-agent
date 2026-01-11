@@ -76,6 +76,8 @@ func (component *Component) updateLayout() {
 
 	slog.Debug(
 		"updated layout in docknorth",
+		slog.String("name", component.name),
+		slog.Int("totalHeight", component.size.Height),
 		slog.Int("dockedChildHeight", dockedChildHeight),
 		slog.Int("mainChildHeight", mainChildHeight),
 	)
