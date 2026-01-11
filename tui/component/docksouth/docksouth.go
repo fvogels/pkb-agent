@@ -41,19 +41,26 @@ func (component *Component) Render() tui.Grid {
 
 func (component *Component) onResize(message tui.MsgResize) {
 	component.size = message.Size
+	component.updateLayout()
+}
+
+func (component *Component) updateLayout() {
+	width := component.size.Width
+	dockedChildHeight := component.dockedChildHeight
+	mainChildHeight := component.size.Height - component.dockedChildHeight
 
 	dockedChildSizeMessage := tui.MsgResize{
 		Size: tui.Size{
-			Width:  message.Size.Width,
-			Height: component.dockedChildHeight,
+			Width:  width,
+			Height: dockedChildHeight,
 		},
 	}
 	component.dockedChild.Handle(dockedChildSizeMessage)
 
 	mainChildSizeMessage := tui.MsgResize{
 		Size: tui.Size{
-			Width:  message.Size.Width,
-			Height: component.size.Height - component.dockedChildHeight,
+			Width:  width,
+			Height: mainChildHeight,
 		},
 	}
 	component.mainChild.Handle(mainChildSizeMessage)
