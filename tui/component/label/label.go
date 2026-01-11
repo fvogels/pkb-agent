@@ -1,6 +1,7 @@
 package label
 
 import (
+	"log/slog"
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
 
@@ -34,13 +35,15 @@ func (component *Component) Handle(message tui.Message) {
 }
 
 func (component *Component) Render() tui.Grid {
-	return &grid{
-		contents: []rune(component.contents.Get()),
-		style:    component.style,
-		size:     component.size,
-	}
+	return newGrid(component, []rune(component.contents.Get()))
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
+	slog.Debug(
+		"label resized",
+		slog.Int("width", message.Size.Width),
+		slog.Int("height", message.Size.Height),
+		slog.String("name", component.name),
+	)
 	component.size = message.Size
 }

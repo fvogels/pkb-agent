@@ -6,18 +6,27 @@ import (
 )
 
 type grid struct {
+	parent   *Component
 	contents []rune
-	style    *tui.Style
-	size     tui.Size
+}
+
+func newGrid(parent *Component, contents []rune) *grid {
+	result := grid{
+		parent:   parent,
+		contents: contents,
+	}
+
+	return &result
 }
 
 func (grid *grid) GetSize() tui.Size {
-	return grid.size
+	return grid.parent.size
 }
 
 func (grid *grid) Get(position tui.Position) tui.Cell {
 	if tui.SafeMode && !grid.isValidPosition(position) {
-		panic(fmt.Sprintf("invalid coordinates (%d, %d), size: %dx%d, contents: %s", position.X, position.Y, grid.size.Width, grid.size.Height, string(grid.contents)))
+		size := grid.parent.size
+		panic(fmt.Sprintf("invalid grid access: parent: %s, coordinates (%d, %d), size: %dx%d, contents: %s", grid.parent.name, position.X, position.Y, size.Width, size.Height, string(grid.contents)))
 	}
 
 	x := position.X
@@ -32,7 +41,7 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 
 	cell := tui.Cell{
 		Contents: contents,
-		Style:    grid.style,
+		Style:    grid.parent.style,
 	}
 
 	return cell
