@@ -11,25 +11,45 @@ import (
 )
 
 type viewMode struct {
-	application *Application
-	statusBar   *label.Component
-	nodes       *nodeselection.Component
-	root        tui.Component
+	application                 *Application
+	statusBar                   *label.Component
+	highlightedNodeViewer       data.Value[tui.Component]
+	highlightedNodeViewerHolder *holder.Component
+	nodes                       *nodeselection.Component
+	root                        tui.Component
 }
 
 func newViewMode(application *Application) *viewMode {
 	model := &application.model
 
 	nodesView := nodeselection.New(model.selectedNodes, model.intersectionNodes, model.highlightedNodeIndex)
-	activeNodeViewer := holder.New(application.model.highlightedNodeViewer)
 	caption := data.NewConstant("hello")
 	statusBar := label.New("view:statusbar", caption)
+	highlightedNodeViewer := data.NewVariable[tui.Component](nil)
+	highlightedNodeViewerHolder := holder.New(highlightedNodeViewer)
+
+	data.DefineReaction(func() {
+		var viewer tui.Component
+
+		if model.intersectionNodes.Size() > 0 {
+			viewer = model.intersectionNodes.At(model.highlightedNodeIndex.Get()).GetViewer()
+		} else if model.selectedNodes.Size() > 0 {
+			viewer = model.selectedNodes.At(model.selectedNodes.Size() - 1).GetViewer()
+		} else {
+			// Should not happen
+			viewer = nil
+		}
+
+		highlightedNodeViewer.Set(viewer)
+
+	}, model.highlightedNodeIndex, model.selectedNodes)
+
 	root := docksouth.New(
 		"view:docksouth[main|statusbar]",
 		docknorth.New(
 			"view:docknorth[nodes|nodeviewer]",
 			nodesView,
-			activeNodeViewer,
+			highlightedNodeViewerHolder,
 			20,
 		),
 		statusBar,
@@ -37,6 +57,24 @@ func newViewMode(application *Application) *viewMode {
 	)
 
 	nodesView.SetOnSelectionChanged(func(value int) { model.highlightedNodeIndex.Set(value) })
+
+	// // Cause node viewer to be updated automatically
+	// updateHighlightedNodeViewer := func() {
+	// 	var viewer tui.Component
+
+	// 	if intersectionNodes.Size() > 0 {
+	// 		viewer = intersectionNodes.At(highlightedNodeIndex.Get()).GetViewer()
+	// 	} else if selectedNodes.Size() > 0 {
+	// 		viewer = selectedNodes.At(selectedNodes.Size() - 1).GetViewer()
+	// 	} else {
+	// 		// Should not happen
+	// 		viewer = nil
+	// 	}
+
+	// 	highlightedNodeViewer.Set(viewer)
+	// }
+	// updateHighlightedNodeViewer()
+	// data.DefineReaction(updateHighlightedNodeViewer, highlightedNodeIndex, selectedNodes)
 
 	result := viewMode{
 		application: application,

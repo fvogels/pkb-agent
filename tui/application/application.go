@@ -40,7 +40,6 @@ type Model struct {
 	intersectionNodes     *data.SliceList[*pkg.Node]
 	highlightedNodeIndex  *data.Variable[int]
 	intersectionNodeNames data.List[string]
-	highlightedNodeViewer data.Value[tui.Component]
 }
 
 func NewApplication(verbose bool) *Application {
@@ -126,6 +125,12 @@ func (application *Application) eventLoop() {
 		case *tcell.EventResize:
 			width, height := event.Size()
 
+			slog.Debug(
+				"screen resized",
+				slog.Int("width", width),
+				slog.Int("height", height),
+			)
+
 			application.size = tui.Size{
 				Width:  width,
 				Height: height,
@@ -134,9 +139,7 @@ func (application *Application) eventLoop() {
 			message := tui.MsgResize{
 				Size: application.size,
 			}
-
-			application.viewMode.Handle(message)
-			application.inputMode.Handle(message)
+			application.activeMode.Handle(message)
 
 			screen.Sync()
 
@@ -195,7 +198,6 @@ func (application *Application) createModel() {
 	selectedNodes := data.NewSliceList[*pkg.Node](nil)
 	intersectionNodes := data.NewSliceList[*pkg.Node](nil)
 	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
-	highlightedNodeViewer := data.NewVariable[tui.Component](nil)
 
 	// Cause intersection node list to be updated whenever the input or the selected nodes change
 	updateIntersectionNodes := func() {
@@ -204,24 +206,6 @@ func (application *Application) createModel() {
 	}
 	updateIntersectionNodes()
 	data.DefineReaction(updateIntersectionNodes, input, selectedNodes)
-
-	// Cause node viewer to be updated automatically
-	updateHighlightedNodeViewer := func() {
-		var viewer tui.Component
-
-		if intersectionNodes.Size() > 0 {
-			viewer = intersectionNodes.At(highlightedNodeIndex.Get()).GetViewer()
-		} else if selectedNodes.Size() > 0 {
-			viewer = selectedNodes.At(selectedNodes.Size() - 1).GetViewer()
-		} else {
-			// Should not happen
-			viewer = nil
-		}
-
-		highlightedNodeViewer.Set(viewer)
-	}
-	updateHighlightedNodeViewer()
-	data.DefineReaction(updateHighlightedNodeViewer, highlightedNodeIndex, selectedNodes)
 
 	input.Observe(func() {
 		if len(input.Get()) > 0 {
@@ -235,7 +219,6 @@ func (application *Application) createModel() {
 		intersectionNodes:     intersectionNodes,
 		highlightedNodeIndex:  highlightedNodeIndex,
 		intersectionNodeNames: intersectionNodeNames,
-		highlightedNodeViewer: highlightedNodeViewer,
 	}
 
 	application.model = model

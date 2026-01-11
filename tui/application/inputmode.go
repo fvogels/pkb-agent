@@ -7,6 +7,7 @@ import (
 	"pkb-agent/tui/component/holder"
 	"pkb-agent/tui/component/input"
 	"pkb-agent/tui/component/nodeselection"
+	"pkb-agent/tui/data"
 	"strings"
 
 	"github.com/gdamore/tcell/v3"
@@ -14,10 +15,12 @@ import (
 )
 
 type inputMode struct {
-	application *Application
-	inputField  *input.Component
-	nodes       *nodeselection.Component
-	root        tui.Component
+	application                 *Application
+	inputField                  *input.Component
+	highlightedNodeViewer       data.Value[tui.Component]
+	highlightedNodeViewerHolder *holder.Component
+	nodes                       *nodeselection.Component
+	root                        tui.Component
 }
 
 func newInputMode(application *Application) *inputMode {
@@ -26,8 +29,25 @@ func newInputMode(application *Application) *inputMode {
 	nodesView := nodeselection.New(model.selectedNodes, model.intersectionNodes, model.highlightedNodeIndex)
 	nodesView.SetOnSelectionChanged(func(value int) { model.highlightedNodeIndex.Set(value) })
 
+	highlightedNodeViewer := data.NewVariable[tui.Component](nil)
+	highlightedNodeViewerHolder := holder.New(highlightedNodeViewer)
+	data.DefineReaction(func() {
+		var viewer tui.Component
+
+		if model.intersectionNodes.Size() > 0 {
+			viewer = model.intersectionNodes.At(model.highlightedNodeIndex.Get()).GetViewer()
+		} else if model.selectedNodes.Size() > 0 {
+			viewer = model.selectedNodes.At(model.selectedNodes.Size() - 1).GetViewer()
+		} else {
+			// Should not happen
+			viewer = nil
+		}
+
+		highlightedNodeViewer.Set(viewer)
+
+	}, model.highlightedNodeIndex, model.selectedNodes)
+
 	inputField := input.New(model.input)
-	activeNodeViewer := holder.New(application.model.highlightedNodeViewer)
 	style := tcell.StyleDefault.Background(color.Red)
 	inputField.SetStyle(&style)
 	inputField.SetOnChange(func(s string) { model.input.Set(strings.ToLower(s)) })
@@ -37,7 +57,7 @@ func newInputMode(application *Application) *inputMode {
 		docknorth.New(
 			"input:docknorth[nodes|nodeviewer]",
 			nodesView,
-			activeNodeViewer,
+			highlightedNodeViewerHolder,
 			30,
 		),
 		inputField,
