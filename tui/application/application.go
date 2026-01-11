@@ -117,9 +117,7 @@ func (application *Application) eventLoop() {
 }
 
 func (application *Application) HandleMessages() {
-	screen := application.screen
-
-	ev := <-screen.EventQ()
+	ev := <-application.screen.EventQ()
 
 	// Process event
 	switch event := ev.(type) {
@@ -142,7 +140,7 @@ func (application *Application) HandleMessages() {
 		}
 		application.activeMode.Handle(message)
 
-		screen.Sync()
+		application.screen.Sync()
 
 	case *tcell.EventKey:
 		translation := translateKey(event)
