@@ -32,7 +32,7 @@ func (node *RawNode) GetLinks() []string {
 }
 
 func (node *RawNode) GetViewer() tui.Component {
-	return label.New(data.NewConstant("backblaze"))
+	return label.New("backblazeviewer", data.NewConstant("backblaze"))
 }
 
 func (node *RawNode) Serialize(writer io.Writer) error {

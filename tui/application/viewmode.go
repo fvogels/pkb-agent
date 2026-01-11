@@ -23,12 +23,13 @@ func newViewMode(application *Application) *viewMode {
 	nodesView := nodeselection.New(model.selectedNodes, model.intersectionNodes, model.highlightedNodeIndex)
 	activeNodeViewer := holder.New(application.model.highlightedNodeViewer)
 	caption := data.NewConstant("hello")
-	statusBar := label.New(caption)
+	statusBar := label.New("view:statusbar", caption)
 	root := docksouth.New(
 		docknorth.New(
+			"view:docknorth[nodes|nodeviewer]",
 			nodesView,
 			activeNodeViewer,
-			10,
+			20,
 		),
 		statusBar,
 		1,

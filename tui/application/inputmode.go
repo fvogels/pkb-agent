@@ -34,9 +34,10 @@ func newInputMode(application *Application) *inputMode {
 
 	root := docksouth.New(
 		docknorth.New(
+			"input:docknorth[nodes|nodeviewer]",
 			nodesView,
 			activeNodeViewer,
-			10,
+			30,
 		),
 		inputField,
 		1,

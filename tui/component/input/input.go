@@ -18,7 +18,7 @@ type Component struct {
 
 func New(contents data.Value[string]) *Component {
 	style := tcell.StyleDefault
-	subComponent := label.New(contents)
+	subComponent := label.New("input[label]", contents)
 	subComponent.SetStyle(&style)
 
 	return &Component{

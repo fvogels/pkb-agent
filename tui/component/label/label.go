@@ -8,13 +8,15 @@ import (
 )
 
 type Component struct {
+	name     string
 	size     tui.Size
 	contents data.Value[string]
 	style    *tui.Style
 }
 
-func New(contents data.Value[string]) *Component {
+func New(name string, contents data.Value[string]) *Component {
 	return &Component{
+		name:     name,
 		contents: contents,
 		style:    &tcell.StyleDefault,
 	}

@@ -40,7 +40,12 @@ func New(selectedNodes data.List[*pkg.Node], nodeIntersection data.List[*pkg.Nod
 	})
 	nodeIntersectionView := stringlist.New(nodeIntersectionItems, selectedIndex)
 
-	root := docknorth.New(selectedNodesView, nodeIntersectionView, 0)
+	root := docknorth.New(
+		"nodeselection[selected|intersection]",
+		selectedNodesView,
+		nodeIntersectionView,
+		0,
+	)
 
 	component := Component{
 		selectedNodes:        selectedNodes,

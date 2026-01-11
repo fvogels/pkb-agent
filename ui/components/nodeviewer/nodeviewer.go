@@ -116,7 +116,7 @@ func (model Model) onSetNode(message MsgSetNode) (Model, tea.Cmd) {
 	}, &commands)
 
 	// Get viewer
-	model.viewer = message.Node.GetViewer()
+	model.viewer = nil // message.Node.GetViewer()
 
 	commands = append(commands, model.viewer.Init())
 

@@ -30,7 +30,7 @@ func (node *RawNode) GetLinks() []string {
 }
 
 func (node *RawNode) GetViewer() tui.Component {
-	return label.New(data.NewConstant("atom"))
+	return label.New("atomviewer", data.NewConstant("atom"))
 }
 
 func (node *RawNode) Serialize(writer io.Writer) error {
