@@ -58,24 +58,6 @@ func newViewMode(application *Application) *viewMode {
 
 	nodesView.SetOnSelectionChanged(func(value int) { model.highlightedNodeIndex.Set(value) })
 
-	// // Cause node viewer to be updated automatically
-	// updateHighlightedNodeViewer := func() {
-	// 	var viewer tui.Component
-
-	// 	if intersectionNodes.Size() > 0 {
-	// 		viewer = intersectionNodes.At(highlightedNodeIndex.Get()).GetViewer()
-	// 	} else if selectedNodes.Size() > 0 {
-	// 		viewer = selectedNodes.At(selectedNodes.Size() - 1).GetViewer()
-	// 	} else {
-	// 		// Should not happen
-	// 		viewer = nil
-	// 	}
-
-	// 	highlightedNodeViewer.Set(viewer)
-	// }
-	// updateHighlightedNodeViewer()
-	// data.DefineReaction(updateHighlightedNodeViewer, highlightedNodeIndex, selectedNodes)
-
 	result := viewMode{
 		application: application,
 		statusBar:   statusBar,
