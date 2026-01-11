@@ -1,7 +1,7 @@
 package main
 
 import (
-	"pkb-agent/cli"
+	"pkb-agent/tui/application"
 
 	"github.com/joho/godotenv"
 )
@@ -11,5 +11,10 @@ func main() {
 		panic("error loading .env file")
 	}
 
-	cli.RunCLI()
+	// cli.RunCLI()
+
+	verbose := true
+	app := application.NewApplication(verbose)
+	defer app.Close()
+	app.Start()
 }

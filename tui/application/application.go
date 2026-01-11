@@ -110,57 +110,57 @@ func (application *Application) initializeScreen() error {
 
 func (application *Application) eventLoop() {
 	// style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
+	for application.running {
+		application.Render()
+		application.HandleMessages()
+	}
+}
+
+func (application *Application) HandleMessages() {
 	screen := application.screen
 
-	for application.running {
-		activeMode := application.activeMode
+	ev := <-screen.EventQ()
 
-		application.Render()
+	// Process event
+	switch event := ev.(type) {
+	case *tcell.EventResize:
+		width, height := event.Size()
 
-		// Poll event (this can be in a select statement as well)
-		ev := <-screen.EventQ()
+		slog.Debug(
+			"screen resized",
+			slog.Int("width", width),
+			slog.Int("height", height),
+		)
 
-		// Process event
-		switch event := ev.(type) {
-		case *tcell.EventResize:
-			width, height := event.Size()
-
-			slog.Debug(
-				"screen resized",
-				slog.Int("width", width),
-				slog.Int("height", height),
-			)
-
-			application.size = tui.Size{
-				Width:  width,
-				Height: height,
-			}
-
-			message := tui.MsgResize{
-				Size: application.size,
-			}
-			application.activeMode.Handle(message)
-
-			screen.Sync()
-
-		case *tcell.EventKey:
-			translation := translateKey(event)
-			slog.Debug("Key pressed", slog.String("key", translation))
-
-			message := tui.MsgKey{
-				Key: translateKey(event),
-			}
-			activeMode.Handle(message)
-
-			// case *tcell.EventMouse:
-			// 	x, y := event.Position()
-			// 	position := tui.Position{X: x, Y: y}
-			// 	clickHandler := grid.Get(position).OnClick
-
-			// 	if clickHandler != nil && event.Buttons() == tcell.Button1 {
-			// 		clickHandler()
-			// 	}
+		application.size = tui.Size{
+			Width:  width,
+			Height: height,
 		}
+
+		message := tui.MsgResize{
+			Size: application.size,
+		}
+		application.activeMode.Handle(message)
+
+		screen.Sync()
+
+	case *tcell.EventKey:
+		translation := translateKey(event)
+		slog.Debug("Key pressed", slog.String("key", translation))
+
+		message := tui.MsgKey{
+			Key: translateKey(event),
+		}
+		application.activeMode.Handle(message)
+
+		// case *tcell.EventMouse:
+		// 	x, y := event.Position()
+		// 	position := tui.Position{X: x, Y: y}
+		// 	clickHandler := grid.Get(position).OnClick
+
+		// 	if clickHandler != nil && event.Buttons() == tcell.Button1 {
+		// 		clickHandler()
+		// 	}
 	}
 }
 
