@@ -1,6 +1,7 @@
 package label
 
 import (
+	"fmt"
 	"pkb-agent/tui"
 )
 
@@ -16,7 +17,7 @@ func (grid *grid) GetSize() tui.Size {
 
 func (grid *grid) Get(position tui.Position) tui.Cell {
 	if tui.SafeMode && !grid.isValidPosition(position) {
-		panic("invalid coordinates")
+		panic(fmt.Sprintf("invalid coordinates: %d, %d, size: %dx%d, contents: %s", position.X, position.Y, grid.size.Width, grid.size.Height, string(grid.contents)))
 	}
 
 	x := position.X
