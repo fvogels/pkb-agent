@@ -8,6 +8,8 @@ import (
 	"pkb-agent/pkg"
 	"pkb-agent/pkg/loaders/sequence"
 	"pkb-agent/tui"
+	"pkb-agent/tui/component/keyview"
+	"pkb-agent/tui/data"
 	"pkb-agent/tui/model"
 	"pkb-agent/util/pathlib"
 	"slices"
@@ -34,6 +36,7 @@ type Application struct {
 	viewMode     *viewMode
 	inputMode    *inputMode
 	activeMode   mode
+	keyBindings  data.Variable[list.List[keyview.KeyBinding]]
 }
 
 func NewApplication(verbose bool) *Application {
@@ -65,6 +68,7 @@ func (application *Application) Start() error {
 	application.viewMode = newViewMode(application)
 	application.inputMode = newInputMode(application)
 	application.activeMode = application.viewMode
+	application.keyBindings = data.NewVariable(list.New[keyview.KeyBinding]())
 
 	application.eventLoop()
 

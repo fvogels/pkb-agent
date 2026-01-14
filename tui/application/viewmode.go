@@ -7,14 +7,14 @@ import (
 	"pkb-agent/tui/component/docknorth"
 	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/holder"
-	"pkb-agent/tui/component/label"
+	"pkb-agent/tui/component/keyview"
 	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/data"
 )
 
 type viewMode struct {
 	application                 *Application
-	statusBar                   *label.Component
+	statusBar                   tui.Component
 	highlightedNodeViewer       data.Value[tui.Component]
 	highlightedNodeViewerHolder *holder.Component
 	nodes                       *nodeselection.Component
@@ -25,8 +25,7 @@ func newViewMode(application *Application) *viewMode {
 	model := &application.model
 
 	nodesView := nodeselection.New(model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
-	caption := data.NewConstant("hello")
-	statusBar := label.New("view:statusbar", caption)
+	statusBar := keyview.New(application.messageQueue, "status bar", &application.keyBindings)
 	highlightedNodeViewer := data.MapValue3(
 		model.HighlightedNodeIndex(),
 		model.IntersectionNodes(),
