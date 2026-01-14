@@ -10,7 +10,7 @@ import (
 	"pkb-agent/pkg/node"
 	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
-	"pkb-agent/zipfile"
+	"pkb-agent/util/zipfile"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
