@@ -35,7 +35,7 @@ func (update *ModelUpdate) Apply() {
 }
 
 func (update *ModelUpdate) SelectHighlightedNode() {
-	model := update.updatedModel
+	model := &update.updatedModel
 	highlightedNode := model.GetHighlightedNode()
 	updatedSelectedNodes := list.Append(model.selectedNodes.Get(), highlightedNode)
 	model.selectedNodes.Set(updatedSelectedNodes)
