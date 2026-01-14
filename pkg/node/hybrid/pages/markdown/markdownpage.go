@@ -3,7 +3,7 @@ package markdownpage
 import (
 	"pkb-agent/pkg/node"
 	"pkb-agent/tui"
-	"pkb-agent/tui/component/label"
+	"pkb-agent/tui/component/markdownview"
 	"pkb-agent/tui/data"
 )
 
@@ -20,7 +20,7 @@ func New(caption string, source string) *Page {
 }
 
 func (page *Page) CreateViewer() tui.Component {
-	return label.New("markdownviewer", data.NewConstant("markdown page"))
+	return markdownview.New(data.NewConstant(page.source))
 }
 
 func (page *Page) GetCaption() string {

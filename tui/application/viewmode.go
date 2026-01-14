@@ -33,9 +33,9 @@ func newViewMode(application *Application) *viewMode {
 		model.SelectedNodes(),
 		func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) tui.Component {
 			if intersectionNodes.Size() > 0 {
-				return intersectionNodes.At(highlightedNodeIndex).GetViewer()
+				return intersectionNodes.At(highlightedNodeIndex).GetViewer(application.messageQueue)
 			} else if selectedNodes.Size() > 0 {
-				return selectedNodes.At(selectedNodes.Size() - 1).GetViewer()
+				return selectedNodes.At(selectedNodes.Size() - 1).GetViewer(application.messageQueue)
 			} else {
 				return nil
 			}

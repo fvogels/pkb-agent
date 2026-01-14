@@ -28,6 +28,6 @@ func (node *Node) GetIndex() int {
 	return node.id
 }
 
-func (node *Node) GetViewer() tui.Component {
-	return node.rawNode.GetViewer()
+func (node *Node) GetViewer(messageQueue tui.MessageQueue) tui.Component {
+	return node.rawNode.GetViewer(messageQueue)
 }

@@ -10,8 +10,6 @@ import (
 	markdownpage "pkb-agent/pkg/node/hybrid/pages/markdown"
 	snippetpage "pkb-agent/pkg/node/hybrid/pages/snippet"
 	"pkb-agent/tui"
-	"pkb-agent/tui/component/label"
-	"pkb-agent/tui/data"
 	"pkb-agent/util"
 	"pkb-agent/util/multifile"
 	"pkb-agent/util/pathlib"
@@ -84,17 +82,22 @@ func (rawNode *RawNode) getData() (*nodeData, error) {
 	return data, nil
 }
 
-func (node *RawNode) GetViewer() tui.Component {
-	return label.New("hybridviewer", data.NewConstant("hybrid"))
+func (rawNode *RawNode) GetViewer(messageQueue tui.MessageQueue) tui.Component {
+	data, err := rawNode.getData()
+	if err != nil {
+		panic("error loading data")
+	}
+
+	return NewViewer(messageQueue, rawNode, data)
 }
 
 // func (rawNode *RawNode) GetViewer() tea.Model {
-// 	data, err := rawNode.getData()
-// 	if err != nil {
-// 		panic("error loading data")
-// 	}
+// data, err := rawNode.getData()
+// if err != nil {
+// 	panic("error loading data")
+// }
 
-// 	return NewViewer(rawNode, data)
+// return NewViewer(rawNode, data)
 // }
 
 func (rawNode *RawNode) Serialize(writer io.Writer) error {

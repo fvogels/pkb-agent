@@ -1,5 +1,62 @@
 package hybrid
 
+import (
+	"pkb-agent/tui"
+)
+
+type Component struct {
+	tui.ComponentBase
+	size            tui.Size
+	rawNode         *RawNode
+	data            *nodeData // (strong) pointer to the node data, keeps information alive while viewer exists
+	activePageIndex int
+	pageViewers     []tui.Component
+}
+
+func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, data *nodeData) *Component {
+	pages := data.pages
+	pageViewers := make([]tui.Component, len(pages))
+
+	for pageIndex, page := range pages {
+		viewer := page.CreateViewer()
+		pageViewers[pageIndex] = viewer
+	}
+
+	return &Component{
+		ComponentBase: tui.ComponentBase{
+			Name:         "unnamed hybrid node viewer",
+			MessageQueue: messageQueue,
+		},
+		rawNode:         rawNode,
+		data:            data,
+		activePageIndex: 0,
+		pageViewers:     pageViewers,
+	}
+}
+
+func (component *Component) Handle(message tui.Message) {
+	switch message := message.(type) {
+	case tui.MsgResize:
+		component.onResize(message)
+	}
+}
+
+func (component *Component) Render() tui.Grid {
+	if len(component.pageViewers) > 0 {
+		return component.pageViewers[component.activePageIndex].Render()
+	} else {
+		return tui.NewEmptyGrid(component.size)
+	}
+}
+
+func (component *Component) onResize(message tui.MsgResize) {
+	component.size = message.Size
+
+	if len(component.pageViewers) > 0 {
+		component.pageViewers[component.activePageIndex].Handle(message)
+	}
+}
+
 // type Model struct {
 // 	id                         int
 // 	size                       util.Size

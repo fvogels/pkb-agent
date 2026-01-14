@@ -23,7 +23,7 @@ func (node *TestNode) GetLinks() []string {
 	return node.Links
 }
 
-func (node *TestNode) GetViewer() tui.Component {
+func (node *TestNode) GetViewer(tui.MessageQueue) tui.Component {
 	return nil
 }
 

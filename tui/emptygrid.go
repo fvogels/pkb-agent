@@ -2,10 +2,11 @@ package tui
 
 import (
 	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 )
 
 func NewEmptyGrid(size Size) Grid {
-	style := tcell.StyleDefault
+	style := tcell.StyleDefault.Foreground(color.Reset).Background(color.Reset)
 
 	result := emptyGrid{
 		size:  size,
