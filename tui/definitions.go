@@ -1,6 +1,8 @@
 package tui
 
-import "github.com/gdamore/tcell/v3"
+import (
+	"github.com/gdamore/tcell/v3"
+)
 
 const (
 	SafeMode = true
@@ -9,6 +11,11 @@ const (
 type Component interface {
 	Handle(Message)
 	Render() Grid
+}
+
+type ComponentBase struct {
+	Name         string
+	MessageQueue MessageQueue
 }
 
 type Message any
@@ -33,6 +40,8 @@ type MsgResize struct {
 type MsgKey struct {
 	Key string
 }
+
+type MsgUpdateLayout struct{}
 
 type Position struct {
 	X int
