@@ -211,41 +211,6 @@ func (application *Application) Render() {
 	slog.Debug("Screen updated", slog.String("duration", time.Since(timeBeforeUpdate).String()))
 }
 
-// func (application *Application) createModel() {
-// 	graph := application.graph
-
-// 	// Create data sources
-// 	input := data.NewVariable("")
-// 	highlightedNodeIndex := data.NewVariable(0)
-// 	selectedNodes := data.NewSliceList[*pkg.Node](nil)
-// 	intersectionNodes := data.NewSliceList[*pkg.Node](nil)
-// 	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
-
-// 	// Cause intersection node list to be updated whenever the input or the selected nodes change
-// 	updateIntersectionNodes := func() {
-// 		nodes := determineIntersectionNodes(input.Get(), graph, data.CopyListToSlice(selectedNodes), true, true)
-// 		intersectionNodes.SetSlice(nodes)
-// 	}
-// 	updateIntersectionNodes()
-// 	data.DefineReaction(updateIntersectionNodes, input, selectedNodes)
-
-// 	input.Observe(func() {
-// 		if len(input.Get()) > 0 {
-// 			application.updateHighlightedNode(input.Get())
-// 		}
-// 	})
-
-// 	model := Model{
-// 		input:                 input,
-// 		selectedNodes:         selectedNodes,
-// 		intersectionNodes:     intersectionNodes,
-// 		highlightedNodeIndex:  highlightedNodeIndex,
-// 		intersectionNodeNames: intersectionNodeNames,
-// 	}
-
-// 	application.model = model
-// }
-
 func (application *Application) initializeLogging() error {
 	if application.verbose {
 		logFile, err := os.Create(logFilename)
