@@ -38,6 +38,14 @@ func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgResize:
 		component.onResize(message)
+
+	case tui.MsgKey:
+		component.onKey(message)
+
+	default:
+		component.withActivePage(func(page Page, viewer tui.Component) {
+			viewer.Handle(message)
+		})
 	}
 }
 
@@ -52,9 +60,47 @@ func (component *Component) Render() tui.Grid {
 func (component *Component) onResize(message tui.MsgResize) {
 	component.size = message.Size
 
+	component.withActivePage(func(page Page, viewer tui.Component) {
+		viewer.Handle(message)
+	})
+}
+
+func (component *Component) withActivePage(f func(page Page, viewer tui.Component)) {
 	if len(component.pageViewers) > 0 {
-		component.pageViewers[component.activePageIndex].Handle(message)
+		activePage := component.data.pages[component.activePageIndex]
+		activeViewer := component.pageViewers[component.activePageIndex]
+
+		f(activePage, activeViewer)
 	}
+}
+
+func (component *Component) onKey(message tui.MsgKey) {
+	switch message.Key {
+	case "Tab":
+		component.withActivePage(func(page Page, viewer tui.Component) {
+			component.setActivePage((component.activePageIndex + 1) % len(component.pageViewers))
+		})
+
+	default:
+		component.withActivePage(func(page Page, viewer tui.Component) {
+			viewer.Handle(message)
+		})
+	}
+}
+
+func (component *Component) setActivePage(index int) {
+	component.activePageIndex = index
+	component.resizeActiveViewer()
+}
+
+func (component *Component) resizeActiveViewer() {
+	component.withActivePage(func(page Page, viewer tui.Component) {
+		resizeMessage := tui.MsgResize{
+			Size: component.size,
+		}
+
+		component.pageViewers[component.activePageIndex].Handle(resizeMessage)
+	})
 }
 
 // type Model struct {
