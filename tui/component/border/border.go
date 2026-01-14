@@ -5,13 +5,18 @@ import (
 )
 
 type Component struct {
+	tui.ComponentBase
 	size  tui.Size
 	child tui.Component
 	style tui.Style
 }
 
-func New(child tui.Component, style tui.Style) *Component {
+func New(messageQueue tui.MessageQueue, child tui.Component, style tui.Style) *Component {
 	return &Component{
+		ComponentBase: tui.ComponentBase{
+			Name:         "unnamed border",
+			MessageQueue: messageQueue,
+		},
 		child: child,
 		style: style,
 	}
