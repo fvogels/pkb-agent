@@ -6,24 +6,23 @@ import (
 )
 
 type Component struct {
+	tui.ComponentBase
 	size  tui.Size
 	child data.Value[tui.Component]
 }
 
-func New(child data.Value[tui.Component]) *Component {
+func New(messageQueue tui.MessageQueue, child data.Value[tui.Component]) *Component {
 	component := Component{
+		ComponentBase: tui.ComponentBase{
+			Name:         "nameless holder",
+			MessageQueue: messageQueue,
+		},
 		child: child,
 	}
 
 	// Make sure that whenever a new component is put in, it is resized
 	child.Observe(func() {
-		c := child.Get()
-
-		if c != nil {
-			c.Handle(tui.MsgResize{
-				Size: component.size,
-			})
-		}
+		component.MessageQueue.Enqueue(tui.MsgUpdateLayout{})
 	})
 
 	return &component
