@@ -2,9 +2,9 @@ package mainscreen
 
 import (
 	"log/slog"
-	"pkb-agent/graph/loaders/sequence"
-	"pkb-agent/graph/node"
 	"pkb-agent/pkg"
+	"pkb-agent/pkg/loaders/sequence"
+	"pkb-agent/pkg/node"
 	"pkb-agent/ui/components/helpbar"
 	"pkb-agent/ui/components/nodeselectionview"
 	"pkb-agent/ui/components/nodeviewer"

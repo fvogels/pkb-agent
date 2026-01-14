@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"pkb-agent/graph/loaders"
-	"pkb-agent/graph/node"
+	"pkb-agent/pkg/loaders"
+	"pkb-agent/pkg/node"
 	pathlib "pkb-agent/util/pathlib"
 	"pkb-agent/util/schema"
 )

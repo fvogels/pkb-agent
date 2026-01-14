@@ -2,7 +2,7 @@ package bookmark
 
 import (
 	"pkb-agent/extern"
-	"pkb-agent/graph/node"
+	"pkb-agent/pkg/node"
 	"pkb-agent/util"
 
 	"github.com/charmbracelet/bubbles/key"

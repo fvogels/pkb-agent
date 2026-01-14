@@ -3,11 +3,11 @@ package metaloader
 import (
 	"errors"
 	"log/slog"
-	"pkb-agent/graph/node"
-	"pkb-agent/graph/node/atom"
-	"pkb-agent/graph/node/backblaze"
-	"pkb-agent/graph/node/bookmark"
-	"pkb-agent/graph/node/hybrid"
+	"pkb-agent/pkg/node"
+	"pkb-agent/pkg/node/atom"
+	"pkb-agent/pkg/node/backblaze"
+	"pkb-agent/pkg/node/bookmark"
+	"pkb-agent/pkg/node/hybrid"
 	pathlib "pkb-agent/util/pathlib"
 	"pkb-agent/util/schema"
 )

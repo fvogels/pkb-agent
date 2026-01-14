@@ -5,13 +5,13 @@ import (
 	"pkb-agent/util"
 	"pkb-agent/util/trie"
 
-	_ "pkb-agent/graph/loaders/glob"
-	_ "pkb-agent/graph/loaders/sequence"
-	_ "pkb-agent/graph/loaders/tagger"
-	_ "pkb-agent/graph/node/atom"
-	_ "pkb-agent/graph/node/backblaze"
-	_ "pkb-agent/graph/node/bookmark"
-	_ "pkb-agent/graph/node/hybrid"
+	_ "pkb-agent/pkg/loaders/glob"
+	_ "pkb-agent/pkg/loaders/sequence"
+	_ "pkb-agent/pkg/loaders/tagger"
+	_ "pkb-agent/pkg/node/atom"
+	_ "pkb-agent/pkg/node/backblaze"
+	_ "pkb-agent/pkg/node/bookmark"
+	_ "pkb-agent/pkg/node/hybrid"
 )
 
 type Graph struct {

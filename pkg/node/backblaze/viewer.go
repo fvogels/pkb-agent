@@ -7,7 +7,7 @@ import (
 	"os"
 	bb "pkb-agent/backblaze"
 	"pkb-agent/extern"
-	"pkb-agent/graph/node"
+	"pkb-agent/pkg/node"
 	"pkb-agent/util"
 	"pkb-agent/util/pathlib"
 	"pkb-agent/zipfile"

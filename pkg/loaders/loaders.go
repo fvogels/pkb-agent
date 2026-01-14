@@ -3,7 +3,7 @@ package loaders
 import (
 	"errors"
 	"fmt"
-	"pkb-agent/graph/node"
+	"pkb-agent/pkg/node"
 )
 
 var loaderTable map[string]node.Loader = make(map[string]node.Loader)

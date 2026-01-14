@@ -1,8 +1,8 @@
 package snippetpage
 
 import (
-	"pkb-agent/graph/node"
-	"pkb-agent/graph/node/hybrid/actions/clipboard"
+	"pkb-agent/pkg/node"
+	"pkb-agent/pkg/node/hybrid/actions/clipboard"
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"

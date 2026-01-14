@@ -1,6 +1,6 @@
 package tagger
 
-import "pkb-agent/graph/node"
+import "pkb-agent/pkg/node"
 
 type NodeWrapper struct {
 	node.RawNode

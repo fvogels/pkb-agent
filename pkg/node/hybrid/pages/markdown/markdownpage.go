@@ -1,7 +1,7 @@
 package markdownpage
 
 import (
-	"pkb-agent/graph/node"
+	"pkb-agent/pkg/node"
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"

@@ -1,7 +1,7 @@
 package pkg
 
 import (
-	"pkb-agent/graph/node"
+	"pkb-agent/pkg/node"
 	pathlib "pkb-agent/util/pathlib"
 
 	"gopkg.in/yaml.v3"

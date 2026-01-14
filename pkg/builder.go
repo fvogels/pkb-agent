@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"maps"
-	"pkb-agent/graph/node"
+	"pkb-agent/pkg/node"
 	"pkb-agent/util/trie"
 	"slices"
 	"strings"
