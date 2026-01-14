@@ -4,7 +4,7 @@ import (
 	"pkb-agent/pkg/node"
 	"pkb-agent/pkg/node/hybrid/actions/clipboard"
 	"pkb-agent/tui"
-	"pkb-agent/tui/component/label"
+	"pkb-agent/tui/component/snippetview"
 	"pkb-agent/tui/data"
 )
 
@@ -27,7 +27,11 @@ func New(caption string, source string, language string) *Page {
 }
 
 func (page *Page) CreateViewer() tui.Component {
-	return label.New("snippetviewer", data.NewConstant("snippet page"))
+	source := snippetview.Source{
+		Contents: page.source,
+		Language: page.language,
+	}
+	return snippetview.New(data.NewConstant(source))
 }
 
 func (page *Page) GetCaption() string {
