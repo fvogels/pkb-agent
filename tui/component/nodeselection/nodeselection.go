@@ -1,6 +1,7 @@
 package nodeselection
 
 import (
+	"pkb-agent/persistent/list"
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/docknorth"
@@ -14,29 +15,34 @@ import (
 
 type Component struct {
 	size                 tui.Size
-	selectedNodes        data.List[*pkg.Node]
-	nodeIntersection     data.List[*pkg.Node]
+	selectedNodes        data.Value[list.List[*pkg.Node]]
+	nodeIntersection     data.Value[list.List[*pkg.Node]]
 	selectedIndex        data.Value[int]
 	selectedNodesView    *stringsview.Component
 	nodeIntersectionView *stringlist.Component
 	root                 *docknorth.Component
 }
 
-func New(selectedNodes data.List[*pkg.Node], nodeIntersection data.List[*pkg.Node], selectedIndex data.Value[int]) *Component {
+func New(selectedNodes data.Value[list.List[*pkg.Node]], nodeIntersection data.Value[list.List[*pkg.Node]], selectedIndex data.Value[int]) *Component {
 	style := tcell.StyleDefault.Background(color.Green)
-	selectedNodesNames := data.MapList(selectedNodes, func(node *pkg.Node) stringsview.Item {
-		name := node.GetName()
-		item := stringsview.Item{
-			Runes: []rune(name),
-			Style: &style,
-		}
-		return item
+
+	selectedNodesNames := data.MapValue(selectedNodes, func(selectedNodes list.List[*pkg.Node]) list.List[stringsview.Item] {
+		return list.MapList(selectedNodes, func(node *pkg.Node) stringsview.Item {
+			name := node.GetName()
+			item := stringsview.Item{
+				Runes: []rune(name),
+				Style: &style,
+			}
+			return item
+		})
 	})
 
 	selectedNodesView := stringsview.New(selectedNodesNames)
 
-	nodeIntersectionItems := data.MapList(nodeIntersection, func(node *pkg.Node) string {
-		return node.GetName()
+	nodeIntersectionItems := data.MapValue(nodeIntersection, func(lst list.List[*pkg.Node]) list.List[string] {
+		return list.MapList(lst, func(node *pkg.Node) string {
+			return node.GetName()
+		})
 	})
 	nodeIntersectionView := stringlist.New(nodeIntersectionItems, selectedIndex)
 
@@ -86,6 +92,6 @@ func (component *Component) onResize(message tui.MsgResize) {
 }
 
 func (component *Component) updateLayout() {
-	selectedNodeCount := component.selectedNodes.Size()
+	selectedNodeCount := component.selectedNodes.Get().Size()
 	component.root.SetDockerChildHeight(selectedNodeCount)
 }

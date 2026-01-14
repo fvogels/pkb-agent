@@ -1,6 +1,8 @@
 package application
 
 import (
+	"pkb-agent/persistent/list"
+	"pkb-agent/pkg"
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/docknorth"
 	"pkb-agent/tui/component/docksouth"
@@ -22,27 +24,24 @@ type viewMode struct {
 func newViewMode(application *Application) *viewMode {
 	model := &application.model
 
-	nodesView := nodeselection.New(model.selectedNodes, model.intersectionNodes, model.highlightedNodeIndex)
+	nodesView := nodeselection.New(model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
 	caption := data.NewConstant("hello")
 	statusBar := label.New("view:statusbar", caption)
-	highlightedNodeViewer := data.NewVariable[tui.Component](nil)
+	highlightedNodeViewer := data.MapValue3(
+		model.HighlightedNodeIndex(),
+		model.IntersectionNodes(),
+		model.SelectedNodes(),
+		func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) tui.Component {
+			if intersectionNodes.Size() > 0 {
+				return intersectionNodes.At(highlightedNodeIndex).GetViewer()
+			} else if selectedNodes.Size() > 0 {
+				return selectedNodes.At(selectedNodes.Size() - 1).GetViewer()
+			} else {
+				return nil
+			}
+		},
+	)
 	highlightedNodeViewerHolder := holder.New(highlightedNodeViewer)
-
-	data.DefineReaction(func() {
-		var viewer tui.Component
-
-		if model.intersectionNodes.Size() > 0 {
-			viewer = model.intersectionNodes.At(model.highlightedNodeIndex.Get()).GetViewer()
-		} else if model.selectedNodes.Size() > 0 {
-			viewer = model.selectedNodes.At(model.selectedNodes.Size() - 1).GetViewer()
-		} else {
-			// Should not happen
-			viewer = nil
-		}
-
-		highlightedNodeViewer.Set(viewer)
-
-	}, model.highlightedNodeIndex, model.selectedNodes)
 
 	root := docksouth.New(
 		"view:docksouth[main|statusbar]",
@@ -56,7 +55,9 @@ func newViewMode(application *Application) *viewMode {
 		1,
 	)
 
-	nodesView.SetOnSelectionChanged(func(value int) { model.highlightedNodeIndex.Set(value) })
+	nodesView.SetOnSelectionChanged(func(value int) {
+		application.highlight(value)
+	})
 
 	result := viewMode{
 		application: application,

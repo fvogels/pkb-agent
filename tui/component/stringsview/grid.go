@@ -27,7 +27,7 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 	y := position.Y
 	firstVisibleIndex := grid.parent.firstVisibleIndex
 	currentItemIndex := firstVisibleIndex + y
-	items := grid.parent.items
+	items := grid.parent.items.Get()
 
 	var contents rune
 	var style *tui.Style

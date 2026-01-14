@@ -1,6 +1,7 @@
 package stringsview
 
 import (
+	"pkb-agent/persistent/list"
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
 
@@ -10,7 +11,7 @@ import (
 
 type Component struct {
 	size              tui.Size
-	items             data.List[Item]
+	items             data.Value[list.List[Item]]
 	emptyStyle        *tui.Style
 	firstVisibleIndex int
 	onItemClicked     func(int)
@@ -21,7 +22,7 @@ type Item struct {
 	Style *tui.Style
 }
 
-func New(items data.List[Item]) *Component {
+func New(items data.Value[list.List[Item]]) *Component {
 	defaultEmptyStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 
 	return &Component{
@@ -56,7 +57,7 @@ func (component *Component) onResize(message tui.MsgResize) {
 }
 
 func (component *Component) EnsureItemIsVisible(index int) {
-	if component.items.Size() == 0 {
+	if component.items.Get().Size() == 0 {
 		component.firstVisibleIndex = 0
 	} else {
 		if index < component.firstVisibleIndex {

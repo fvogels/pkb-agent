@@ -1,6 +1,7 @@
 package stringlist
 
 import (
+	"pkb-agent/persistent/list"
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
@@ -11,7 +12,7 @@ import (
 
 type Component struct {
 	size               tui.Size
-	items              data.List[string]
+	items              data.Value[list.List[string]]
 	selectedIndex      data.Value[int]
 	emptyStyle         *tui.Style
 	itemStyle          *tui.Style
@@ -21,18 +22,10 @@ type Component struct {
 	subComponent       *stringsview.Component
 }
 
-func New(items data.List[string], selectedItem data.Value[int]) *Component {
+func New(items data.Value[list.List[string]], selectedItem data.Value[int]) *Component {
 	defaultEmptyStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	defaultItemStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	defaultSelectedItemStyle := tcell.StyleDefault.Background(color.Gray).Foreground(color.Reset)
-
-	subComponentList := SubComponentList{
-		items:         items,
-		selectedIndex: selectedItem,
-		defaultStyle:  &defaultItemStyle,
-		selectedStyle: &defaultSelectedItemStyle,
-	}
-	subComponent := stringsview.New(&subComponentList)
 
 	component := Component{
 		items:             items,
@@ -41,11 +34,28 @@ func New(items data.List[string], selectedItem data.Value[int]) *Component {
 		emptyStyle:        &defaultEmptyStyle,
 		selectedItemStyle: &defaultSelectedItemStyle,
 		firstVisibleIndex: 0,
-		subComponent:      subComponent,
 	}
 
+	subComponentList := data.MapValue2(items, selectedItem, func(items list.List[string], selectedIndex int) list.List[stringsview.Item] {
+		return list.MapWithIndex(items, func(index int, item string) stringsview.Item {
+			var style *tui.Style
+			if index == selectedIndex {
+				style = component.selectedItemStyle
+			} else {
+				style = component.itemStyle
+			}
+
+			return stringsview.Item{
+				Runes: []rune(item),
+				Style: style,
+			}
+		})
+	})
+
+	component.subComponent = stringsview.New(subComponentList)
+
 	// update selection when item clicked
-	subComponent.SetOnItemClicked(func(index int) {
+	component.subComponent.SetOnItemClicked(func(index int) {
 		if component.onSelectionChanged != nil {
 			component.onSelectionChanged(index)
 		}
@@ -106,7 +116,7 @@ func (component *Component) ensureSelectedItemIsVisible() {
 
 func (component *Component) onKey(message tui.MsgKey) {
 	selectedIndex := component.selectedIndex.Get()
-	maximumIndex := component.items.Size() - 1
+	maximumIndex := component.items.Get().Size() - 1
 	pageSize := component.size.Height
 	onSelectionChanged := func(index int) {
 		if index > maximumIndex {
@@ -143,14 +153,14 @@ func (component *Component) onKey(message tui.MsgKey) {
 }
 
 type SubComponentList struct {
-	items         data.List[string]
+	items         data.Value[list.List[string]]
 	selectedIndex data.Value[int]
 	defaultStyle  *tui.Style
 	selectedStyle *tui.Style
 }
 
 func (list *SubComponentList) Size() int {
-	return list.items.Size()
+	return list.items.Get().Size()
 }
 
 func (list *SubComponentList) At(index int) stringsview.Item {
@@ -162,9 +172,7 @@ func (list *SubComponentList) At(index int) stringsview.Item {
 	}
 
 	return stringsview.Item{
-		Runes: []rune(list.items.At(index)),
+		Runes: []rune(list.items.Get().At(index)),
 		Style: style,
 	}
 }
-
-func (list *SubComponentList) Observe(func()) {}

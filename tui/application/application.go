@@ -5,9 +5,10 @@ import (
 	"log/slog"
 	"os"
 	"pkb-agent/graph/loaders/sequence"
+	"pkb-agent/persistent/list"
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
-	"pkb-agent/tui/data"
+	"pkb-agent/tui/model"
 	"pkb-agent/util/pathlib"
 	"slices"
 	"strings"
@@ -28,18 +29,10 @@ type Application struct {
 	screen     tcell.Screen
 	size       tui.Size
 	graph      *pkg.Graph
-	model      Model
+	model      model.Model
 	viewMode   *viewMode
 	inputMode  *inputMode
 	activeMode mode
-}
-
-type Model struct {
-	input                 *data.Variable[string]
-	selectedNodes         *data.SliceList[*pkg.Node]
-	intersectionNodes     *data.SliceList[*pkg.Node]
-	highlightedNodeIndex  *data.Variable[int]
-	intersectionNodeNames data.List[string]
 }
 
 func NewApplication(verbose bool) *Application {
@@ -65,7 +58,7 @@ func (application *Application) Start() error {
 		return err
 	}
 
-	application.createModel()
+	application.model = model.New(application.graph)
 	application.viewMode = newViewMode(application)
 	application.inputMode = newInputMode(application)
 	application.activeMode = application.viewMode
@@ -202,40 +195,40 @@ func (application *Application) Render() {
 	slog.Debug("Screen updated", slog.String("duration", time.Since(timeBeforeUpdate).String()))
 }
 
-func (application *Application) createModel() {
-	graph := application.graph
+// func (application *Application) createModel() {
+// 	graph := application.graph
 
-	// Create data sources
-	input := data.NewVariable("")
-	highlightedNodeIndex := data.NewVariable(0)
-	selectedNodes := data.NewSliceList[*pkg.Node](nil)
-	intersectionNodes := data.NewSliceList[*pkg.Node](nil)
-	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
+// 	// Create data sources
+// 	input := data.NewVariable("")
+// 	highlightedNodeIndex := data.NewVariable(0)
+// 	selectedNodes := data.NewSliceList[*pkg.Node](nil)
+// 	intersectionNodes := data.NewSliceList[*pkg.Node](nil)
+// 	intersectionNodeNames := data.MapList(intersectionNodes, func(node *pkg.Node) string { return node.GetName() })
 
-	// Cause intersection node list to be updated whenever the input or the selected nodes change
-	updateIntersectionNodes := func() {
-		nodes := determineIntersectionNodes(input.Get(), graph, data.CopyListToSlice(selectedNodes), true, true)
-		intersectionNodes.SetSlice(nodes)
-	}
-	updateIntersectionNodes()
-	data.DefineReaction(updateIntersectionNodes, input, selectedNodes)
+// 	// Cause intersection node list to be updated whenever the input or the selected nodes change
+// 	updateIntersectionNodes := func() {
+// 		nodes := determineIntersectionNodes(input.Get(), graph, data.CopyListToSlice(selectedNodes), true, true)
+// 		intersectionNodes.SetSlice(nodes)
+// 	}
+// 	updateIntersectionNodes()
+// 	data.DefineReaction(updateIntersectionNodes, input, selectedNodes)
 
-	input.Observe(func() {
-		if len(input.Get()) > 0 {
-			application.updateHighlightedNode(input.Get())
-		}
-	})
+// 	input.Observe(func() {
+// 		if len(input.Get()) > 0 {
+// 			application.updateHighlightedNode(input.Get())
+// 		}
+// 	})
 
-	model := Model{
-		input:                 input,
-		selectedNodes:         selectedNodes,
-		intersectionNodes:     intersectionNodes,
-		highlightedNodeIndex:  highlightedNodeIndex,
-		intersectionNodeNames: intersectionNodeNames,
-	}
+// 	model := Model{
+// 		input:                 input,
+// 		selectedNodes:         selectedNodes,
+// 		intersectionNodes:     intersectionNodes,
+// 		highlightedNodeIndex:  highlightedNodeIndex,
+// 		intersectionNodeNames: intersectionNodeNames,
+// 	}
 
-	application.model = model
-}
+// 	application.model = model
+// }
 
 func (application *Application) initializeLogging() error {
 	if application.verbose {
@@ -280,7 +273,8 @@ func (application *Application) loadGraph() error {
 }
 
 func (application *Application) updateHighlightedNode(target string) {
-	nodes := data.CopyListToSlice(application.model.intersectionNodes)
+	intersectionNodes := application.model.IntersectionNodes().Get()
+	nodes := list.ToSlice(intersectionNodes)
 
 	bestMatchIndex, found := slices.BinarySearchFunc(
 		nodes,
@@ -301,28 +295,43 @@ func (application *Application) updateHighlightedNode(target string) {
 		bestMatchIndex = 0
 	}
 
-	application.model.highlightedNodeIndex.Set(bestMatchIndex)
-}
-
-func (application *Application) selectHighlightedNode() {
-	if application.model.intersectionNodes.Size() > 0 {
-		highlightedNodeIndex := application.model.highlightedNodeIndex.Get()
-		highlightedNode := application.model.intersectionNodes.At(highlightedNodeIndex)
-		application.model.selectedNodes.Update(func(ns []*pkg.Node) []*pkg.Node {
-			return append(ns, highlightedNode)
-		})
-	}
-}
-
-func (application *Application) unselectLastNode() {
-	if application.model.selectedNodes.Size() > 0 {
-		application.model.selectedNodes.Update(func(ns []*pkg.Node) []*pkg.Node {
-			return ns[:len(ns)-1]
-		})
-	}
+	update := application.model.Update()
+	update.Highlight(bestMatchIndex)
+	update.Apply()
 }
 
 func (application *Application) switchMode(mode mode) {
 	application.activeMode = mode
 	application.activeMode.Handle(tui.MsgResize{Size: application.size})
+}
+
+func (application *Application) selectHighlightedNode() {
+	update := application.model.Update()
+	update.SelectHighlightedNode()
+	update.Apply()
+}
+
+func (application *Application) unselectLastNode() {
+	update := application.model.Update()
+	update.UnselectLastNode()
+	update.Apply()
+}
+
+func (application *Application) highlight(index int) {
+	update := application.model.Update()
+	update.Highlight(index)
+	update.Apply()
+}
+
+func (application *Application) selectHighlightedAndClearInput() {
+	update := application.model.Update()
+	update.SelectHighlightedNode()
+	update.SetInput("")
+	update.Apply()
+}
+
+func (application *Application) updateInput(newInput string) {
+	update := application.model.Update()
+	update.SetInput(strings.ToLower(newInput))
+	update.Apply()
 }

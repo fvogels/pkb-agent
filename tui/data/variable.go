@@ -5,10 +5,10 @@ type Variable[T any] struct {
 	observers []func()
 }
 
-func NewVariable[T any](value T) *Variable[T] {
+func NewVariable[T any](value T) Variable[T] {
 	result := Variable[T]{value: value}
 
-	return &result
+	return result
 }
 
 func (v *Variable[T]) Set(value T) {

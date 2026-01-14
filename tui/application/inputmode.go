@@ -1,6 +1,8 @@
 package application
 
 import (
+	"pkb-agent/persistent/list"
+	"pkb-agent/pkg"
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/docknorth"
 	"pkb-agent/tui/component/docksouth"
@@ -8,7 +10,6 @@ import (
 	"pkb-agent/tui/component/input"
 	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/data"
-	"strings"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
@@ -26,31 +27,31 @@ type inputMode struct {
 func newInputMode(application *Application) *inputMode {
 	model := &application.model
 
-	nodesView := nodeselection.New(model.selectedNodes, model.intersectionNodes, model.highlightedNodeIndex)
-	nodesView.SetOnSelectionChanged(func(value int) { model.highlightedNodeIndex.Set(value) })
+	nodesView := nodeselection.New(model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
+	nodesView.SetOnSelectionChanged(func(value int) {
+		application.highlight(value)
+	})
 
-	highlightedNodeViewer := data.NewVariable[tui.Component](nil)
+	highlightedNodeViewer := data.MapValue3(
+		model.HighlightedNodeIndex(),
+		model.IntersectionNodes(),
+		model.SelectedNodes(),
+		func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) tui.Component {
+			if intersectionNodes.Size() > 0 {
+				return intersectionNodes.At(highlightedNodeIndex).GetViewer()
+			} else if selectedNodes.Size() > 0 {
+				return selectedNodes.At(selectedNodes.Size() - 1).GetViewer()
+			} else {
+				return nil
+			}
+		},
+	)
 	highlightedNodeViewerHolder := holder.New(highlightedNodeViewer)
-	data.DefineReaction(func() {
-		var viewer tui.Component
 
-		if model.intersectionNodes.Size() > 0 {
-			viewer = model.intersectionNodes.At(model.highlightedNodeIndex.Get()).GetViewer()
-		} else if model.selectedNodes.Size() > 0 {
-			viewer = model.selectedNodes.At(model.selectedNodes.Size() - 1).GetViewer()
-		} else {
-			// Should not happen
-			viewer = nil
-		}
-
-		highlightedNodeViewer.Set(viewer)
-
-	}, model.highlightedNodeIndex, model.selectedNodes)
-
-	inputField := input.New(model.input)
+	inputField := input.New(model.Input())
 	style := tcell.StyleDefault.Background(color.Red)
 	inputField.SetStyle(&style)
-	inputField.SetOnChange(func(s string) { model.input.Set(strings.ToLower(s)) })
+	inputField.SetOnChange(func(s string) { application.updateInput(s) })
 
 	root := docksouth.New(
 		"input:[main|input]",
@@ -90,8 +91,7 @@ func (mode *inputMode) Handle(message tui.Message) {
 func (mode *inputMode) onKey(message tui.MsgKey) {
 	switch message.Key {
 	case "Enter":
-		mode.application.selectHighlightedNode()
-		mode.application.model.input.Set("")
+		mode.application.selectHighlightedAndClearInput()
 		mode.application.switchMode(mode.application.viewMode)
 
 	default:
