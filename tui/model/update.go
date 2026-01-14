@@ -53,7 +53,7 @@ func (update *ModelUpdate) UnselectLastNode() {
 	updated := &update.updatedModel
 	selectedNodes := updated.selectedNodes.Get()
 
-	if selectedNodes != nil {
+	if selectedNodes.Size() > 0 {
 		updated.selectedNodes.Set(list.DropLast(selectedNodes))
 	}
 }
