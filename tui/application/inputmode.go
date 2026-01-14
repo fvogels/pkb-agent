@@ -46,12 +46,12 @@ func newInputMode(application *Application) *inputMode {
 			}
 		},
 	)
-	highlightedNodeViewerHolder := holder.New(highlightedNodeViewer)
+	highlightedNodeViewerHolder := holder.New(application.messageQueue, highlightedNodeViewer)
 
 	inputField := input.New(model.Input())
 	style := tcell.StyleDefault.Background(color.Red)
 	inputField.SetStyle(&style)
-	inputField.SetOnChange(func(s string) { application.updateInput(s) })
+	inputField.SetOnChange(func(s string) { application.updateInputAndHighlightBestMatch(s) })
 
 	root := docksouth.New(
 		"input:[main|input]",

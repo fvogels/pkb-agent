@@ -23,16 +23,17 @@ const (
 )
 
 type Application struct {
-	verbose    bool
-	running    bool
-	logFile    *os.File
-	screen     tcell.Screen
-	size       tui.Size
-	graph      *pkg.Graph
-	model      model.Model
-	viewMode   *viewMode
-	inputMode  *inputMode
-	activeMode mode
+	verbose      bool
+	running      bool
+	logFile      *os.File
+	screen       tcell.Screen
+	messageQueue tui.MessageQueue
+	size         tui.Size
+	graph        *pkg.Graph
+	model        model.Model
+	viewMode     *viewMode
+	inputMode    *inputMode
+	activeMode   mode
 }
 
 func NewApplication(verbose bool) *Application {
@@ -53,6 +54,8 @@ func (application *Application) Start() error {
 	if err := application.initializeScreen(); err != nil {
 		return err
 	}
+
+	application.createMessageQueue()
 
 	if err := application.loadGraph(); err != nil {
 		return err
@@ -158,6 +161,19 @@ func (application *Application) HandleEvent(event tcell.Event) {
 			Key: translateKey(event),
 		}
 		application.activeMode.Handle(message)
+
+	case *tui.EventMessage:
+		message := event.Message
+
+		switch message := message.(type) {
+		case tui.MsgUpdateLayout:
+			application.activeMode.Handle(tui.MsgResize{
+				Size: application.size,
+			})
+
+		default:
+			application.activeMode.Handle(message)
+		}
 
 		// case *tcell.EventMouse:
 		// 	x, y := event.Position()
@@ -272,7 +288,7 @@ func (application *Application) loadGraph() error {
 	return nil
 }
 
-func (application *Application) updateHighlightedNode(target string) {
+func (application *Application) findIndexOfIntersectionNode(target string) int {
 	intersectionNodes := application.model.IntersectionNodes().Get()
 	nodes := list.ToSlice(intersectionNodes)
 
@@ -295,9 +311,7 @@ func (application *Application) updateHighlightedNode(target string) {
 		bestMatchIndex = 0
 	}
 
-	update := application.model.Update()
-	update.Highlight(bestMatchIndex)
-	update.Apply()
+	return bestMatchIndex
 }
 
 func (application *Application) switchMode(mode mode) {
@@ -330,8 +344,24 @@ func (application *Application) selectHighlightedAndClearInput() {
 	update.Apply()
 }
 
-func (application *Application) updateInput(newInput string) {
-	update := application.model.Update()
-	update.SetInput(strings.ToLower(newInput))
-	update.Apply()
+func (application *Application) updateInputAndHighlightBestMatch(newInput string) {
+	lowerCasedNewInput := strings.ToLower(newInput)
+
+	// Model update has to happen in two separate phases,
+	// since finding the best match needs to be done on an updated version of the intersection nodes
+	{
+		update := application.model.Update()
+		update.SetInput(lowerCasedNewInput)
+		update.Apply()
+	}
+
+	{
+		update := application.model.Update()
+		update.Highlight(application.findIndexOfIntersectionNode(lowerCasedNewInput))
+		update.Apply()
+	}
+}
+
+func (application *Application) createMessageQueue() {
+	application.messageQueue = tui.NewMessageQueue(application.screen.EventQ())
 }
