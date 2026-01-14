@@ -1,5 +1,7 @@
 package tui
 
+import "fmt"
+
 type MemoryGrid struct {
 	items []Cell
 	size  Size
@@ -25,20 +27,44 @@ func MaterializeGrid(grid Grid) Grid {
 	}
 }
 
+func NewMaterializedGrid(size Size, initializer func(Position) Cell) *MemoryGrid {
+	items := make([]Cell, size.Width*size.Height)
+
+	i := 0
+	for y := range size.Height {
+		for x := range size.Width {
+			position := Position{X: x, Y: y}
+			items[i] = initializer(position)
+			i++
+		}
+	}
+
+	result := MemoryGrid{
+		items: items,
+		size:  size,
+	}
+
+	return &result
+}
+
 func (grid *MemoryGrid) GetSize() Size {
 	return grid.size
 }
 
 func (grid *MemoryGrid) Get(position Position) Cell {
 	if SafeMode && !grid.isValidPosition(position) {
+		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d", position.X, position.Y, grid.size.Width, grid.size.Height))
+	}
+
+	return grid.items[grid.computeIndexOfPosition(position)]
+}
+
+func (grid *MemoryGrid) Set(position Position, cell Cell) {
+	if SafeMode && !grid.isValidPosition(position) {
 		panic("invalid position")
 	}
 
-	width := grid.size.Width
-	x := position.X
-	y := position.Y
-
-	return grid.items[y*width+x]
+	grid.items[grid.computeIndexOfPosition(position)] = cell
 }
 
 func (grid *MemoryGrid) isValidPosition(position Position) bool {
@@ -56,4 +82,12 @@ func (grid *MemoryGrid) isValidPosition(position Position) bool {
 	}
 
 	return true
+}
+
+func (grid *MemoryGrid) computeIndexOfPosition(position Position) int {
+	width := grid.size.Width
+	x := position.X
+	y := position.Y
+
+	return y*width + x
 }
