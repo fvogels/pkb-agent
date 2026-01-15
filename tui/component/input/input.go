@@ -7,6 +7,7 @@ import (
 	"pkb-agent/ui/uid"
 
 	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 )
 
 type Component struct {
@@ -18,11 +19,11 @@ type Component struct {
 }
 
 func New(messageQueue tui.MessageQueue, contents data.Value[string]) *Component {
-	style := tcell.StyleDefault
+	style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	subComponent := label.New(messageQueue, "input[label]", contents)
 	subComponent.SetStyle(&style)
 
-	return &Component{
+	component := Component{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
 			Name:         "nameless label",
@@ -33,6 +34,8 @@ func New(messageQueue tui.MessageQueue, contents data.Value[string]) *Component 
 		onChange: nil,
 		label:    subComponent,
 	}
+
+	return &component
 }
 
 func (component *Component) SetStyle(style *tui.Style) {
