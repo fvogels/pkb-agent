@@ -29,5 +29,5 @@ func (node *Node) GetIndex() int {
 }
 
 func (node *Node) GetViewer(messageQueue tui.MessageQueue) tui.Component {
-	return node.rawNode.GetViewer(messageQueue)
+	return node.rawNode.CreateViewer(messageQueue)
 }

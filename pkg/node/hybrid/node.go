@@ -77,7 +77,7 @@ func (rawNode *RawNode) getData() (*nodeData, error) {
 	return data, nil
 }
 
-func (rawNode *RawNode) GetViewer(messageQueue tui.MessageQueue) tui.Component {
+func (rawNode *RawNode) CreateViewer(messageQueue tui.MessageQueue) tui.Component {
 	data, err := rawNode.getData()
 	if err != nil {
 		panic("error loading data")

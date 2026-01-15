@@ -30,7 +30,7 @@ func (node *RawNode) GetLinks() []string {
 	return node.links
 }
 
-func (node *RawNode) GetViewer(messageQueue tui.MessageQueue) tui.Component {
+func (node *RawNode) CreateViewer(messageQueue tui.MessageQueue) tui.Component {
 	return label.New(messageQueue, "bookmarkviewer", data.NewConstant("bookmark"))
 }
 

@@ -16,7 +16,7 @@ type RawNode interface {
 	GetName() string
 	GetSearchStrings() []string
 	GetLinks() []string
-	GetViewer(tui.MessageQueue) tui.Component
+	CreateViewer(tui.MessageQueue) tui.Component
 	Serialize(io.Writer) error
 }
 
