@@ -17,6 +17,7 @@ type ComponentBase struct {
 	Identifier   int
 	Name         string
 	MessageQueue MessageQueue
+	Size         Size
 }
 
 type Grid interface {

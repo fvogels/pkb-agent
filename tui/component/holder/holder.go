@@ -8,7 +8,6 @@ import (
 
 type Component struct {
 	tui.ComponentBase
-	size  tui.Size
 	child data.Value[tui.Component]
 }
 
@@ -46,12 +45,12 @@ func (component *Component) Render() tui.Grid {
 	if child != nil {
 		return child.Render()
 	} else {
-		return tui.NewEmptyGrid(component.size)
+		return tui.NewEmptyGrid(component.Size)
 	}
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	component.size = message.Size
+	component.Size = message.Size
 
 	child := component.child.Get()
 	if child != nil {

@@ -7,7 +7,6 @@ import (
 
 type Component struct {
 	tui.ComponentBase
-	size  tui.Size
 	child tui.Component
 	style tui.Style
 }
@@ -42,12 +41,12 @@ func (component *Component) Render() tui.Grid {
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	component.size = message.Size
+	component.Size = message.Size
 
 	childSizeMessage := tui.MsgResize{
 		Size: tui.Size{
 			Width:  message.Size.Width - 2,
-			Height: component.size.Height - 2,
+			Height: component.Size.Height - 2,
 		},
 	}
 	component.child.Handle(childSizeMessage)

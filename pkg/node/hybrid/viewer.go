@@ -7,7 +7,6 @@ import (
 
 type Component struct {
 	tui.ComponentBase
-	size            tui.Size
 	rawNode         *RawNode
 	data            *nodeData // (strong) pointer to the node data, keeps information alive while viewer exists
 	activePageIndex int
@@ -55,12 +54,12 @@ func (component *Component) Render() tui.Grid {
 	if len(component.pageViewers) > 0 {
 		return component.pageViewers[component.activePageIndex].Render()
 	} else {
-		return tui.NewEmptyGrid(component.size)
+		return tui.NewEmptyGrid(component.Size)
 	}
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	component.size = message.Size
+	component.Size = message.Size
 
 	component.withActivePage(func(page Page, viewer tui.Component) {
 		viewer.Handle(message)
@@ -98,7 +97,7 @@ func (component *Component) setActivePage(index int) {
 func (component *Component) resizeActiveViewer() {
 	component.withActivePage(func(page Page, viewer tui.Component) {
 		resizeMessage := tui.MsgResize{
-			Size: component.size,
+			Size: component.Size,
 		}
 
 		component.pageViewers[component.activePageIndex].Handle(resizeMessage)

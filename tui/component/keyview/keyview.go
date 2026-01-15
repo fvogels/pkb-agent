@@ -12,7 +12,6 @@ import (
 
 type Component struct {
 	tui.ComponentBase
-	size             tui.Size
 	keyBindings      data.Value[list.List[tui.KeyBinding]]
 	cachedGrid       tui.Grid
 	keyStyle         *tui.Style
@@ -59,7 +58,7 @@ func (component *Component) Render() tui.Grid {
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	component.size = message.Size
+	component.Size = message.Size
 	component.cachedGrid = nil
 }
 
@@ -68,7 +67,7 @@ func (component *Component) renderKeyBindings() tui.Grid {
 		Contents: ' ',
 		Style:    component.emptyStyle,
 	}
-	result := tui.NewMaterializedGrid(component.size, func(tui.Position) tui.Cell { return cell })
+	result := tui.NewMaterializedGrid(component.Size, func(tui.Position) tui.Cell { return cell })
 
 	x := 0
 	write := func(contents rune, style *tui.Style) {
