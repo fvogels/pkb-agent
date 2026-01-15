@@ -2,6 +2,8 @@ package tui
 
 type Message any
 
+type MsgActivate struct{}
+
 type MsgResize struct {
 	Size Size
 }
