@@ -14,6 +14,7 @@ type Component interface {
 }
 
 type ComponentBase struct {
+	Identifier   int
 	Name         string
 	MessageQueue MessageQueue
 }
