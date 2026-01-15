@@ -31,12 +31,6 @@ type nodeData struct {
 	actions []node.Action
 }
 
-type Page interface {
-	GetCaption() string
-	CreateViewer() tui.Component
-	GetActions() []node.Action
-}
-
 func (rawNode *RawNode) GetName() string {
 	return rawNode.name
 }
