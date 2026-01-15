@@ -15,7 +15,7 @@ type Component struct {
 }
 
 func New(messageQueue tui.MessageQueue, name string, contents data.Value[string]) *Component {
-	return &Component{
+	component := Component{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
 			Name:         name,
@@ -24,6 +24,8 @@ func New(messageQueue tui.MessageQueue, name string, contents data.Value[string]
 		contents: contents,
 		style:    &tcell.StyleDefault,
 	}
+
+	return &component
 }
 
 func (component *Component) SetStyle(style *tui.Style) {
