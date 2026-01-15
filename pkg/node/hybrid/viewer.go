@@ -18,7 +18,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, data *nodeData) 
 	pageViewers := make([]tui.Component, len(pages))
 
 	for pageIndex, page := range pages {
-		viewer := page.CreateViewer()
+		viewer := page.CreateViewer(messageQueue)
 		pageViewers[pageIndex] = viewer
 	}
 
