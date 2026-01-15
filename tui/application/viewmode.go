@@ -11,9 +11,11 @@ import (
 	"pkb-agent/tui/component/keyview"
 	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/data"
+	"pkb-agent/ui/uid"
 )
 
 type viewMode struct {
+	tui.ComponentBase
 	application                 *Application
 	statusBar                   tui.Component
 	highlightedNodeViewer       data.Value[tui.Component]
@@ -24,30 +26,31 @@ type viewMode struct {
 
 func newViewMode(application *Application) *viewMode {
 	model := &application.model
+	messageQueue := application.messageQueue
 
-	nodesView := nodeselection.New(application.messageQueue, model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
-	statusBar := keyview.New(application.messageQueue, "status bar", application.keyBindings)
+	nodesView := nodeselection.New(messageQueue, model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
+	statusBar := keyview.New(messageQueue, "status bar", application.keyBindings)
 	highlightedNodeViewer := data.MapValue3(
 		model.HighlightedNodeIndex(),
 		model.IntersectionNodes(),
 		model.SelectedNodes(),
 		func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) tui.Component {
 			if intersectionNodes.Size() > 0 {
-				return intersectionNodes.At(highlightedNodeIndex).GetViewer(application.messageQueue)
+				return intersectionNodes.At(highlightedNodeIndex).GetViewer(messageQueue)
 			} else if selectedNodes.Size() > 0 {
-				return selectedNodes.At(selectedNodes.Size() - 1).GetViewer(application.messageQueue)
+				return selectedNodes.At(selectedNodes.Size() - 1).GetViewer(messageQueue)
 			} else {
 				return nil
 			}
 		},
 	)
-	highlightedNodeViewerHolder := holder.New(application.messageQueue, highlightedNodeViewer)
+	highlightedNodeViewerHolder := holder.New(messageQueue, highlightedNodeViewer)
 
 	root := docksouth.New(
-		application.messageQueue,
+		messageQueue,
 		"view:docksouth[main|statusbar]",
 		docknorth.New(
-			application.messageQueue,
+			messageQueue,
 			"view:docknorth[nodes|nodeviewer]",
 			nodesView,
 			highlightedNodeViewerHolder,
@@ -62,6 +65,11 @@ func newViewMode(application *Application) *viewMode {
 	})
 
 	result := viewMode{
+		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
+			Name:         "view mode",
+			MessageQueue: messageQueue,
+		},
 		application: application,
 		statusBar:   statusBar,
 		root:        root,

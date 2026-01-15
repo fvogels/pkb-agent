@@ -9,6 +9,7 @@ const (
 )
 
 type Component interface {
+	GetIdentifier() int
 	Handle(Message)
 	Render() Grid
 }
@@ -18,6 +19,10 @@ type ComponentBase struct {
 	Name         string
 	MessageQueue MessageQueue
 	Size         Size
+}
+
+func (base *ComponentBase) GetIdentifier() int {
+	return base.Identifier
 }
 
 type Grid interface {

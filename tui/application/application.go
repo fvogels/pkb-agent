@@ -325,7 +325,7 @@ func (application *Application) findIndexOfIntersectionNode(target string) int {
 	return bestMatchIndex
 }
 
-func (application *Application) switchMode(mode mode) {
+func (application *Application) switchMode(mode tui.Component) {
 	application.activeMode.Set(mode)
 }
 

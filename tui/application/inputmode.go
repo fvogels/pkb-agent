@@ -11,12 +11,14 @@ import (
 	"pkb-agent/tui/component/input"
 	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/data"
+	"pkb-agent/ui/uid"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
 )
 
 type inputMode struct {
+	tui.ComponentBase
 	application                 *Application
 	inputField                  *input.Component
 	highlightedNodeViewer       data.Value[tui.Component]
@@ -70,6 +72,11 @@ func newInputMode(application *Application) *inputMode {
 	)
 
 	result := inputMode{
+		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
+			Name:         "input mode",
+			MessageQueue: messageQueue,
+		},
 		application: application,
 		inputField:  inputField,
 		root:        root,
