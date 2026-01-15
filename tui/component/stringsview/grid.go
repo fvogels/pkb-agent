@@ -15,7 +15,7 @@ func newGrid(component *Component) *grid {
 }
 
 func (grid *grid) GetSize() tui.Size {
-	return grid.parent.size
+	return grid.parent.Size
 }
 
 func (grid *grid) Get(position tui.Position) tui.Cell {

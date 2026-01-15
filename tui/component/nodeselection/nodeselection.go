@@ -38,7 +38,7 @@ func New(messageQueue tui.MessageQueue, selectedNodes data.Value[list.List[*pkg.
 		})
 	})
 
-	selectedNodesView := stringsview.New(selectedNodesNames)
+	selectedNodesView := stringsview.New(messageQueue, selectedNodesNames)
 
 	nodeIntersectionItems := data.MapValue(nodeIntersection, func(lst list.List[*pkg.Node]) list.List[string] {
 		return list.MapList(lst, func(node *pkg.Node) string {

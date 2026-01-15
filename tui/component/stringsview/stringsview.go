@@ -4,13 +4,14 @@ import (
 	"pkb-agent/persistent/list"
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
+	"pkb-agent/ui/uid"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
 )
 
 type Component struct {
-	size              tui.Size
+	tui.ComponentBase
 	items             data.Value[list.List[Item]]
 	emptyStyle        *tui.Style
 	firstVisibleIndex int
@@ -22,10 +23,15 @@ type Item struct {
 	Style *tui.Style
 }
 
-func New(items data.Value[list.List[Item]]) *Component {
+func New(messageQueue tui.MessageQueue, items data.Value[list.List[Item]]) *Component {
 	defaultEmptyStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 
 	return &Component{
+		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
+			Name:         "unnamed strings view",
+			MessageQueue: messageQueue,
+		},
 		items:             items,
 		emptyStyle:        &defaultEmptyStyle,
 		firstVisibleIndex: 0,
@@ -53,7 +59,7 @@ func (component *Component) Render() tui.Grid {
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	component.size = message.Size
+	component.Size = message.Size
 }
 
 func (component *Component) EnsureItemIsVisible(index int) {
@@ -62,8 +68,8 @@ func (component *Component) EnsureItemIsVisible(index int) {
 	} else {
 		if index < component.firstVisibleIndex {
 			component.firstVisibleIndex = index
-		} else if component.firstVisibleIndex+component.size.Height <= index {
-			component.firstVisibleIndex = index - component.size.Height + 1
+		} else if component.firstVisibleIndex+component.Size.Height <= index {
+			component.firstVisibleIndex = index - component.Size.Height + 1
 		}
 	}
 }

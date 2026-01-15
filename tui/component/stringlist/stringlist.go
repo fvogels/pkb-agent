@@ -58,7 +58,7 @@ func New(messageQueue tui.MessageQueue, items data.Value[list.List[string]], sel
 		})
 	})
 
-	component.subComponent = stringsview.New(subComponentList)
+	component.subComponent = stringsview.New(messageQueue, subComponentList)
 
 	// update selection when item clicked
 	component.subComponent.SetOnItemClicked(func(index int) {
