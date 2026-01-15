@@ -8,18 +8,11 @@ import (
 	"golang.design/x/clipboard"
 )
 
-var (
-	bindingCopy = tui.KeyBinding{
-		Key:         "c",
-		Description: "copy",
-		Message:     msgCopySnippet{},
-	}
-)
-
 type pageComponent struct {
 	tui.ComponentBase
 	parent        *Page
 	snippetViewer *snippetview.Component
+	bindingCopy   tui.KeyBinding
 }
 
 type msgCopySnippet struct{}
@@ -37,6 +30,11 @@ func NewPageComponent(messageQueue tui.MessageQueue, parent *Page) *pageComponen
 		},
 		parent:        parent,
 		snippetViewer: snippetview.New(source),
+		bindingCopy: tui.KeyBinding{
+			Key:         "c",
+			Description: "copy",
+			Message:     msgCopySnippet{},
+		},
 	}
 
 	return &component
@@ -60,7 +58,7 @@ func (component *pageComponent) Handle(message tui.Message) {
 }
 
 func (component *pageComponent) onKey(message tui.MsgKey) {
-	tui.HandleKeyBindings(component.MessageQueue, message, bindingCopy)
+	tui.HandleKeyBindings(component.MessageQueue, message, component.bindingCopy)
 }
 
 func (component *pageComponent) onCopySnippet() {
