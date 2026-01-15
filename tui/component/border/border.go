@@ -2,6 +2,7 @@ package border
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/ui/uid"
 )
 
 type Component struct {
@@ -14,6 +15,7 @@ type Component struct {
 func New(messageQueue tui.MessageQueue, child tui.Component, style tui.Style) *Component {
 	return &Component{
 		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
 			Name:         "unnamed border",
 			MessageQueue: messageQueue,
 		},
