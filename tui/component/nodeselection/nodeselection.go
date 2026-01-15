@@ -45,7 +45,7 @@ func New(messageQueue tui.MessageQueue, selectedNodes data.Value[list.List[*pkg.
 			return node.GetName()
 		})
 	})
-	nodeIntersectionView := stringlist.New(nodeIntersectionItems, selectedIndex)
+	nodeIntersectionView := stringlist.New(messageQueue, nodeIntersectionItems, selectedIndex)
 
 	root := docknorth.New(
 		messageQueue,

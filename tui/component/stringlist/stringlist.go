@@ -5,13 +5,14 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
+	"pkb-agent/ui/uid"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
 )
 
 type Component struct {
-	size               tui.Size
+	tui.ComponentBase
 	items              data.Value[list.List[string]]
 	selectedIndex      data.Value[int]
 	emptyStyle         *tui.Style
@@ -22,12 +23,17 @@ type Component struct {
 	subComponent       *stringsview.Component
 }
 
-func New(items data.Value[list.List[string]], selectedItem data.Value[int]) *Component {
+func New(messageQueue tui.MessageQueue, items data.Value[list.List[string]], selectedItem data.Value[int]) *Component {
 	defaultEmptyStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	defaultItemStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	defaultSelectedItemStyle := tcell.StyleDefault.Background(color.Gray).Foreground(color.Reset)
 
 	component := Component{
+		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
+			Name:         "unnamed stringlist",
+			MessageQueue: messageQueue,
+		},
 		items:             items,
 		selectedIndex:     selectedItem,
 		itemStyle:         &defaultItemStyle,
@@ -103,7 +109,7 @@ func (component *Component) Render() tui.Grid {
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	component.size = message.Size
+	component.Size = message.Size
 	component.subComponent.Handle(message)
 	component.ensureSelectedItemIsVisible()
 }
@@ -117,7 +123,7 @@ func (component *Component) ensureSelectedItemIsVisible() {
 func (component *Component) onKey(message tui.MsgKey) {
 	selectedIndex := component.selectedIndex.Get()
 	maximumIndex := component.items.Get().Size() - 1
-	pageSize := component.size.Height
+	pageSize := component.Size.Height
 	onSelectionChanged := func(index int) {
 		if index > maximumIndex {
 			index = maximumIndex
