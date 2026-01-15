@@ -24,7 +24,7 @@ type viewMode struct {
 func newViewMode(application *Application) *viewMode {
 	model := &application.model
 
-	nodesView := nodeselection.New(model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
+	nodesView := nodeselection.New(application.messageQueue, model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
 	statusBar := keyview.New(application.messageQueue, "status bar", application.keyBindings)
 	highlightedNodeViewer := data.MapValue3(
 		model.HighlightedNodeIndex(),
@@ -45,6 +45,7 @@ func newViewMode(application *Application) *viewMode {
 	root := docksouth.New(
 		"view:docksouth[main|statusbar]",
 		docknorth.New(
+			application.messageQueue,
 			"view:docknorth[nodes|nodeviewer]",
 			nodesView,
 			highlightedNodeViewerHolder,

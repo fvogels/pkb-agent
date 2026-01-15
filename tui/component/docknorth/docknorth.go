@@ -3,19 +3,23 @@ package docknorth
 import (
 	"log/slog"
 	"pkb-agent/tui"
+	"pkb-agent/ui/uid"
 )
 
 type Component struct {
-	name              string
-	size              tui.Size
+	tui.ComponentBase
 	mainChild         tui.Component
 	dockedChild       tui.Component
 	dockedChildHeight int
 }
 
-func New(name string, dockedChild tui.Component, mainChild tui.Component, dockedChildHeight int) *Component {
+func New(messageQueue tui.MessageQueue, name string, dockedChild tui.Component, mainChild tui.Component, dockedChildHeight int) *Component {
 	return &Component{
-		name:              name,
+		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
+			Name:         name,
+			MessageQueue: messageQueue,
+		},
 		mainChild:         mainChild,
 		dockedChild:       dockedChild,
 		dockedChildHeight: dockedChildHeight,
@@ -40,7 +44,7 @@ func (component *Component) Handle(message tui.Message) {
 
 func (component *Component) Render() tui.Grid {
 	return &grid{
-		size:            component.size,
+		size:            component.Size,
 		mainChildGrid:   component.mainChild.Render(),
 		dockedChildGrid: component.dockedChild.Render(),
 		boundary:        component.dockedChildHeight,
@@ -48,15 +52,15 @@ func (component *Component) Render() tui.Grid {
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	component.size = message.Size
+	component.Size = message.Size
 
 	component.updateLayout()
 }
 
 func (component *Component) updateLayout() {
-	width := component.size.Width
+	width := component.Size.Width
 	dockedChildHeight := component.dockedChildHeight
-	mainChildHeight := component.size.Height - component.dockedChildHeight
+	mainChildHeight := component.Size.Height - component.dockedChildHeight
 
 	dockedChildSizeMessage := tui.MsgResize{
 		Size: tui.Size{
@@ -76,8 +80,8 @@ func (component *Component) updateLayout() {
 
 	slog.Debug(
 		"updated layout in docknorth",
-		slog.String("name", component.name),
-		slog.Int("totalHeight", component.size.Height),
+		slog.String("name", component.Name),
+		slog.Int("totalHeight", component.Size.Height),
 		slog.Int("dockedChildHeight", dockedChildHeight),
 		slog.Int("mainChildHeight", mainChildHeight),
 	)

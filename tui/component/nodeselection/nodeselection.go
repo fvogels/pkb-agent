@@ -23,7 +23,7 @@ type Component struct {
 	root                 *docknorth.Component
 }
 
-func New(selectedNodes data.Value[list.List[*pkg.Node]], nodeIntersection data.Value[list.List[*pkg.Node]], selectedIndex data.Value[int]) *Component {
+func New(messageQueue tui.MessageQueue, selectedNodes data.Value[list.List[*pkg.Node]], nodeIntersection data.Value[list.List[*pkg.Node]], selectedIndex data.Value[int]) *Component {
 	style := tcell.StyleDefault.Background(color.Green)
 
 	selectedNodesNames := data.MapValue(selectedNodes, func(selectedNodes list.List[*pkg.Node]) list.List[stringsview.Item] {
@@ -47,6 +47,7 @@ func New(selectedNodes data.Value[list.List[*pkg.Node]], nodeIntersection data.V
 	nodeIntersectionView := stringlist.New(nodeIntersectionItems, selectedIndex)
 
 	root := docknorth.New(
+		messageQueue,
 		"nodeselection[selected|intersection]",
 		selectedNodesView,
 		nodeIntersectionView,

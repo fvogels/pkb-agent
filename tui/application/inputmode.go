@@ -27,7 +27,7 @@ type inputMode struct {
 func newInputMode(application *Application) *inputMode {
 	model := &application.model
 
-	nodesView := nodeselection.New(model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
+	nodesView := nodeselection.New(application.messageQueue, model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
 	nodesView.SetOnSelectionChanged(func(value int) {
 		application.highlight(value)
 	})
@@ -56,6 +56,7 @@ func newInputMode(application *Application) *inputMode {
 	root := docksouth.New(
 		"input:[main|input]",
 		docknorth.New(
+			application.messageQueue,
 			"input:docknorth[nodes|nodeviewer]",
 			nodesView,
 			highlightedNodeViewerHolder,
