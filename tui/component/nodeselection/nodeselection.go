@@ -8,13 +8,14 @@ import (
 	"pkb-agent/tui/component/stringlist"
 	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
+	"pkb-agent/ui/uid"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
 )
 
 type Component struct {
-	size                 tui.Size
+	tui.ComponentBase
 	selectedNodes        data.Value[list.List[*pkg.Node]]
 	nodeIntersection     data.Value[list.List[*pkg.Node]]
 	selectedIndex        data.Value[int]
@@ -55,6 +56,11 @@ func New(messageQueue tui.MessageQueue, selectedNodes data.Value[list.List[*pkg.
 	)
 
 	component := Component{
+		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
+			Name:         "unnamed node selection view",
+			MessageQueue: messageQueue,
+		},
 		selectedNodes:        selectedNodes,
 		nodeIntersection:     nodeIntersection,
 		selectedIndex:        selectedIndex,
@@ -88,7 +94,7 @@ func (component *Component) Render() tui.Grid {
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	component.size = message.Size
+	component.Size = message.Size
 	component.root.Handle(message)
 }
 
