@@ -94,8 +94,10 @@ func (mode *inputMode) Handle(message tui.Message) {
 	case tui.MsgKey:
 		mode.onKey(message)
 
-	case messages.MsgActivateMode:
-		mode.onActivateMode()
+	case tui.MsgActivate:
+		if message.ShouldRespond(mode.Identifier) {
+			mode.onActivate()
+		}
 
 	default:
 		mode.root.Handle(message)
@@ -113,8 +115,10 @@ func (mode *inputMode) onKey(message tui.MsgKey) {
 	}
 }
 
-func (mode *inputMode) onActivateMode() {
+func (mode *inputMode) onActivate() {
 	mode.application.messageQueue.Enqueue(messages.MsgSetModeKeyBindings{
 		Bindings: list.New[tui.KeyBinding](),
 	})
+
+	mode.root.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }

@@ -21,6 +21,4 @@ type MsgActivateInputMode struct{}
 
 type MsgActivateViewMode struct{}
 
-type MsgActivateMode struct{}
-
 type MsgUnselectLastNode struct{}

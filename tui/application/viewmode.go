@@ -87,15 +87,17 @@ func (mode *viewMode) Handle(message tui.Message) {
 	case tui.MsgKey:
 		mode.onKey(message)
 
-	case messages.MsgActivateMode:
-		mode.onActivateMode()
+	case tui.MsgActivate:
+		if message.ShouldRespond(mode.Identifier) {
+			mode.onActivate()
+		}
 
 	default:
 		mode.root.Handle(message)
 	}
 }
 
-func (mode *viewMode) onActivateMode() {
+func (mode *viewMode) onActivate() {
 	messageQueue := mode.application.messageQueue
 	messageQueue.Enqueue(messages.MsgSetModeKeyBindings{
 		Bindings: list.FromItems(
@@ -106,7 +108,7 @@ func (mode *viewMode) onActivateMode() {
 		),
 	})
 
-	mode.root.Handle(tui.MsgActivate{})
+	mode.root.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }
 
 func (mode *viewMode) onKey(message tui.MsgKey) {

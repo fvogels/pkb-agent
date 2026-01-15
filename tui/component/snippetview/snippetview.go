@@ -40,6 +40,12 @@ func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgResize:
 		component.onResize(message)
+
+	case tui.MsgActivate:
+		if message.ShouldRespond(component.Identifier) {
+			component.onActivate()
+		}
+
 	}
 }
 
@@ -62,4 +68,8 @@ func (component *Component) reformatMarkdown() {
 	}
 
 	component.formattedSource.Set(reformatted)
+}
+
+func (component *Component) onActivate() {
+	component.ansiView.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }

@@ -13,15 +13,15 @@ import (
 
 type Component struct {
 	tui.ComponentBase
-	rawNode           *RawNode
-	data              *nodeData // (strong) pointer to the node data, keeps information alive while viewer exists
-	activePageIndex   data.Variable[int]
-	pageViewers       []tui.Component
-	actionKeyBindings data.Variable[list.List[tui.KeyBinding]]
-	pageKeyBindings   data.Variable[list.List[tui.KeyBinding]]
-	keyBindings       data.Value[list.List[tui.KeyBinding]]
-	activePageViewer  data.Value[tui.Component]
-	pageViewerHolder  holder.Component
+	rawNode                *RawNode
+	data                   *nodeData // (strong) pointer to the node data, keeps information alive while viewer exists
+	activePageIndex        data.Variable[int]
+	pageViewers            []tui.Component
+	actionKeyBindings      data.Variable[list.List[tui.KeyBinding]]
+	pageKeyBindings        data.Variable[list.List[tui.KeyBinding]]
+	keyBindings            data.Value[list.List[tui.KeyBinding]]
+	activePageViewer       data.Value[tui.Component]
+	activePageViewerHolder holder.Component
 }
 
 func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeData) *Component {
@@ -66,7 +66,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 			return component.pageViewers[index]
 		})
 	}
-	component.pageViewerHolder = *holder.New(messageQueue, component.activePageViewer)
+	component.activePageViewerHolder = *holder.New(messageQueue, component.activePageViewer)
 
 	return &component
 }
@@ -74,7 +74,9 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgActivate:
-		component.onActivate()
+		if message.ShouldRespond(component.Identifier) {
+			component.onActivate()
+		}
 
 	case tui.MsgResize:
 		component.onResize(message)
@@ -96,6 +98,8 @@ func (component *Component) onActivate() {
 	if len(component.pageViewers) > 0 {
 		component.setActivePage(0)
 	}
+
+	component.activePageViewerHolder.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }
 
 func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindings) {

@@ -36,6 +36,11 @@ func (component *Component) Handle(message tui.Message) {
 	case tui.MsgResize:
 		component.onResize(message)
 
+	case tui.MsgActivate:
+		if message.ShouldRespond(component.Identifier) {
+			component.onActivate()
+		}
+
 	default:
 		component.mainChild.Handle(message)
 		component.dockedChild.Handle(message)
@@ -85,4 +90,9 @@ func (component *Component) updateLayout() {
 		slog.Int("dockedChildHeight", dockedChildHeight),
 		slog.Int("mainChildHeight", mainChildHeight),
 	)
+}
+
+func (component *Component) onActivate() {
+	component.mainChild.Handle(tui.MsgActivate{Recipient: tui.Everyone})
+	component.dockedChild.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }

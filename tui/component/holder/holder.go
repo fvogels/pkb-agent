@@ -23,7 +23,7 @@ func New(messageQueue tui.MessageQueue, child data.Value[tui.Component]) *Compon
 
 	// Make sure that whenever a new component is put in, it is activated and resized
 	child.Observe(func() {
-		component.child.Get().Handle(tui.MsgActivate{})
+		component.MessageQueue.Enqueue(tui.MsgActivate{Recipient: component.child.Get().GetIdentifier()})
 		component.MessageQueue.Enqueue(tui.MsgUpdateLayout{})
 	})
 

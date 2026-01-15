@@ -53,6 +53,11 @@ func (component *Component) Handle(message tui.Message) {
 
 	case tui.MsgKey:
 		component.onKey(message)
+
+	case tui.MsgActivate:
+		if message.ShouldRespond(component.Identifier) {
+			component.onActivate()
+		}
 	}
 }
 
@@ -83,4 +88,8 @@ func (component *Component) signalOnChange(contents string) {
 	if component.onChange != nil {
 		component.onChange(contents)
 	}
+}
+
+func (component *Component) onActivate() {
+	component.label.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }

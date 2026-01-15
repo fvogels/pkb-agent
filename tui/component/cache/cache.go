@@ -41,6 +41,11 @@ func (component *Component) Handle(message tui.Message) {
 	case tui.MsgResize:
 		component.onResize(message)
 
+	case tui.MsgActivate:
+		if message.ShouldRespond(component.Identifier) {
+			component.onActivate()
+		}
+
 	default:
 		component.child.Handle(message)
 	}
@@ -68,4 +73,8 @@ func (component *Component) Invalidate() {
 // rerender asks the child component to rerender itself, which overwrites the cache
 func (component *Component) rerender() {
 	component.cached = tui.MaterializeGrid(component.child.Render())
+}
+
+func (component *Component) onActivate() {
+	component.child.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }

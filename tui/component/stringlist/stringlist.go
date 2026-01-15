@@ -99,6 +99,11 @@ func (component *Component) Handle(message tui.Message) {
 	case tui.MsgKey:
 		component.onKey(message)
 
+	case tui.MsgActivate:
+		if message.ShouldRespond(component.Identifier) {
+			component.onActivate()
+		}
+
 	default:
 		component.subComponent.Handle(message)
 	}
@@ -181,4 +186,8 @@ func (list *SubComponentList) At(index int) stringsview.Item {
 		Runes: []rune(list.items.Get().At(index)),
 		Style: style,
 	}
+}
+
+func (component *Component) onActivate() {
+	component.subComponent.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }
