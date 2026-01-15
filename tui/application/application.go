@@ -9,6 +9,7 @@ import (
 	"pkb-agent/pkg/loaders/sequence"
 	"pkb-agent/tui"
 	"pkb-agent/tui/application/messages"
+	"pkb-agent/tui/component/holder"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/model"
 	"pkb-agent/util/pathlib"
@@ -26,30 +27,33 @@ const (
 )
 
 type Application struct {
-	verbose      bool
-	running      bool
-	logFile      *os.File
-	screen       tcell.Screen
-	messageQueue tui.MessageQueue
-	size         tui.Size
-	graph        *pkg.Graph
-	model        model.Model
-	viewMode     *viewMode
-	inputMode    *inputMode
-	activeMode   mode
-	modeBindings data.Variable[list.List[tui.KeyBinding]]
-	nodeBindings data.Variable[list.List[tui.KeyBinding]]
-	keyBindings  data.Value[list.List[tui.KeyBinding]]
+	verbose          bool
+	running          bool
+	logFile          *os.File
+	screen           tcell.Screen
+	messageQueue     tui.MessageQueue
+	size             tui.Size
+	graph            *pkg.Graph
+	model            model.Model
+	viewMode         *viewMode
+	inputMode        *inputMode
+	activeMode       data.Variable[tui.Component]
+	activeModeHolder *holder.Component
+	modeBindings     data.Variable[list.List[tui.KeyBinding]]
+	nodeBindings     data.Variable[list.List[tui.KeyBinding]]
+	keyBindings      data.Value[list.List[tui.KeyBinding]]
 }
 
 func NewApplication(verbose bool) *Application {
 	application := Application{
-		verbose: verbose,
-		running: true,
+		verbose:      verbose,
+		running:      true,
+		logFile:      nil,
+		activeMode:   data.NewVariable[tui.Component](nil),
+		modeBindings: data.NewVariable(list.New[tui.KeyBinding]()),
+		nodeBindings: data.NewVariable(list.New[tui.KeyBinding]()),
 	}
 
-	application.modeBindings = data.NewVariable(list.New[tui.KeyBinding]())
-	application.nodeBindings = data.NewVariable(list.New[tui.KeyBinding]())
 	application.keyBindings = data.MapValue2(
 		&application.modeBindings,
 		&application.nodeBindings,
@@ -80,6 +84,7 @@ func (application *Application) Start() error {
 	application.model = model.New(application.graph)
 	application.viewMode = newViewMode(application)
 	application.inputMode = newInputMode(application)
+	application.activeModeHolder = holder.New(application.messageQueue, &application.activeMode)
 
 	application.switchMode(application.viewMode)
 
@@ -168,7 +173,7 @@ func (application *Application) HandleEvent(event tcell.Event) {
 		}
 		slog.Debug("Application handles message", slog.String("messageType", reflect.TypeOf(message).String()))
 
-		application.activeMode.Handle(message)
+		application.activeMode.Get().Handle(message)
 		application.screen.Sync()
 
 	case *tcell.EventKey:
@@ -181,7 +186,7 @@ func (application *Application) HandleEvent(event tcell.Event) {
 
 		slog.Debug("Application handles message", slog.String("messageType", reflect.TypeOf(message).String()))
 
-		application.activeMode.Handle(message)
+		application.activeMode.Get().Handle(message)
 
 	case *tui.EventMessage:
 		message := event.Message
@@ -190,7 +195,7 @@ func (application *Application) HandleEvent(event tcell.Event) {
 
 		switch message := message.(type) {
 		case tui.MsgUpdateLayout:
-			application.activeMode.Handle(tui.MsgResize{
+			application.activeMode.Get().Handle(tui.MsgResize{
 				Size: application.size,
 			})
 
@@ -213,7 +218,7 @@ func (application *Application) HandleEvent(event tcell.Event) {
 			application.switchMode(application.inputMode)
 
 		default:
-			application.activeMode.Handle(message)
+			application.activeMode.Get().Handle(message)
 		}
 
 		// case *tcell.EventMouse:
@@ -233,7 +238,7 @@ func (application *Application) Render() {
 
 	screen.Clear()
 
-	grid := activeMode.Render()
+	grid := activeMode.Get().Render()
 	gridSize := grid.GetSize()
 	runes := make([]rune, 1)
 
@@ -321,9 +326,7 @@ func (application *Application) findIndexOfIntersectionNode(target string) int {
 }
 
 func (application *Application) switchMode(mode mode) {
-	application.activeMode = mode
-	application.activeMode.Handle(tui.MsgResize{Size: application.size})
-	application.activeMode.Handle(messages.MsgActivateMode{})
+	application.activeMode.Set(mode)
 }
 
 func (application *Application) selectHighlightedNode() {
