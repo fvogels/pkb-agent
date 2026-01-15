@@ -3,6 +3,7 @@ package holder
 import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
+	"pkb-agent/ui/uid"
 )
 
 type Component struct {
@@ -14,6 +15,7 @@ type Component struct {
 func New(messageQueue tui.MessageQueue, child data.Value[tui.Component]) *Component {
 	component := Component{
 		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
 			Name:         "nameless holder",
 			MessageQueue: messageQueue,
 		},
