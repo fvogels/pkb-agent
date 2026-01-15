@@ -20,7 +20,7 @@ type Component struct {
 func New(messageQueue tui.MessageQueue, contents data.Value[string]) *Component {
 	emptyStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 
-	return &Component{
+	component := Component{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
 			MessageQueue: messageQueue,
@@ -32,6 +32,8 @@ func New(messageQueue tui.MessageQueue, contents data.Value[string]) *Component 
 		}),
 		emptyStyle: &emptyStyle,
 	}
+
+	return &component
 }
 
 func (component *Component) SetEmptyStyle(style *tui.Style) {
