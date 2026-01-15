@@ -1,29 +1,32 @@
 package application
 
-import "pkb-agent/tui"
+import (
+	"pkb-agent/tui"
+	"pkb-agent/tui/application/messages"
+)
 
 var (
 	BindingQuit = tui.KeyBinding{
 		Key:         "q",
 		Description: "quit",
-		Message:     MsgQuit{},
+		Message:     messages.MsgQuit{},
 	}
 
 	BindingSelect = tui.KeyBinding{
 		Key:         "Enter",
 		Description: "select",
-		Message:     MsgSelectHighlightedNode{},
+		Message:     messages.MsgSelectHighlightedNode{},
 	}
 
 	BindingUnselect = tui.KeyBinding{
 		Key:         "Delete",
 		Description: "pop",
-		Message:     MsgUnselectLastNode{},
+		Message:     messages.MsgUnselectLastNode{},
 	}
 
 	BindingSearch = tui.KeyBinding{
 		Key:         "/",
 		Description: "search",
-		Message:     MsgActivateInputMode{},
+		Message:     messages.MsgActivateInputMode{},
 	}
 )

@@ -7,8 +7,9 @@ import (
 	"log/slog"
 	"pkb-agent/pkg/node"
 	"pkb-agent/pkg/node/hybrid/actions/www"
-	markdownpage "pkb-agent/pkg/node/hybrid/pages/markdown"
-	snippetpage "pkb-agent/pkg/node/hybrid/pages/snippet"
+	"pkb-agent/pkg/node/hybrid/page"
+	markdownpage "pkb-agent/pkg/node/hybrid/page/markdown"
+	snippetpage "pkb-agent/pkg/node/hybrid/page/snippet"
 	"pkb-agent/tui"
 	"pkb-agent/util"
 	"pkb-agent/util/multifile"
@@ -27,7 +28,7 @@ type RawNode struct {
 }
 
 type nodeData struct {
-	pages   []Page
+	pages   []page.Page
 	actions []node.Action
 }
 
@@ -123,8 +124,8 @@ func (rawNode *RawNode) Serialize(writer io.Writer) error {
 	return nil
 }
 
-func (rawNode *RawNode) loadPages(file *multifile.MultiFile) []Page {
-	pages := []Page{}
+func (rawNode *RawNode) loadPages(file *multifile.MultiFile) []page.Page {
+	pages := []page.Page{}
 
 	for _, segment := range file.Segments {
 		switch segment.Type {

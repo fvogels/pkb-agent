@@ -1,6 +1,8 @@
 package snippetpage
 
 import (
+	"pkb-agent/persistent/list"
+	"pkb-agent/pkg/node/hybrid/page"
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/snippetview"
 	"pkb-agent/tui/data"
@@ -53,6 +55,13 @@ func (component *pageComponent) Handle(message tui.Message) {
 
 	case msgCopySnippet:
 		component.onCopySnippet()
+
+	case page.MsgActivatePage:
+		component.MessageQueue.Enqueue(page.MsgSetPageKeyBindings{
+			Bindings: list.FromItems(
+				component.bindingCopy,
+			),
+		})
 
 	default:
 		component.snippetViewer.Handle(message)

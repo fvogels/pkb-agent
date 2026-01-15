@@ -4,6 +4,7 @@ import (
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
+	"pkb-agent/tui/application/messages"
 	"pkb-agent/tui/component/docknorth"
 	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/holder"
@@ -86,7 +87,7 @@ func (mode *inputMode) Handle(message tui.Message) {
 	case tui.MsgKey:
 		mode.onKey(message)
 
-	case MsgActivateMode:
+	case messages.MsgActivateMode:
 		mode.onActivateMode()
 
 	default:
@@ -106,7 +107,7 @@ func (mode *inputMode) onKey(message tui.MsgKey) {
 }
 
 func (mode *inputMode) onActivateMode() {
-	mode.application.messageQueue.Enqueue(MsgSetModeKeyBindings{
+	mode.application.messageQueue.Enqueue(messages.MsgSetModeKeyBindings{
 		Bindings: list.New[tui.KeyBinding](),
 	})
 }

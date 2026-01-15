@@ -1,4 +1,4 @@
-package application
+package messages
 
 import (
 	"pkb-agent/persistent/list"

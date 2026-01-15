@@ -8,9 +8,11 @@ import (
 	"pkb-agent/pkg"
 	"pkb-agent/pkg/loaders/sequence"
 	"pkb-agent/tui"
+	"pkb-agent/tui/application/messages"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/model"
 	"pkb-agent/util/pathlib"
+	"reflect"
 	"slices"
 	"strings"
 	"time"
@@ -164,8 +166,9 @@ func (application *Application) HandleEvent(event tcell.Event) {
 		message := tui.MsgResize{
 			Size: application.size,
 		}
-		application.activeMode.Handle(message)
+		slog.Debug("Application handles message", slog.String("messageType", reflect.TypeOf(message).String()))
 
+		application.activeMode.Handle(message)
 		application.screen.Sync()
 
 	case *tcell.EventKey:
@@ -176,10 +179,14 @@ func (application *Application) HandleEvent(event tcell.Event) {
 			Key: translateKey(event),
 		}
 
+		slog.Debug("Application handles message", slog.String("messageType", reflect.TypeOf(message).String()))
+
 		application.activeMode.Handle(message)
 
 	case *tui.EventMessage:
 		message := event.Message
+
+		slog.Debug("Application handles message", slog.String("messageType", reflect.TypeOf(message).String()))
 
 		switch message := message.(type) {
 		case tui.MsgUpdateLayout:
@@ -187,22 +194,22 @@ func (application *Application) HandleEvent(event tcell.Event) {
 				Size: application.size,
 			})
 
-		case MsgQuit:
+		case messages.MsgQuit:
 			application.running = false
 
-		case MsgSelectHighlightedNode:
+		case messages.MsgSelectHighlightedNode:
 			application.selectHighlightedNode()
 
-		case MsgUnselectLastNode:
+		case messages.MsgUnselectLastNode:
 			application.unselectLastNode()
 
-		case MsgSetModeKeyBindings:
+		case messages.MsgSetModeKeyBindings:
 			application.modeBindings.Set(message.Bindings)
 
-		case MsgSetNodeKeyBindings:
+		case messages.MsgSetNodeKeyBindings:
 			application.nodeBindings.Set(message.Bindings)
 
-		case MsgActivateInputMode:
+		case messages.MsgActivateInputMode:
 			application.switchMode(application.inputMode)
 
 		default:
@@ -316,7 +323,7 @@ func (application *Application) findIndexOfIntersectionNode(target string) int {
 func (application *Application) switchMode(mode mode) {
 	application.activeMode = mode
 	application.activeMode.Handle(tui.MsgResize{Size: application.size})
-	application.activeMode.Handle(MsgActivateMode{})
+	application.activeMode.Handle(messages.MsgActivateMode{})
 }
 
 func (application *Application) selectHighlightedNode() {

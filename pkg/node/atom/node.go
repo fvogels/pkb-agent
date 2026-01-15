@@ -4,8 +4,6 @@ import (
 	"encoding/binary"
 	"io"
 	"pkb-agent/tui"
-	"pkb-agent/tui/component/label"
-	"pkb-agent/tui/data"
 	"pkb-agent/util"
 	"strings"
 )
@@ -30,7 +28,7 @@ func (node *RawNode) GetLinks() []string {
 }
 
 func (node *RawNode) GetViewer(messageQueue tui.MessageQueue) tui.Component {
-	return label.New(messageQueue, "atomviewer", data.NewConstant("atom"))
+	return NewViewer(messageQueue)
 }
 
 func (node *RawNode) Serialize(writer io.Writer) error {

@@ -1,53 +1,91 @@
 package hybrid
 
 import (
+	"pkb-agent/persistent/list"
+	"pkb-agent/pkg/node/hybrid/page"
 	"pkb-agent/tui"
+	"pkb-agent/tui/application/messages"
+	"pkb-agent/tui/data"
 	"pkb-agent/ui/uid"
 )
 
 type Component struct {
 	tui.ComponentBase
-	rawNode         *RawNode
-	data            *nodeData // (strong) pointer to the node data, keeps information alive while viewer exists
-	activePageIndex int
-	pageViewers     []tui.Component
+	rawNode           *RawNode
+	data              *nodeData // (strong) pointer to the node data, keeps information alive while viewer exists
+	activePageIndex   int
+	pageViewers       []tui.Component
+	actionKeyBindings data.Variable[list.List[tui.KeyBinding]]
+	pageKeyBindings   data.Variable[list.List[tui.KeyBinding]]
+	keyBindings       data.Value[list.List[tui.KeyBinding]]
 }
 
-func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, data *nodeData) *Component {
-	pages := data.pages
-	pageViewers := make([]tui.Component, len(pages))
-
-	for pageIndex, page := range pages {
-		viewer := page.CreateViewer(messageQueue)
-		pageViewers[pageIndex] = viewer
-	}
-
-	return &Component{
+func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeData) *Component {
+	component := Component{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
 			Name:         "unnamed hybrid node viewer",
 			MessageQueue: messageQueue,
 		},
-		rawNode:         rawNode,
-		data:            data,
-		activePageIndex: 0,
-		pageViewers:     pageViewers,
+		rawNode: rawNode,
+		data:    nodeData,
 	}
+
+	pages := nodeData.pages
+	component.pageViewers = make([]tui.Component, len(pages))
+
+	for pageIndex, page := range pages {
+		viewer := page.CreateViewer(messageQueue)
+		component.pageViewers[pageIndex] = viewer
+	}
+
+	component.actionKeyBindings = data.NewVariable(list.New[tui.KeyBinding]())
+	component.pageKeyBindings = data.NewVariable(list.New[tui.KeyBinding]())
+	component.keyBindings = data.MapValue2(
+		&component.actionKeyBindings,
+		&component.pageKeyBindings,
+		func(xs, ys list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
+			return list.Concatenate(xs, ys)
+		},
+	)
+	component.keyBindings.Observe(func() {
+		messageQueue.Enqueue(messages.MsgSetNodeKeyBindings{
+			Bindings: component.keyBindings.Get(),
+		})
+	})
+
+	return &component
 }
 
 func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
+	case tui.MsgActivate:
+		component.onActivate()
+
 	case tui.MsgResize:
 		component.onResize(message)
 
 	case tui.MsgKey:
 		component.onKey(message)
 
+	case page.MsgSetPageKeyBindings:
+		component.onSetPageKeyBindings(message)
+
 	default:
-		component.withActivePage(func(page Page, viewer tui.Component) {
+		component.withActivePage(func(page page.Page, viewer tui.Component) {
 			viewer.Handle(message)
 		})
 	}
+}
+
+func (component *Component) onActivate() {
+	if len(component.pageViewers) > 0 {
+		component.setActivePage(0)
+	}
+}
+
+func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindings) {
+	component.pageKeyBindings.Set(message.Bindings)
 }
 
 func (component *Component) Render() tui.Grid {
@@ -61,12 +99,12 @@ func (component *Component) Render() tui.Grid {
 func (component *Component) onResize(message tui.MsgResize) {
 	component.Size = message.Size
 
-	component.withActivePage(func(page Page, viewer tui.Component) {
+	component.withActivePage(func(page page.Page, viewer tui.Component) {
 		viewer.Handle(message)
 	})
 }
 
-func (component *Component) withActivePage(f func(page Page, viewer tui.Component)) {
+func (component *Component) withActivePage(f func(page page.Page, viewer tui.Component)) {
 	if len(component.pageViewers) > 0 {
 		activePage := component.data.pages[component.activePageIndex]
 		activeViewer := component.pageViewers[component.activePageIndex]
@@ -78,12 +116,12 @@ func (component *Component) withActivePage(f func(page Page, viewer tui.Componen
 func (component *Component) onKey(message tui.MsgKey) {
 	switch message.Key {
 	case "Tab":
-		component.withActivePage(func(page Page, viewer tui.Component) {
+		component.withActivePage(func(page page.Page, viewer tui.Component) {
 			component.setActivePage((component.activePageIndex + 1) % len(component.pageViewers))
 		})
 
 	default:
-		component.withActivePage(func(page Page, viewer tui.Component) {
+		component.withActivePage(func(page page.Page, viewer tui.Component) {
 			viewer.Handle(message)
 		})
 	}
@@ -92,10 +130,11 @@ func (component *Component) onKey(message tui.MsgKey) {
 func (component *Component) setActivePage(index int) {
 	component.activePageIndex = index
 	component.resizeActiveViewer()
+	component.Handle(page.MsgActivatePage{})
 }
 
 func (component *Component) resizeActiveViewer() {
-	component.withActivePage(func(page Page, viewer tui.Component) {
+	component.withActivePage(func(page page.Page, viewer tui.Component) {
 		resizeMessage := tui.MsgResize{
 			Size: component.Size,
 		}

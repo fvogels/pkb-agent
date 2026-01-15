@@ -4,6 +4,7 @@ import (
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
+	"pkb-agent/tui/application/messages"
 	"pkb-agent/tui/component/docknorth"
 	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/holder"
@@ -78,7 +79,7 @@ func (mode *viewMode) Handle(message tui.Message) {
 	case tui.MsgKey:
 		mode.onKey(message)
 
-	case MsgActivateMode:
+	case messages.MsgActivateMode:
 		mode.onActivateMode()
 
 	default:
@@ -87,7 +88,8 @@ func (mode *viewMode) Handle(message tui.Message) {
 }
 
 func (mode *viewMode) onActivateMode() {
-	mode.application.messageQueue.Enqueue(MsgSetModeKeyBindings{
+	messageQueue := mode.application.messageQueue
+	messageQueue.Enqueue(messages.MsgSetModeKeyBindings{
 		Bindings: list.FromItems(
 			BindingQuit,
 			BindingSelect,
@@ -95,6 +97,8 @@ func (mode *viewMode) onActivateMode() {
 			BindingSearch,
 		),
 	})
+
+	mode.root.Handle(tui.MsgActivate{})
 }
 
 func (mode *viewMode) onKey(message tui.MsgKey) {
