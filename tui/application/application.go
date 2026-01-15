@@ -24,20 +24,20 @@ const (
 )
 
 type Application struct {
-	verbose        bool
-	running        bool
-	logFile        *os.File
-	screen         tcell.Screen
-	messageQueue   tui.MessageQueue
-	size           tui.Size
-	graph          *pkg.Graph
-	model          model.Model
-	viewMode       *viewMode
-	inputMode      *inputMode
-	activeMode     mode
-	globalBindings data.Variable[list.List[tui.KeyBinding]]
-	nodeBindings   data.Variable[list.List[tui.KeyBinding]]
-	keyBindings    data.Value[list.List[tui.KeyBinding]]
+	verbose      bool
+	running      bool
+	logFile      *os.File
+	screen       tcell.Screen
+	messageQueue tui.MessageQueue
+	size         tui.Size
+	graph        *pkg.Graph
+	model        model.Model
+	viewMode     *viewMode
+	inputMode    *inputMode
+	activeMode   mode
+	modeBindings data.Variable[list.List[tui.KeyBinding]]
+	nodeBindings data.Variable[list.List[tui.KeyBinding]]
+	keyBindings  data.Value[list.List[tui.KeyBinding]]
 }
 
 func NewApplication(verbose bool) *Application {
@@ -46,16 +46,10 @@ func NewApplication(verbose bool) *Application {
 		running: true,
 	}
 
-	application.globalBindings = data.NewVariable(list.FromItems(
-		tui.KeyBinding{
-			Key:         "q",
-			Description: "quit",
-			Message:     MsgQuit{},
-		},
-	))
+	application.modeBindings = data.NewVariable(list.New[tui.KeyBinding]())
 	application.nodeBindings = data.NewVariable(list.New[tui.KeyBinding]())
 	application.keyBindings = data.MapValue2(
-		&application.globalBindings,
+		&application.modeBindings,
 		&application.nodeBindings,
 		func(xs list.List[tui.KeyBinding], ys list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
 			return list.Concatenate(xs, ys)
@@ -84,7 +78,8 @@ func (application *Application) Start() error {
 	application.model = model.New(application.graph)
 	application.viewMode = newViewMode(application)
 	application.inputMode = newInputMode(application)
-	application.activeMode = application.viewMode
+
+	application.switchMode(application.viewMode)
 
 	application.eventLoop()
 
@@ -180,6 +175,7 @@ func (application *Application) HandleEvent(event tcell.Event) {
 		message := tui.MsgKey{
 			Key: translateKey(event),
 		}
+
 		application.activeMode.Handle(message)
 
 	case *tui.EventMessage:
@@ -190,6 +186,24 @@ func (application *Application) HandleEvent(event tcell.Event) {
 			application.activeMode.Handle(tui.MsgResize{
 				Size: application.size,
 			})
+
+		case MsgQuit:
+			application.running = false
+
+		case MsgSelectHighlightedNode:
+			application.selectHighlightedNode()
+
+		case MsgUnselectLastNode:
+			application.unselectLastNode()
+
+		case MsgSetModeKeyBindings:
+			application.modeBindings.Set(message.Bindings)
+
+		case MsgSetNodeKeyBindings:
+			application.nodeBindings.Set(message.Bindings)
+
+		case MsgActivateInputMode:
+			application.switchMode(application.inputMode)
 
 		default:
 			application.activeMode.Handle(message)
@@ -302,6 +316,7 @@ func (application *Application) findIndexOfIntersectionNode(target string) int {
 func (application *Application) switchMode(mode mode) {
 	application.activeMode = mode
 	application.activeMode.Handle(tui.MsgResize{Size: application.size})
+	application.activeMode.Handle(MsgActivateMode{})
 }
 
 func (application *Application) selectHighlightedNode() {

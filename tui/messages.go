@@ -1,9 +1,5 @@
 package tui
 
-import (
-	"pkb-agent/persistent/list"
-)
-
 type Message any
 
 type MsgResize struct {
@@ -15,7 +11,3 @@ type MsgKey struct {
 }
 
 type MsgUpdateLayout struct{}
-
-type MsgSetNodeKeyBindings struct {
-	Bindings list.List[KeyBinding]
-}

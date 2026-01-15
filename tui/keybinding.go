@@ -6,10 +6,13 @@ type KeyBinding struct {
 	Message     Message
 }
 
-func Match(messageQueue MessageQueue, message MsgKey, bindings ...KeyBinding) {
+func HandleKeyBindings(messageQueue MessageQueue, message MsgKey, bindings ...KeyBinding) bool {
 	for _, binding := range bindings {
 		if message.Key == binding.Key {
 			messageQueue.Enqueue(binding.Message)
+			return true
 		}
 	}
+
+	return false
 }

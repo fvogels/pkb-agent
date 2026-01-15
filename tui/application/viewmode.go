@@ -76,30 +76,53 @@ func (mode *viewMode) Handle(message tui.Message) {
 	case tui.MsgKey:
 		mode.onKey(message)
 
+	case MsgActivateMode:
+		mode.onActivateMode()
+
 	default:
 		mode.root.Handle(message)
 	}
 }
 
+func (mode *viewMode) onActivateMode() {
+	mode.application.messageQueue.Enqueue(MsgSetModeKeyBindings{
+		Bindings: list.FromItems(
+			BindingQuit,
+			BindingSelect,
+			BindingUnselect,
+			BindingSearch,
+		),
+	})
+}
+
 func (mode *viewMode) onKey(message tui.MsgKey) {
 	application := mode.application
+	activeBindings := []tui.KeyBinding{
+		BindingQuit,
+		BindingSelect,
+		BindingUnselect,
+		BindingSearch,
+	}
 
-	switch message.Key {
-	case "q":
-		application.running = false
-
-	case "Enter":
-		application.selectHighlightedNode()
-
-	case "Delete":
-		application.unselectLastNode()
-
-	case "/":
-		application.switchMode(mode.application.inputMode)
-
-	default:
+	if !tui.HandleKeyBindings(application.messageQueue, message, activeBindings...) {
 		mode.root.Handle(message)
 	}
+	// switch message.Key {
+	// case "q":
+	// 	application.running = false
+
+	// case "Enter":
+	// 	application.selectHighlightedNode()
+
+	// case "Delete":
+	// 	application.unselectLastNode()
+
+	// case "/":
+	// 	application.switchMode(mode.application.inputMode)
+
+	// default:
+
+	// }
 }
 
 // func (mode *viewMode) updateLayout() {

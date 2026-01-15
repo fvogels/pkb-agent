@@ -83,6 +83,9 @@ func (mode *inputMode) Handle(message tui.Message) {
 	case tui.MsgKey:
 		mode.onKey(message)
 
+	case MsgActivateMode:
+		mode.onActivateMode()
+
 	default:
 		mode.root.Handle(message)
 	}
@@ -97,4 +100,10 @@ func (mode *inputMode) onKey(message tui.MsgKey) {
 	default:
 		mode.root.Handle(message)
 	}
+}
+
+func (mode *inputMode) onActivateMode() {
+	mode.application.messageQueue.Enqueue(MsgSetModeKeyBindings{
+		Bindings: list.New[tui.KeyBinding](),
+	})
 }
