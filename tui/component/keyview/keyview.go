@@ -4,6 +4,7 @@ import (
 	"pkb-agent/persistent/list"
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
+	"pkb-agent/ui/uid"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
@@ -26,6 +27,7 @@ func New(messageQueue tui.MessageQueue, name string, keyBindings data.Value[list
 
 	component := Component{
 		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
 			Name:         name,
 			MessageQueue: messageQueue,
 		},
