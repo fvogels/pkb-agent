@@ -18,8 +18,6 @@ type ComponentBase struct {
 	MessageQueue MessageQueue
 }
 
-type Message any
-
 type Grid interface {
 	GetSize() Size
 	Get(position Position) Cell
@@ -32,16 +30,6 @@ type Cell struct {
 	Style    *Style
 	OnClick  func()
 }
-
-type MsgResize struct {
-	Size Size
-}
-
-type MsgKey struct {
-	Key string
-}
-
-type MsgUpdateLayout struct{}
 
 type Position struct {
 	X int
