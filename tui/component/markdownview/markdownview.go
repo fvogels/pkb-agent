@@ -4,11 +4,12 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/ansiview"
 	"pkb-agent/tui/data"
+	"pkb-agent/ui/uid"
 	"pkb-agent/util/markdown"
 )
 
 type Component struct {
-	size            tui.Size
+	tui.ComponentBase
 	source          data.Value[string]
 	formattedSource data.Variable[string]
 	ansiView        *ansiview.Component
@@ -16,6 +17,11 @@ type Component struct {
 
 func New(messageQueue tui.MessageQueue, source data.Value[string]) *Component {
 	component := Component{
+		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
+			Name:         "unnamed markdown viewer",
+			MessageQueue: messageQueue,
+		},
 		source:          source,
 		formattedSource: data.NewVariable(""),
 	}
@@ -37,12 +43,12 @@ func (component *Component) Render() tui.Grid {
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	component.size = message.Size
+	component.Size = message.Size
 	component.reformatMarkdown()
 }
 
 func (component *Component) reformatMarkdown() {
-	reformatted, err := markdown.Render(component.source.Get(), component.size.Width)
+	reformatted, err := markdown.Render(component.source.Get(), component.Size.Width)
 	if err != nil {
 		panic("failed to render markdown")
 	}
