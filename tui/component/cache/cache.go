@@ -3,17 +3,23 @@ package cache
 import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
+	"pkb-agent/ui/uid"
 )
 
 type Component struct {
-	size   tui.Size
+	tui.ComponentBase
 	child  tui.Component
 	cached tui.Grid
 	dirty  bool
 }
 
-func New(child tui.Component, observables ...data.Observable) *Component {
+func New(messageQueue tui.MessageQueue, child tui.Component, observables ...data.Observable) *Component {
 	result := Component{
+		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
+			Name:         "nameless cache",
+			MessageQueue: messageQueue,
+		},
 		child: child,
 	}
 
@@ -50,7 +56,7 @@ func (component *Component) Render() tui.Grid {
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	component.size = message.Size
+	component.Size = message.Size
 	component.child.Handle(message)
 	component.Invalidate()
 }
