@@ -12,19 +12,14 @@ import (
 type Component struct {
 	tui.ComponentBase
 	size             tui.Size
-	keyBindings      data.Value[list.List[KeyBinding]]
+	keyBindings      data.Value[list.List[tui.KeyBinding]]
 	cachedGrid       tui.Grid
 	keyStyle         *tui.Style
 	descriptionStyle *tui.Style
 	emptyStyle       *tui.Style
 }
 
-type KeyBinding struct {
-	key         string
-	description string
-}
-
-func New(messageQueue tui.MessageQueue, name string, keyBindings data.Value[list.List[KeyBinding]]) *Component {
+func New(messageQueue tui.MessageQueue, name string, keyBindings data.Value[list.List[tui.KeyBinding]]) *Component {
 	keyStyle := tcell.StyleDefault.Background(color.NewHexColor(0xAAAAFF))
 	descriptionStyle := tcell.StyleDefault.Background(color.NewHexColor(0x8888FF))
 	emptyStyle := tcell.StyleDefault.Background(color.Reset)
@@ -80,15 +75,15 @@ func (component *Component) renderKeyBindings() tui.Grid {
 			x++
 		}
 	}
-	list.ForEach(component.keyBindings.Get(), func(index int, keyBinding KeyBinding) {
+	list.ForEach(component.keyBindings.Get(), func(index int, keyBinding tui.KeyBinding) {
 		write(' ', component.keyStyle)
-		for _, r := range []rune(keyBinding.key) {
+		for _, r := range []rune(keyBinding.Key) {
 			write(r, component.keyStyle)
 		}
 		write(' ', component.keyStyle)
 
 		write(' ', component.descriptionStyle)
-		for _, r := range []rune(keyBinding.description) {
+		for _, r := range []rune(keyBinding.Description) {
 			write(r, component.descriptionStyle)
 		}
 		write(' ', component.descriptionStyle)

@@ -8,7 +8,6 @@ import (
 	"pkb-agent/pkg"
 	"pkb-agent/pkg/loaders/sequence"
 	"pkb-agent/tui"
-	"pkb-agent/tui/component/keyview"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/model"
 	"pkb-agent/util/pathlib"
@@ -25,18 +24,20 @@ const (
 )
 
 type Application struct {
-	verbose      bool
-	running      bool
-	logFile      *os.File
-	screen       tcell.Screen
-	messageQueue tui.MessageQueue
-	size         tui.Size
-	graph        *pkg.Graph
-	model        model.Model
-	viewMode     *viewMode
-	inputMode    *inputMode
-	activeMode   mode
-	keyBindings  data.Variable[list.List[keyview.KeyBinding]]
+	verbose        bool
+	running        bool
+	logFile        *os.File
+	screen         tcell.Screen
+	messageQueue   tui.MessageQueue
+	size           tui.Size
+	graph          *pkg.Graph
+	model          model.Model
+	viewMode       *viewMode
+	inputMode      *inputMode
+	activeMode     mode
+	globalBindings data.Variable[list.List[tui.KeyBinding]]
+	nodeBindings   data.Variable[list.List[tui.KeyBinding]]
+	keyBindings    data.Value[list.List[tui.KeyBinding]]
 }
 
 func NewApplication(verbose bool) *Application {
@@ -44,6 +45,22 @@ func NewApplication(verbose bool) *Application {
 		verbose: verbose,
 		running: true,
 	}
+
+	application.globalBindings = data.NewVariable(list.FromItems(
+		tui.KeyBinding{
+			Key:         "q",
+			Description: "quit",
+			Message:     MsgQuit{},
+		},
+	))
+	application.nodeBindings = data.NewVariable(list.New[tui.KeyBinding]())
+	application.keyBindings = data.MapValue2(
+		&application.globalBindings,
+		&application.nodeBindings,
+		func(xs list.List[tui.KeyBinding], ys list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
+			return list.Concatenate(xs, ys)
+		},
+	)
 
 	return &application
 }
@@ -68,7 +85,6 @@ func (application *Application) Start() error {
 	application.viewMode = newViewMode(application)
 	application.inputMode = newInputMode(application)
 	application.activeMode = application.viewMode
-	application.keyBindings = data.NewVariable(list.New[keyview.KeyBinding]())
 
 	application.eventLoop()
 
