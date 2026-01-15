@@ -12,7 +12,7 @@ type Component struct {
 }
 
 func New(messageQueue tui.MessageQueue, child tui.Component, style tui.Style) *Component {
-	return &Component{
+	component := Component{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
 			Name:         "unnamed border",
@@ -21,6 +21,8 @@ func New(messageQueue tui.MessageQueue, child tui.Component, style tui.Style) *C
 		child: child,
 		style: style,
 	}
+
+	return &component
 }
 
 func (component *Component) Handle(message tui.Message) {
