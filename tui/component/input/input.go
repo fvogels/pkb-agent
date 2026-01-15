@@ -19,7 +19,7 @@ type Component struct {
 
 func New(messageQueue tui.MessageQueue, contents data.Value[string]) *Component {
 	style := tcell.StyleDefault
-	subComponent := label.New("input[label]", contents)
+	subComponent := label.New(messageQueue, "input[label]", contents)
 	subComponent.SetStyle(&style)
 
 	return &Component{

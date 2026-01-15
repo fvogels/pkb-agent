@@ -3,20 +3,24 @@ package label
 import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
+	"pkb-agent/ui/uid"
 
 	"github.com/gdamore/tcell/v3"
 )
 
 type Component struct {
-	name     string
-	size     tui.Size
+	tui.ComponentBase
 	contents data.Value[string]
 	style    *tui.Style
 }
 
-func New(name string, contents data.Value[string]) *Component {
+func New(messageQueue tui.MessageQueue, name string, contents data.Value[string]) *Component {
 	return &Component{
-		name:     name,
+		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
+			Name:         name,
+			MessageQueue: messageQueue,
+		},
 		contents: contents,
 		style:    &tcell.StyleDefault,
 	}
@@ -38,5 +42,5 @@ func (component *Component) Render() tui.Grid {
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	component.size = message.Size
+	component.Size = message.Size
 }

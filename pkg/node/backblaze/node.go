@@ -31,8 +31,8 @@ func (node *RawNode) GetLinks() []string {
 	return node.links
 }
 
-func (node *RawNode) GetViewer(tui.MessageQueue) tui.Component {
-	return label.New("backblazeviewer", data.NewConstant("backblaze"))
+func (node *RawNode) GetViewer(messageQueue tui.MessageQueue) tui.Component {
+	return label.New(messageQueue, "backblazeviewer", data.NewConstant("backblaze"))
 }
 
 func (node *RawNode) Serialize(writer io.Writer) error {

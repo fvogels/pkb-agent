@@ -30,8 +30,8 @@ func (node *RawNode) GetLinks() []string {
 	return node.links
 }
 
-func (node *RawNode) GetViewer(tui.MessageQueue) tui.Component {
-	return label.New("bookmarkviewer", data.NewConstant("bookmark"))
+func (node *RawNode) GetViewer(messageQueue tui.MessageQueue) tui.Component {
+	return label.New(messageQueue, "bookmarkviewer", data.NewConstant("bookmark"))
 }
 
 func (node *RawNode) Serialize(writer io.Writer) error {
