@@ -2,6 +2,7 @@ package hybrid
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/ui/uid"
 )
 
 type Component struct {
@@ -24,6 +25,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, data *nodeData) 
 
 	return &Component{
 		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
 			Name:         "unnamed hybrid node viewer",
 			MessageQueue: messageQueue,
 		},
