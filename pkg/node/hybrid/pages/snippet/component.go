@@ -31,7 +31,7 @@ func NewPageComponent(messageQueue tui.MessageQueue, parent *Page) *pageComponen
 			MessageQueue: messageQueue,
 		},
 		parent:        parent,
-		snippetViewer: snippetview.New(source),
+		snippetViewer: snippetview.New(messageQueue, source),
 		bindingCopy: tui.KeyBinding{
 			Key:         "c",
 			Description: "copy",

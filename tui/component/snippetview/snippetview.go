@@ -19,12 +19,12 @@ type Source struct {
 	Language string
 }
 
-func New(source data.Value[Source]) *Component {
+func New(messageQueue tui.MessageQueue, source data.Value[Source]) *Component {
 	component := Component{
 		source:          source,
 		formattedSource: data.NewVariable(""),
 	}
-	component.ansiView = ansiview.New(&component.formattedSource)
+	component.ansiView = ansiview.New(messageQueue, &component.formattedSource)
 	component.source.Observe(func() { component.reformatMarkdown() })
 
 	return &component

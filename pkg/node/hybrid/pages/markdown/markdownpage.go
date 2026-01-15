@@ -20,7 +20,7 @@ func New(caption string, source string) *Page {
 }
 
 func (page *Page) CreateViewer(messageQueue tui.MessageQueue) tui.Component {
-	return markdownview.New(data.NewConstant(page.source))
+	return markdownview.New(messageQueue, data.NewConstant(page.source))
 }
 
 func (page *Page) GetCaption() string {

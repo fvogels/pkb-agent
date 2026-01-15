@@ -14,12 +14,12 @@ type Component struct {
 	ansiView        *ansiview.Component
 }
 
-func New(source data.Value[string]) *Component {
+func New(messageQueue tui.MessageQueue, source data.Value[string]) *Component {
 	component := Component{
 		source:          source,
 		formattedSource: data.NewVariable(""),
 	}
-	component.ansiView = ansiview.New(&component.formattedSource)
+	component.ansiView = ansiview.New(messageQueue, &component.formattedSource)
 	component.source.Observe(func() { component.reformatMarkdown() })
 
 	return &component
