@@ -26,8 +26,9 @@ type inputMode struct {
 
 func newInputMode(application *Application) *inputMode {
 	model := &application.model
+	messageQueue := application.messageQueue
 
-	nodesView := nodeselection.New(application.messageQueue, model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
+	nodesView := nodeselection.New(messageQueue, model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
 	nodesView.SetOnSelectionChanged(func(value int) {
 		application.highlight(value)
 	})
@@ -38,26 +39,26 @@ func newInputMode(application *Application) *inputMode {
 		model.SelectedNodes(),
 		func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) tui.Component {
 			if intersectionNodes.Size() > 0 {
-				return intersectionNodes.At(highlightedNodeIndex).GetViewer(application.messageQueue)
+				return intersectionNodes.At(highlightedNodeIndex).GetViewer(messageQueue)
 			} else if selectedNodes.Size() > 0 {
-				return selectedNodes.At(selectedNodes.Size() - 1).GetViewer(application.messageQueue)
+				return selectedNodes.At(selectedNodes.Size() - 1).GetViewer(messageQueue)
 			} else {
 				return nil
 			}
 		},
 	)
-	highlightedNodeViewerHolder := holder.New(application.messageQueue, highlightedNodeViewer)
+	highlightedNodeViewerHolder := holder.New(messageQueue, highlightedNodeViewer)
 
-	inputField := input.New(model.Input())
+	inputField := input.New(messageQueue, model.Input())
 	style := tcell.StyleDefault.Background(color.Red)
 	inputField.SetStyle(&style)
 	inputField.SetOnChange(func(s string) { application.updateInputAndHighlightBestMatch(s) })
 
 	root := docksouth.New(
-		application.messageQueue,
+		messageQueue,
 		"input:[main|input]",
 		docknorth.New(
-			application.messageQueue,
+			messageQueue,
 			"input:docknorth[nodes|nodeviewer]",
 			nodesView,
 			highlightedNodeViewerHolder,
