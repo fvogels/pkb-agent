@@ -6,12 +6,12 @@ import (
 
 type ModelUpdate struct {
 	originalModel *Model
-	updatedModel  Model
+	UpdatedModel  Model
 }
 
 func (update *ModelUpdate) Apply() {
 	original := update.originalModel
-	updated := &update.updatedModel
+	updated := &update.UpdatedModel
 	updateIntersection := false
 
 	if original.selectedNodes.Get() != updated.selectedNodes.Get() {
@@ -29,28 +29,35 @@ func (update *ModelUpdate) Apply() {
 	}
 
 	if updateIntersection {
-		updatedIntersectionNodes := determineIntersectionNodes(original.input.Get(), original.Graph, original.selectedNodes.Get(), true, true)
-		original.intersectionNodes.Set(updatedIntersectionNodes)
+		update.DetermineIntersectionNodes()
+		original.intersectionNodes.Set(updated.intersectionNodes.Get())
 	}
 }
 
+func (update *ModelUpdate) DetermineIntersectionNodes() {
+	original := update.originalModel
+	updated := &update.UpdatedModel
+
+	updated.intersectionNodes.Set(determineIntersectionNodes(original.input.Get(), original.Graph, original.selectedNodes.Get(), true, true))
+}
+
 func (update *ModelUpdate) SelectHighlightedNode() {
-	model := &update.updatedModel
+	model := &update.UpdatedModel
 	highlightedNode := model.GetHighlightedNode()
 	updatedSelectedNodes := list.Append(model.selectedNodes.Get(), highlightedNode)
 	model.selectedNodes.Set(updatedSelectedNodes)
 }
 
 func (update *ModelUpdate) SetInput(input string) {
-	update.updatedModel.input.Set(input)
+	update.UpdatedModel.input.Set(input)
 }
 
 func (update *ModelUpdate) Highlight(index int) {
-	update.updatedModel.highlightedNodeIndex.Set(index)
+	update.UpdatedModel.highlightedNodeIndex.Set(index)
 }
 
 func (update *ModelUpdate) UnselectLastNode() {
-	updated := &update.updatedModel
+	updated := &update.UpdatedModel
 	selectedNodes := updated.selectedNodes.Get()
 
 	if selectedNodes.Size() > 0 {

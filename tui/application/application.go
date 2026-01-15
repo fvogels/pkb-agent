@@ -299,12 +299,9 @@ func (application *Application) loadGraph() error {
 	return nil
 }
 
-func (application *Application) findIndexOfIntersectionNode(target string) int {
-	intersectionNodes := application.model.IntersectionNodes().Get()
-	nodes := list.ToSlice(intersectionNodes)
-
+func (application *Application) findIndexOfIntersectionNode(intersectionNodes []*pkg.Node, target string) int {
 	bestMatchIndex, found := slices.BinarySearchFunc(
-		nodes,
+		intersectionNodes,
 		target,
 		func(node *pkg.Node, target string) int {
 			nodeName := strings.ToLower(node.GetName())
@@ -357,19 +354,12 @@ func (application *Application) selectHighlightedAndClearInput() {
 func (application *Application) updateInputAndHighlightBestMatch(newInput string) {
 	lowerCasedNewInput := strings.ToLower(newInput)
 
-	// Model update has to happen in two separate phases,
-	// since finding the best match needs to be done on an updated version of the intersection nodes
-	{
-		update := application.model.Update()
-		update.SetInput(lowerCasedNewInput)
-		update.Apply()
-	}
-
-	{
-		update := application.model.Update()
-		update.Highlight(application.findIndexOfIntersectionNode(lowerCasedNewInput))
-		update.Apply()
-	}
+	update := application.model.Update()
+	update.SetInput(lowerCasedNewInput)
+	update.DetermineIntersectionNodes()
+	intersectionNodes := update.UpdatedModel.IntersectionNodes().Get()
+	update.Highlight(application.findIndexOfIntersectionNode(list.ToSlice(intersectionNodes), lowerCasedNewInput))
+	update.Apply()
 }
 
 func (application *Application) createMessageQueue() {

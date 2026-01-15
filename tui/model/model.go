@@ -48,7 +48,7 @@ func (model *Model) HighlightedNodeIndex() data.Value[int] {
 func (model *Model) Update() *ModelUpdate {
 	return &ModelUpdate{
 		originalModel: model,
-		updatedModel:  *model,
+		UpdatedModel:  *model,
 	}
 }
 
