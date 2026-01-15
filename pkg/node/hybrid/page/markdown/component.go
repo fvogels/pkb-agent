@@ -58,7 +58,7 @@ func (component *pageComponent) Handle(message tui.Message) {
 }
 
 func (component *pageComponent) onKey(message tui.MsgKey) {
-	// tui.HandleKeyBindings(component.MessageQueue, message, component.bindingCopy)
+	// No key bindings for this page
 }
 
 func (component *pageComponent) onCopySnippet() {
