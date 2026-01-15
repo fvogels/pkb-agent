@@ -43,6 +43,7 @@ func newViewMode(application *Application) *viewMode {
 	highlightedNodeViewerHolder := holder.New(application.messageQueue, highlightedNodeViewer)
 
 	root := docksouth.New(
+		application.messageQueue,
 		"view:docksouth[main|statusbar]",
 		docknorth.New(
 			application.messageQueue,

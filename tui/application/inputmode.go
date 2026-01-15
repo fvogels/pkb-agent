@@ -54,6 +54,7 @@ func newInputMode(application *Application) *inputMode {
 	inputField.SetOnChange(func(s string) { application.updateInputAndHighlightBestMatch(s) })
 
 	root := docksouth.New(
+		application.messageQueue,
 		"input:[main|input]",
 		docknorth.New(
 			application.messageQueue,
