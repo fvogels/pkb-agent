@@ -4,6 +4,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/snippetview"
 	"pkb-agent/tui/data"
+	"pkb-agent/ui/uid"
 
 	"golang.design/x/clipboard"
 )
@@ -25,6 +26,7 @@ func NewPageComponent(messageQueue tui.MessageQueue, parent *Page) *pageComponen
 
 	component := pageComponent{
 		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
 			Name:         "nameless snippet page",
 			MessageQueue: messageQueue,
 		},
