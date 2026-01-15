@@ -10,6 +10,10 @@ func New[T any]() List[T] {
 	}
 }
 
+func FromItems[T any](items ...T) List[T] {
+	return FromSlice(items)
+}
+
 func FromSlice[T any](items []T) List[T] {
 	return &MaterialList[T]{
 		items: items,
