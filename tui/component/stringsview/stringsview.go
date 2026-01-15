@@ -26,7 +26,7 @@ type Item struct {
 func New(messageQueue tui.MessageQueue, items data.Value[list.List[Item]]) *Component {
 	defaultEmptyStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 
-	return &Component{
+	component := Component{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
 			Name:         "unnamed strings view",
@@ -37,6 +37,8 @@ func New(messageQueue tui.MessageQueue, items data.Value[list.List[Item]]) *Comp
 		firstVisibleIndex: 0,
 		onItemClicked:     nil,
 	}
+
+	return &component
 }
 
 func (component *Component) SetEmptyStyle(emptyStyle *tui.Style) {
