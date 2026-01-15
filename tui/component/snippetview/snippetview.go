@@ -4,11 +4,12 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/ansiview"
 	"pkb-agent/tui/data"
+	"pkb-agent/ui/uid"
 	"pkb-agent/util/syntaxhighlighting"
 )
 
 type Component struct {
-	size            tui.Size
+	tui.ComponentBase
 	source          data.Value[Source]
 	formattedSource data.Variable[string]
 	ansiView        *ansiview.Component
@@ -21,6 +22,11 @@ type Source struct {
 
 func New(messageQueue tui.MessageQueue, source data.Value[Source]) *Component {
 	component := Component{
+		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
+			Name:         "unnamed snippet viewer",
+			MessageQueue: messageQueue,
+		},
 		source:          source,
 		formattedSource: data.NewVariable(""),
 	}
@@ -42,7 +48,7 @@ func (component *Component) Render() tui.Grid {
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	component.size = message.Size
+	component.Size = message.Size
 	component.reformatMarkdown()
 }
 
