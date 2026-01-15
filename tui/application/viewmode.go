@@ -121,27 +121,4 @@ func (mode *viewMode) onKey(message tui.MsgKey) {
 	if !tui.HandleKeyBindings(application.messageQueue, message, activeBindings...) {
 		mode.root.Handle(message)
 	}
-	// switch message.Key {
-	// case "q":
-	// 	application.running = false
-
-	// case "Enter":
-	// 	application.selectHighlightedNode()
-
-	// case "Delete":
-	// 	application.unselectLastNode()
-
-	// case "/":
-	// 	application.switchMode(mode.application.inputMode)
-
-	// default:
-
-	// }
 }
-
-// func (mode *viewMode) updateLayout() {
-// 	message := tui.MsgResize{
-// 		Size: mode.application.size,
-// 	}
-// 	mode.root.Handle(message)
-// }
