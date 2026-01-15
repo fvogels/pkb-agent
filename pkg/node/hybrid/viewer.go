@@ -3,8 +3,10 @@ package hybrid
 import (
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg/node/hybrid/page"
+	"pkb-agent/pkg/node/hybrid/page/empty"
 	"pkb-agent/tui"
 	"pkb-agent/tui/application/messages"
+	"pkb-agent/tui/component/holder"
 	"pkb-agent/tui/data"
 	"pkb-agent/ui/uid"
 )
@@ -13,11 +15,13 @@ type Component struct {
 	tui.ComponentBase
 	rawNode           *RawNode
 	data              *nodeData // (strong) pointer to the node data, keeps information alive while viewer exists
-	activePageIndex   int
+	activePageIndex   data.Variable[int]
 	pageViewers       []tui.Component
 	actionKeyBindings data.Variable[list.List[tui.KeyBinding]]
 	pageKeyBindings   data.Variable[list.List[tui.KeyBinding]]
 	keyBindings       data.Value[list.List[tui.KeyBinding]]
+	activePageViewer  data.Value[tui.Component]
+	pageViewerHolder  holder.Component
 }
 
 func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeData) *Component {
@@ -27,8 +31,9 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 			Name:         "unnamed hybrid node viewer",
 			MessageQueue: messageQueue,
 		},
-		rawNode: rawNode,
-		data:    nodeData,
+		rawNode:         rawNode,
+		activePageIndex: data.NewVariable(0),
+		data:            nodeData,
 	}
 
 	pages := nodeData.pages
@@ -53,6 +58,15 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 			Bindings: component.keyBindings.Get(),
 		})
 	})
+
+	if len(pages) == 0 {
+		component.activePageViewer = data.NewConstant[tui.Component](empty.NewPageComponent(messageQueue))
+	} else {
+		component.activePageViewer = data.MapValue(&component.activePageIndex, func(index int) tui.Component {
+			return component.pageViewers[index]
+		})
+	}
+	component.pageViewerHolder = *holder.New(messageQueue, component.activePageViewer)
 
 	return &component
 }
@@ -89,11 +103,7 @@ func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindi
 }
 
 func (component *Component) Render() tui.Grid {
-	if len(component.pageViewers) > 0 {
-		return component.pageViewers[component.activePageIndex].Render()
-	} else {
-		return tui.NewEmptyGrid(component.Size)
-	}
+	return component.activePageViewer.Get().Render()
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
@@ -106,8 +116,8 @@ func (component *Component) onResize(message tui.MsgResize) {
 
 func (component *Component) withActivePage(f func(page page.Page, viewer tui.Component)) {
 	if len(component.pageViewers) > 0 {
-		activePage := component.data.pages[component.activePageIndex]
-		activeViewer := component.pageViewers[component.activePageIndex]
+		activePage := component.data.pages[component.activePageIndex.Get()]
+		activeViewer := component.pageViewers[component.activePageIndex.Get()]
 
 		f(activePage, activeViewer)
 	}
@@ -117,7 +127,7 @@ func (component *Component) onKey(message tui.MsgKey) {
 	switch message.Key {
 	case "Tab":
 		component.withActivePage(func(page page.Page, viewer tui.Component) {
-			component.setActivePage((component.activePageIndex + 1) % len(component.pageViewers))
+			component.setActivePage((component.activePageIndex.Get() + 1) % len(component.pageViewers))
 		})
 
 	default:
@@ -128,20 +138,18 @@ func (component *Component) onKey(message tui.MsgKey) {
 }
 
 func (component *Component) setActivePage(index int) {
-	component.activePageIndex = index
-	component.Handle(page.MsgActivatePage{})
-	component.resizeActiveViewer()
+	component.activePageIndex.Set(index)
 }
 
-func (component *Component) resizeActiveViewer() {
-	component.withActivePage(func(page page.Page, viewer tui.Component) {
-		resizeMessage := tui.MsgResize{
-			Size: component.Size,
-		}
+// func (component *Component) resizeActiveViewer() {
+// 	component.withActivePage(func(page page.Page, viewer tui.Component) {
+// 		resizeMessage := tui.MsgResize{
+// 			Size: component.Size,
+// 		}
 
-		component.pageViewers[component.activePageIndex].Handle(resizeMessage)
-	})
-}
+// 		component.pageViewers[component.activePageIndex].Handle(resizeMessage)
+// 	})
+// }
 
 // type Model struct {
 // 	id                         int
