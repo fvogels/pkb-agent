@@ -3,8 +3,6 @@ package markdownpage
 import (
 	"pkb-agent/pkg/node"
 	"pkb-agent/tui"
-	"pkb-agent/tui/component/markdownview"
-	"pkb-agent/tui/data"
 )
 
 type Page struct {
@@ -20,7 +18,7 @@ func New(caption string, source string) *Page {
 }
 
 func (page *Page) CreateViewer(messageQueue tui.MessageQueue) tui.Component {
-	return markdownview.New(messageQueue, data.NewConstant(page.source))
+	return NewPageComponent(messageQueue, page)
 }
 
 func (page *Page) GetCaption() string {

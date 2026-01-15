@@ -129,8 +129,8 @@ func (component *Component) onKey(message tui.MsgKey) {
 
 func (component *Component) setActivePage(index int) {
 	component.activePageIndex = index
-	component.resizeActiveViewer()
 	component.Handle(page.MsgActivatePage{})
+	component.resizeActiveViewer()
 }
 
 func (component *Component) resizeActiveViewer() {
