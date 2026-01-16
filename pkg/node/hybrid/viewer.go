@@ -1,12 +1,15 @@
 package hybrid
 
 import (
+	"fmt"
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg/node/hybrid/page"
 	"pkb-agent/pkg/node/hybrid/page/empty"
 	"pkb-agent/tui"
 	"pkb-agent/tui/application/messages"
+	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/holder"
+	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"
 	"pkb-agent/util/uid"
 )
@@ -22,6 +25,8 @@ type Component struct {
 	keyBindings            data.Value[list.List[tui.KeyBinding]]
 	activePageViewer       data.Value[tui.Component]
 	activePageViewerHolder holder.Component
+	pageStatus             data.Value[string]
+	pageStatusView         tui.Component
 	root                   tui.Component
 }
 
@@ -68,7 +73,29 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 		})
 	}
 	component.activePageViewerHolder = *holder.New(messageQueue, component.activePageViewer)
-	component.root = &component.activePageViewerHolder
+	component.pageStatus = data.MapValue(
+		&component.activePageIndex,
+		func(pageIndex int) string {
+			if len(pages) > 0 {
+				return fmt.Sprintf("Page %d/%d: %s", pageIndex+1, len(pages), pages[pageIndex].GetCaption())
+			} else {
+				return "No pages"
+			}
+		},
+	)
+	component.pageStatusView = label.New(
+		messageQueue,
+		"page status",
+		component.pageStatus,
+	)
+
+	component.root = docksouth.New(
+		messageQueue,
+		"docksouth[page|pagestatus]",
+		&component.activePageViewerHolder,
+		component.pageStatusView,
+		1,
+	)
 
 	return &component
 }
