@@ -21,6 +21,10 @@ func (message MsgActivate) Respond(receiver int, onActivate func(), children ...
 		for _, child := range children {
 			child.Handle(MsgActivate{Recipient: Everyone})
 		}
+	} else {
+		for _, child := range children {
+			child.Handle(message)
+		}
 	}
 }
 
