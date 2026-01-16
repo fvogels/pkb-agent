@@ -5,6 +5,7 @@ import (
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
 	"pkb-agent/tui/application/messages"
+	"pkb-agent/tui/component/border"
 	"pkb-agent/tui/component/docknorth"
 	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/holder"
@@ -67,15 +68,16 @@ func newInputMode(application *Application) *inputMode {
 	inputField.SetStyle(&style)
 	inputField.SetOnChange(func(s string) { application.updateInputAndHighlightBestMatch(s) })
 
+	borderStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	root := docksouth.New(
 		messageQueue,
 		"input:[main|input]",
 		docknorth.New(
 			messageQueue,
 			"input:docknorth[nodes|nodeviewer]",
-			nodesView,
-			highlightedNodeViewerHolder,
-			30,
+			border.New(messageQueue, nodesView, &borderStyle),
+			border.New(messageQueue, highlightedNodeViewerHolder, &borderStyle),
+			20,
 		),
 		inputField,
 		1,
