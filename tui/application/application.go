@@ -32,7 +32,7 @@ type Application struct {
 	logFile          *os.File
 	screen           tcell.Screen
 	messageQueue     tui.MessageQueue
-	size             tui.Size
+	screenSize       tui.Size
 	graph            *pkg.Graph
 	model            data.Variable[*model.Model]
 	viewMode         *viewMode
@@ -163,13 +163,13 @@ func (application *Application) HandleEvent(event tcell.Event) {
 			slog.Int("height", height),
 		)
 
-		application.size = tui.Size{
+		application.screenSize = tui.Size{
 			Width:  width,
 			Height: height,
 		}
 
 		message := tui.MsgResize{
-			Size: application.size,
+			Size: application.screenSize,
 		}
 		slog.Debug("Application handles message", slog.String("messageType", reflect.TypeOf(message).String()))
 
@@ -196,7 +196,7 @@ func (application *Application) HandleEvent(event tcell.Event) {
 		switch message := message.(type) {
 		case tui.MsgUpdateLayout:
 			application.activeMode.Get().Handle(tui.MsgResize{
-				Size: application.size,
+				Size: application.screenSize,
 			})
 
 		case messages.MsgQuit:
