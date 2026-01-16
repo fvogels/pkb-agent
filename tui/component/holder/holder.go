@@ -35,6 +35,11 @@ func (component *Component) Handle(message tui.Message) {
 	case tui.MsgResize:
 		component.onResize(message)
 
+	case tui.MsgActivate:
+		if message.ShouldRespond(component.Identifier) {
+			component.onActivate()
+		}
+
 	default:
 		component.child.Get().Handle(message)
 	}
@@ -57,4 +62,8 @@ func (component *Component) onResize(message tui.MsgResize) {
 	if child != nil {
 		child.Handle(message)
 	}
+}
+
+func (component *Component) onActivate() {
+	component.child.Get().Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }
