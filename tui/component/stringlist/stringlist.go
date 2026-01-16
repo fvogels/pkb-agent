@@ -20,7 +20,7 @@ type Component struct {
 	selectedItemStyle  *tui.Style
 	firstVisibleIndex  int
 	onSelectionChanged func(int)
-	subComponent       *stringsview.Component
+	child              *stringsview.Component
 }
 
 func New(messageQueue tui.MessageQueue, items data.Value[list.List[string]], selectedItem data.Value[int]) *Component {
@@ -58,10 +58,10 @@ func New(messageQueue tui.MessageQueue, items data.Value[list.List[string]], sel
 		})
 	})
 
-	component.subComponent = stringsview.New(messageQueue, subComponentList)
+	component.child = stringsview.New(messageQueue, subComponentList)
 
 	// update selection when item clicked
-	component.subComponent.SetOnItemClicked(func(index int) {
+	component.child.SetOnItemClicked(func(index int) {
 		if component.onSelectionChanged != nil {
 			component.onSelectionChanged(index)
 		}
@@ -100,29 +100,31 @@ func (component *Component) Handle(message tui.Message) {
 		component.onKey(message)
 
 	case tui.MsgActivate:
-		if message.ShouldRespond(component.Identifier) {
-			component.onActivate()
-		}
+		message.Respond(
+			component.Identifier,
+			func() {},
+			component.child,
+		)
 
 	default:
-		component.subComponent.Handle(message)
+		component.child.Handle(message)
 	}
 }
 
 func (component *Component) Render() tui.Grid {
-	return component.subComponent.Render()
+	return component.child.Render()
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
 	component.Size = message.Size
-	component.subComponent.Handle(message)
+	component.child.Handle(message)
 	component.ensureSelectedItemIsVisible()
 }
 
 func (component *Component) ensureSelectedItemIsVisible() {
 	selectedIndex := component.selectedIndex.Get()
 
-	component.subComponent.EnsureItemIsVisible(selectedIndex)
+	component.child.EnsureItemIsVisible(selectedIndex)
 }
 
 func (component *Component) onKey(message tui.MsgKey) {
@@ -186,8 +188,4 @@ func (list *SubComponentList) At(index int) stringsview.Item {
 		Runes: []rune(list.items.Get().At(index)),
 		Style: style,
 	}
-}
-
-func (component *Component) onActivate() {
-	component.subComponent.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }

@@ -57,9 +57,11 @@ func (component *pageComponent) Handle(message tui.Message) {
 		component.onCopySnippet()
 
 	case tui.MsgActivate:
-		if message.ShouldRespond(component.Identifier) {
-			component.onActivate()
-		}
+		message.Respond(
+			component.Identifier,
+			component.onActivate,
+			component.snippetViewer,
+		)
 
 	default:
 		component.snippetViewer.Handle(message)

@@ -74,9 +74,11 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgActivate:
-		if message.ShouldRespond(component.Identifier) {
-			component.onActivate()
-		}
+		message.Respond(
+			component.Identifier,
+			component.onActivate,
+			&component.activePageViewerHolder,
+		)
 
 	case tui.MsgResize:
 		component.onResize(message)
@@ -98,8 +100,6 @@ func (component *Component) onActivate() {
 	if len(component.pageViewers) > 0 {
 		component.setActivePage(0)
 	}
-
-	component.activePageViewerHolder.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }
 
 func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindings) {

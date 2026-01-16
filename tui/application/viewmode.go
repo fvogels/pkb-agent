@@ -92,9 +92,11 @@ func (mode *viewMode) Handle(message tui.Message) {
 		mode.onKey(message)
 
 	case tui.MsgActivate:
-		if message.ShouldRespond(mode.Identifier) {
-			mode.onActivate()
-		}
+		message.Respond(
+			mode.Identifier,
+			mode.onActivate,
+			mode.root,
+		)
 
 	default:
 		mode.root.Handle(message)
@@ -111,8 +113,6 @@ func (mode *viewMode) onActivate() {
 			BindingSearch,
 		),
 	})
-
-	mode.root.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }
 
 func (mode *viewMode) onKey(message tui.MsgKey) {

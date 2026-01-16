@@ -32,9 +32,12 @@ func (component *Component) Handle(message tui.Message) {
 		component.onResize(message)
 
 	case tui.MsgActivate:
-		if message.ShouldRespond(component.Identifier) {
-			component.onActivate()
-		}
+		message.Respond(
+			component.Identifier,
+			func() {},
+			component.mainChild,
+			component.dockedChild,
+		)
 
 	default:
 		component.mainChild.Handle(message)
@@ -82,9 +85,4 @@ func (component *Component) updateLayout() {
 		},
 	}
 	component.mainChild.Handle(mainChildSizeMessage)
-}
-
-func (component *Component) onActivate() {
-	component.mainChild.Handle(tui.MsgActivate{Recipient: tui.Everyone})
-	component.dockedChild.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }

@@ -39,9 +39,11 @@ func (component *pageComponent) Handle(message tui.Message) {
 		component.onKey(message)
 
 	case tui.MsgActivate:
-		if message.ShouldRespond(component.Identifier) {
-			component.onActivate()
-		}
+		message.Respond(
+			component.Identifier,
+			component.onActivate,
+			component.child,
+		)
 
 	default:
 		component.child.Handle(message)

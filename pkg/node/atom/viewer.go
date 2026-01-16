@@ -30,9 +30,11 @@ func NewViewer(messageQueue tui.MessageQueue) *Component {
 func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgActivate:
-		if message.ShouldRespond(component.Identifier) {
-			component.onActivate()
-		}
+		message.Respond(
+			component.Identifier,
+			component.onActivate,
+			component.child,
+		)
 
 	case tui.MsgResize:
 		component.onResize(message)

@@ -14,6 +14,16 @@ func (message MsgActivate) ShouldRespond(identifier int) bool {
 	return message.Recipient == Everyone || message.Recipient == identifier
 }
 
+func (message MsgActivate) Respond(receiver int, onActivate func(), children ...Component) {
+	if message.ShouldRespond(receiver) {
+		onActivate()
+
+		for _, child := range children {
+			child.Handle(MsgActivate{Recipient: Everyone})
+		}
+	}
+}
+
 type MsgResize struct {
 	Size Size
 }

@@ -12,7 +12,7 @@ type Component struct {
 	tui.ComponentBase
 	source          data.Value[Source]
 	formattedSource data.Variable[string]
-	ansiView        *ansiview.Component
+	child           *ansiview.Component
 }
 
 type Source struct {
@@ -30,7 +30,7 @@ func New(messageQueue tui.MessageQueue, source data.Value[Source]) *Component {
 		source:          source,
 		formattedSource: data.NewVariable(""),
 	}
-	component.ansiView = ansiview.New(messageQueue, &component.formattedSource)
+	component.child = ansiview.New(messageQueue, &component.formattedSource)
 	component.source.Observe(func() { component.reformatMarkdown() })
 
 	return &component
@@ -42,15 +42,17 @@ func (component *Component) Handle(message tui.Message) {
 		component.onResize(message)
 
 	case tui.MsgActivate:
-		if message.ShouldRespond(component.Identifier) {
-			component.onActivate()
-		}
+		message.Respond(
+			component.Identifier,
+			func() {},
+			component.child,
+		)
 
 	}
 }
 
 func (component *Component) Render() tui.Grid {
-	return component.ansiView.Render()
+	return component.child.Render()
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
@@ -68,8 +70,4 @@ func (component *Component) reformatMarkdown() {
 	}
 
 	component.formattedSource.Set(reformatted)
-}
-
-func (component *Component) onActivate() {
-	component.ansiView.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }

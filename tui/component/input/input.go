@@ -15,7 +15,7 @@ type Component struct {
 	contents data.Value[string]
 	style    *tui.Style
 	onChange func(string)
-	label    *label.Component
+	child    *label.Component
 }
 
 func New(messageQueue tui.MessageQueue, contents data.Value[string]) *Component {
@@ -32,7 +32,7 @@ func New(messageQueue tui.MessageQueue, contents data.Value[string]) *Component 
 		contents: contents,
 		style:    &style,
 		onChange: nil,
-		label:    subComponent,
+		child:    subComponent,
 	}
 
 	return &component
@@ -55,20 +55,22 @@ func (component *Component) Handle(message tui.Message) {
 		component.onKey(message)
 
 	case tui.MsgActivate:
-		if message.ShouldRespond(component.Identifier) {
-			component.onActivate()
-		}
+		message.Respond(
+			component.Identifier,
+			func() {},
+			component.child,
+		)
 	}
 }
 
 func (component *Component) Render() tui.Grid {
-	return component.label.Render()
+	return component.child.Render()
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
 	component.Size = message.Size
 
-	component.label.Handle(message)
+	component.child.Handle(message)
 }
 
 func (component *Component) onKey(message tui.MsgKey) {
@@ -88,8 +90,4 @@ func (component *Component) signalOnChange(contents string) {
 	if component.onChange != nil {
 		component.onChange(contents)
 	}
-}
-
-func (component *Component) onActivate() {
-	component.label.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }
