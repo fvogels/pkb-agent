@@ -55,7 +55,6 @@ func (loader *Loader) Load(parentDirectory pathlib.Path, rawConfiguration any, c
 
 	var errs []error
 	for index, entry := range entries {
-		slog.Debug("Parsing bookmark entry", slog.String("name", entry.Name))
 		rawNode, err := loader.convertEntryToNode(&entry)
 
 		if err != nil {
