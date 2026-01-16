@@ -11,6 +11,7 @@ import (
 	"pkb-agent/tui/component/keyview"
 	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/model"
 	"pkb-agent/ui/uid"
 )
 
@@ -25,15 +26,18 @@ type viewMode struct {
 }
 
 func newViewMode(application *Application) *viewMode {
-	model := &application.model
 	messageQueue := application.messageQueue
 
-	nodesView := nodeselection.New(messageQueue, model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
+	selectedNodes := data.MapValue(&application.model, func(m *model.Model) list.List[*pkg.Node] { return m.SelectedNodes })
+	intersectionNodes := data.MapValue(&application.model, func(m *model.Model) list.List[*pkg.Node] { return m.IntersectionNodes })
+	highlightedNodeIndex := data.MapValue(&application.model, func(m *model.Model) int { return m.HighlightedNodeIndex })
+
+	nodesView := nodeselection.New(messageQueue, selectedNodes, intersectionNodes, highlightedNodeIndex)
 	statusBar := keyview.New(messageQueue, "status bar", application.keyBindings)
 	highlightedNodeViewer := data.MapValue3(
-		model.HighlightedNodeIndex(),
-		model.IntersectionNodes(),
-		model.SelectedNodes(),
+		highlightedNodeIndex,
+		intersectionNodes,
+		selectedNodes,
 		func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) tui.Component {
 			if intersectionNodes.Size() > 0 {
 				return intersectionNodes.At(highlightedNodeIndex).GetViewer(messageQueue)

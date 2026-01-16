@@ -34,7 +34,7 @@ type Application struct {
 	messageQueue     tui.MessageQueue
 	size             tui.Size
 	graph            *pkg.Graph
-	model            model.Model
+	model            data.Variable[*model.Model]
 	viewMode         *viewMode
 	inputMode        *inputMode
 	activeMode       data.Variable[tui.Component]
@@ -81,7 +81,7 @@ func (application *Application) Start() error {
 		return err
 	}
 
-	application.model = model.New(application.graph)
+	application.model = data.NewVariable(model.New(application.graph))
 	application.viewMode = newViewMode(application)
 	application.inputMode = newInputMode(application)
 	application.activeModeHolder = holder.New(application.messageQueue, &application.activeMode)
@@ -326,40 +326,49 @@ func (application *Application) switchMode(mode tui.Component) {
 	application.activeMode.Set(mode)
 }
 
+func (application *Application) updateModel(updater func(model *model.Model)) {
+	updatedModel := *application.model.Get()
+	updater(&updatedModel)
+	application.model.Set(&updatedModel)
+}
+
 func (application *Application) selectHighlightedNode() {
-	update := application.model.Update()
-	update.SelectHighlightedNode()
-	update.Apply()
+	application.updateModel(func(model *model.Model) {
+		model.SelectHighlightedNode()
+		model.DetermineIntersectionNodes()
+	})
 }
 
 func (application *Application) unselectLastNode() {
-	update := application.model.Update()
-	update.UnselectLastNode()
-	update.Apply()
+	application.updateModel(func(model *model.Model) {
+		model.UnselectLastNode()
+		model.DetermineIntersectionNodes()
+	})
 }
 
 func (application *Application) highlight(index int) {
-	update := application.model.Update()
-	update.Highlight(index)
-	update.Apply()
+	application.updateModel(func(model *model.Model) {
+		model.HighlightedNodeIndex = index
+		model.DetermineIntersectionNodes()
+	})
 }
 
 func (application *Application) selectHighlightedAndClearInput() {
-	update := application.model.Update()
-	update.SelectHighlightedNode()
-	update.SetInput("")
-	update.Apply()
+	application.updateModel(func(model *model.Model) {
+		model.SelectHighlightedNode()
+		model.Input = ""
+		model.DetermineIntersectionNodes()
+	})
 }
 
 func (application *Application) updateInputAndHighlightBestMatch(newInput string) {
 	lowerCasedNewInput := strings.ToLower(newInput)
 
-	update := application.model.Update()
-	update.SetInput(lowerCasedNewInput)
-	update.DetermineIntersectionNodes()
-	intersectionNodes := update.UpdatedModel.IntersectionNodes().Get()
-	update.Highlight(application.findIndexOfIntersectionNode(list.ToSlice(intersectionNodes), lowerCasedNewInput))
-	update.Apply()
+	application.updateModel(func(model *model.Model) {
+		model.Input = newInput
+		model.DetermineIntersectionNodes()
+		model.HighlightedNodeIndex = application.findIndexOfIntersectionNode(list.ToSlice(model.IntersectionNodes), lowerCasedNewInput)
+	})
 }
 
 func (application *Application) createMessageQueue() {

@@ -11,6 +11,7 @@ import (
 	"pkb-agent/tui/component/input"
 	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/model"
 	"pkb-agent/ui/uid"
 
 	"github.com/gdamore/tcell/v3"
@@ -28,18 +29,27 @@ type inputMode struct {
 }
 
 func newInputMode(application *Application) *inputMode {
-	model := &application.model
 	messageQueue := application.messageQueue
 
-	nodesView := nodeselection.New(messageQueue, model.SelectedNodes(), model.IntersectionNodes(), model.HighlightedNodeIndex())
+	selectedNodes := data.MapValue(&application.model, func(m *model.Model) list.List[*pkg.Node] { return m.SelectedNodes })
+	intersectionNodes := data.MapValue(&application.model, func(m *model.Model) list.List[*pkg.Node] { return m.IntersectionNodes })
+	highlightedNodeIndex := data.MapValue(&application.model, func(m *model.Model) int { return m.HighlightedNodeIndex })
+	searchString := data.MapValue(&application.model, func(m *model.Model) string { return m.Input })
+
+	nodesView := nodeselection.New(
+		messageQueue,
+		selectedNodes,
+		intersectionNodes,
+		highlightedNodeIndex,
+	)
 	nodesView.SetOnSelectionChanged(func(value int) {
 		application.highlight(value)
 	})
 
 	highlightedNodeViewer := data.MapValue3(
-		model.HighlightedNodeIndex(),
-		model.IntersectionNodes(),
-		model.SelectedNodes(),
+		highlightedNodeIndex,
+		intersectionNodes,
+		selectedNodes,
 		func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) tui.Component {
 			if intersectionNodes.Size() > 0 {
 				return intersectionNodes.At(highlightedNodeIndex).GetViewer(messageQueue)
@@ -52,7 +62,7 @@ func newInputMode(application *Application) *inputMode {
 	)
 	highlightedNodeViewerHolder := holder.New(messageQueue, highlightedNodeViewer)
 
-	inputField := input.New(messageQueue, model.Input())
+	inputField := input.New(messageQueue, searchString)
 	style := tcell.StyleDefault.Background(color.Red)
 	inputField.SetStyle(&style)
 	inputField.SetOnChange(func(s string) { application.updateInputAndHighlightBestMatch(s) })
