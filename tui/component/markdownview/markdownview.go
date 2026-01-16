@@ -51,6 +51,7 @@ func (component *Component) Render() tui.Grid {
 
 func (component *Component) onResize(message tui.MsgResize) {
 	component.Size = message.Size
+	component.child.Handle(message)
 	component.reformatMarkdown()
 }
 
