@@ -1,6 +1,8 @@
 package tui
 
 import (
+	"fmt"
+
 	"github.com/gdamore/tcell/v3"
 )
 
@@ -50,4 +52,8 @@ func (position Position) String() string {
 type Size struct {
 	Width  int
 	Height int
+}
+
+func (size Size) String() string {
+	return fmt.Sprintf("%dx%d", size.Width, size.Height)
 }
