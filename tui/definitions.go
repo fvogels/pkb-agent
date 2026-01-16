@@ -43,6 +43,10 @@ type Position struct {
 	Y int
 }
 
+func (position Position) String() string {
+	return fmt.Sprintf("(%d, %d)", position.X, position.Y)
+}
+
 type Size struct {
 	Width  int
 	Height int
