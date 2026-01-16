@@ -12,8 +12,6 @@ type Page interface {
 	GetActions() []node.Action
 }
 
-type MsgActivatePage struct{}
-
 type MsgSetPageKeyBindings struct {
 	Bindings list.List[tui.KeyBinding]
 }
