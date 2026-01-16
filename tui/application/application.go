@@ -171,9 +171,9 @@ func (application *Application) HandleEvent(event tcell.Event) {
 		message := tui.MsgResize{
 			Size: application.screenSize,
 		}
-		slog.Debug("Application handles message", slog.String("messageType", reflect.TypeOf(message).String()))
 
-		application.activeMode.Get().Handle(message)
+		application.handleMessage(message)
+
 		application.screen.Sync()
 
 	case *tcell.EventKey:
@@ -184,45 +184,10 @@ func (application *Application) HandleEvent(event tcell.Event) {
 			Key: translateKey(event),
 		}
 
-		slog.Debug("Application handles message", slog.String("messageType", reflect.TypeOf(message).String()))
-
-		application.activeMode.Get().Handle(message)
+		application.handleMessage(message)
 
 	case *tui.EventMessage:
-		message := event.Message
-
-		slog.Debug("Application handles message", slog.String("messageType", reflect.TypeOf(message).String()))
-
-		switch message := message.(type) {
-		case tui.MsgUpdateLayout:
-			application.activeMode.Get().Handle(tui.MsgResize{
-				Size: application.screenSize,
-			})
-
-		case messages.MsgQuit:
-			application.running = false
-
-		case messages.MsgSelectHighlightedNode:
-			application.selectHighlightedNode()
-
-		case messages.MsgUnselectLastNode:
-			application.unselectLastNode()
-
-		case messages.MsgSetModeKeyBindings:
-			application.modeBindings.Set(message.Bindings)
-
-		case messages.MsgSetNodeKeyBindings:
-			application.nodeBindings.Set(message.Bindings)
-
-		case messages.MsgActivateInputMode:
-			application.switchMode(application.inputMode)
-
-		case tui.MsgCommand:
-			message.Command()
-
-		default:
-			application.activeMode.Get().Handle(message)
-		}
+		application.handleMessage(event.Message)
 
 		// case *tcell.EventMouse:
 		// 	x, y := event.Position()
@@ -232,6 +197,41 @@ func (application *Application) HandleEvent(event tcell.Event) {
 		// 	if clickHandler != nil && event.Buttons() == tcell.Button1 {
 		// 		clickHandler()
 		// 	}
+	}
+}
+
+func (application *Application) handleMessage(message tui.Message) {
+	slog.Debug("Application handles message", slog.String("messageType", reflect.TypeOf(message).String()))
+
+	switch message := message.(type) {
+	case tui.MsgUpdateLayout:
+		application.activeMode.Get().Handle(tui.MsgResize{
+			Size: application.screenSize,
+		})
+
+	case messages.MsgQuit:
+		application.running = false
+
+	case messages.MsgSelectHighlightedNode:
+		application.selectHighlightedNode()
+
+	case messages.MsgUnselectLastNode:
+		application.unselectLastNode()
+
+	case messages.MsgSetModeKeyBindings:
+		application.modeBindings.Set(message.Bindings)
+
+	case messages.MsgSetNodeKeyBindings:
+		application.nodeBindings.Set(message.Bindings)
+
+	case messages.MsgActivateInputMode:
+		application.switchMode(application.inputMode)
+
+	case tui.MsgCommand:
+		message.Command()
+
+	default:
+		application.activeMode.Get().Handle(message)
 	}
 }
 
