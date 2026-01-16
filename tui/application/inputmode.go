@@ -12,7 +12,7 @@ import (
 	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/model"
-	"pkb-agent/ui/uid"
+	"pkb-agent/util/uid"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"

@@ -6,7 +6,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"
-	"pkb-agent/ui/uid"
+	"pkb-agent/util/uid"
 )
 
 type pageComponent struct {

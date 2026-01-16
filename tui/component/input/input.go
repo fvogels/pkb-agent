@@ -4,7 +4,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"
-	"pkb-agent/ui/uid"
+	"pkb-agent/util/uid"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"

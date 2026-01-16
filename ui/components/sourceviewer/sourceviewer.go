@@ -2,9 +2,9 @@ package sourceviewer
 
 import (
 	"log/slog"
-	"pkb-agent/ui/uid"
 	"pkb-agent/util"
 	"pkb-agent/util/syntaxhighlighting"
+	"pkb-agent/util/uid"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

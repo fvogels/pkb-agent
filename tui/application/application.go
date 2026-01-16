@@ -217,6 +217,9 @@ func (application *Application) HandleEvent(event tcell.Event) {
 		case messages.MsgActivateInputMode:
 			application.switchMode(application.inputMode)
 
+		case tui.MsgCommand:
+			message.Command()
+
 		default:
 			application.activeMode.Get().Handle(message)
 		}

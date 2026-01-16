@@ -12,7 +12,7 @@ import (
 	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/model"
-	"pkb-agent/ui/uid"
+	"pkb-agent/util/uid"
 )
 
 type viewMode struct {

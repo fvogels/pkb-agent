@@ -2,7 +2,7 @@ package border
 
 import (
 	"pkb-agent/tui"
-	"pkb-agent/ui/uid"
+	"pkb-agent/util/uid"
 )
 
 type Component struct {

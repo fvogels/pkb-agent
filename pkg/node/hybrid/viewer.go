@@ -8,7 +8,7 @@ import (
 	"pkb-agent/tui/application/messages"
 	"pkb-agent/tui/component/holder"
 	"pkb-agent/tui/data"
-	"pkb-agent/ui/uid"
+	"pkb-agent/util/uid"
 )
 
 type Component struct {

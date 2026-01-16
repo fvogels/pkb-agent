@@ -3,8 +3,8 @@ package markdownview
 import (
 	"log/slog"
 	"pkb-agent/ui/debug"
-	"pkb-agent/ui/uid"
 	"pkb-agent/util"
+	"pkb-agent/util/uid"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"

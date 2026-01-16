@@ -4,8 +4,8 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/ansiview"
 	"pkb-agent/tui/data"
-	"pkb-agent/ui/uid"
 	"pkb-agent/util/markdown"
+	"pkb-agent/util/uid"
 )
 
 type Component struct {

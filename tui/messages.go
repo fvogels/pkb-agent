@@ -37,3 +37,7 @@ type MsgKey struct {
 }
 
 type MsgUpdateLayout struct{}
+
+type MsgCommand struct {
+	Command func()
+}
