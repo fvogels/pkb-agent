@@ -22,6 +22,7 @@ type Component struct {
 	keyBindings            data.Value[list.List[tui.KeyBinding]]
 	activePageViewer       data.Value[tui.Component]
 	activePageViewerHolder holder.Component
+	root                   tui.Component
 }
 
 func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeData) *Component {
@@ -67,6 +68,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 		})
 	}
 	component.activePageViewerHolder = *holder.New(messageQueue, component.activePageViewer)
+	component.root = &component.activePageViewerHolder
 
 	return &component
 }
@@ -77,7 +79,7 @@ func (component *Component) Handle(message tui.Message) {
 		message.Respond(
 			component.Identifier,
 			component.onActivate,
-			&component.activePageViewerHolder,
+			component.root,
 		)
 
 	case tui.MsgResize:
@@ -90,7 +92,7 @@ func (component *Component) Handle(message tui.Message) {
 		component.onSetPageKeyBindings(message)
 
 	default:
-		component.activePageViewerHolder.Handle(message)
+		component.root.Handle(message)
 	}
 }
 
@@ -105,13 +107,13 @@ func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindi
 }
 
 func (component *Component) Render() tui.Grid {
-	return component.activePageViewerHolder.Render()
+	return component.root.Render()
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
 	component.Size = message.Size
 
-	component.activePageViewerHolder.Handle(message)
+	component.root.Handle(message)
 }
 
 func (component *Component) withActivePage(f func(page page.Page, viewer tui.Component)) {
