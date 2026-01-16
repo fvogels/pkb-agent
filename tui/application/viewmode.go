@@ -5,6 +5,7 @@ import (
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
 	"pkb-agent/tui/application/messages"
+	"pkb-agent/tui/component/border"
 	"pkb-agent/tui/component/docknorth"
 	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/holder"
@@ -13,6 +14,9 @@ import (
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/model"
 	"pkb-agent/util/uid"
+
+	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 )
 
 type viewMode struct {
@@ -50,13 +54,14 @@ func newViewMode(application *Application) *viewMode {
 	)
 	highlightedNodeViewerHolder := holder.New(messageQueue, highlightedNodeViewer)
 
+	borderStyle := tcell.StyleDefault.Foreground(color.Reset).Background(color.Reset)
 	root := docksouth.New(
 		messageQueue,
 		"view:docksouth[main|statusbar]",
 		docknorth.New(
 			messageQueue,
 			"view:docknorth[nodes|nodeviewer]",
-			nodesView,
+			border.New(messageQueue, nodesView, borderStyle),
 			highlightedNodeViewerHolder,
 			20,
 		),
