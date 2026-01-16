@@ -8,10 +8,10 @@ import (
 type Component struct {
 	tui.ComponentBase
 	child tui.Component
-	style tui.Style
+	style *tui.Style
 }
 
-func New(messageQueue tui.MessageQueue, child tui.Component, style tui.Style) *Component {
+func New(messageQueue tui.MessageQueue, child tui.Component, style *tui.Style) *Component {
 	component := Component{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
@@ -43,10 +43,7 @@ func (component *Component) Handle(message tui.Message) {
 }
 
 func (component *Component) Render() tui.Grid {
-	return &grid{
-		childGrid: component.child.Render(),
-		style:     component.style,
-	}
+	return newGrid(component)
 }
 
 func (component *Component) onResize(message tui.MsgResize) {

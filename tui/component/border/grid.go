@@ -1,14 +1,24 @@
 package border
 
 import (
+	"fmt"
 	"pkb-agent/tui"
 
 	"github.com/gdamore/tcell/v3"
 )
 
 type grid struct {
+	parent    *Component
 	childGrid tui.Grid
-	style     tui.Style
+}
+
+func newGrid(parent *Component) tui.Grid {
+	grid := grid{
+		parent:    parent,
+		childGrid: parent.child.Render(),
+	}
+
+	return &grid
 }
 
 func (grid *grid) GetSize() tui.Size {
@@ -22,7 +32,8 @@ func (grid *grid) GetSize() tui.Size {
 
 func (grid *grid) Get(position tui.Position) tui.Cell {
 	if tui.SafeMode && !grid.isValidPosition(position) {
-		panic("invalid coordinates")
+		size := grid.GetSize()
+		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d", position.X, position.Y, size.Width, size.Height))
 	}
 
 	x := position.X
@@ -36,7 +47,7 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 	var onClick func()
 
 	if x == 0 {
-		style = &grid.style
+		style = grid.parent.style
 
 		if y == 0 {
 			// Upper left corner
@@ -49,7 +60,7 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 			char = tcell.RuneVLine
 		}
 	} else if x == width-1 {
-		style = &grid.style
+		style = grid.parent.style
 
 		if y == 0 {
 			// Upper right corner
@@ -62,7 +73,7 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 			char = tcell.RuneVLine
 		}
 	} else if y == 0 || y == height-1 {
-		style = &grid.style
+		style = grid.parent.style
 		char = tcell.RuneHLine
 	} else {
 		cell := grid.childGrid.Get(tui.Position{X: x - 1, Y: y - 1})
