@@ -90,9 +90,7 @@ func (component *Component) Handle(message tui.Message) {
 		component.onSetPageKeyBindings(message)
 
 	default:
-		component.withActivePage(func(page page.Page, viewer tui.Component) {
-			viewer.Handle(message)
-		})
+		component.activePageViewerHolder.Handle(message)
 	}
 }
 
@@ -107,15 +105,13 @@ func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindi
 }
 
 func (component *Component) Render() tui.Grid {
-	return component.activePageViewer.Get().Render()
+	return component.activePageViewerHolder.Render()
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
 	component.Size = message.Size
 
-	component.withActivePage(func(page page.Page, viewer tui.Component) {
-		viewer.Handle(message)
-	})
+	component.activePageViewerHolder.Handle(message)
 }
 
 func (component *Component) withActivePage(f func(page page.Page, viewer tui.Component)) {
