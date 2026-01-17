@@ -29,7 +29,7 @@ func (node *RawNode) GetLinks() []string {
 }
 
 func (node *RawNode) CreateViewer(messageQueue tui.MessageQueue) tui.Component {
-	return NewViewer(messageQueue)
+	return NewViewer(messageQueue, node)
 }
 
 func (node *RawNode) Serialize(writer io.Writer) error {

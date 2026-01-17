@@ -7,21 +7,35 @@ import (
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"
 	"pkb-agent/util/uid"
+
+	"github.com/pkg/browser"
 )
 
 type Component struct {
 	tui.ComponentBase
-	child tui.Component
+	child                tui.Component
+	bindingOpenInBrowser tui.KeyBinding
 }
 
-func NewViewer(messageQueue tui.MessageQueue) *Component {
+func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode) *Component {
+	identifier := uid.Generate()
+
 	component := Component{
 		ComponentBase: tui.ComponentBase{
-			Identifier:   uid.Generate(),
+			Identifier:   identifier,
 			Name:         "unnamed bookmark viewer",
 			MessageQueue: messageQueue,
 		},
 		child: label.New(messageQueue, "bookmark label", data.NewConstant("bookmark!")),
+		bindingOpenInBrowser: tui.KeyBinding{
+			Key:         "o",
+			Description: "view",
+			Message: tui.MsgCommand{
+				Command: func() {
+					go viewInBrowser(rawNode.url)
+				},
+			},
+		},
 	}
 
 	return &component
@@ -38,12 +52,25 @@ func (component *Component) Handle(message tui.Message) {
 
 	case tui.MsgResize:
 		component.onResize(message)
+
+	case tui.MsgKey:
+		component.onKey(message)
 	}
+}
+
+func (component *Component) onKey(message tui.MsgKey) {
+	tui.HandleKeyBindings(
+		component.MessageQueue,
+		message,
+		component.bindingOpenInBrowser,
+	)
 }
 
 func (component *Component) onActivate() {
 	component.MessageQueue.Enqueue(messages.MsgSetNodeKeyBindings{
-		Bindings: list.New[tui.KeyBinding](),
+		Bindings: list.FromItems(
+			component.bindingOpenInBrowser,
+		),
 	})
 }
 
@@ -54,6 +81,10 @@ func (component *Component) Render() tui.Grid {
 func (component *Component) onResize(message tui.MsgResize) {
 	component.Size = message.Size
 	component.child.Handle(message)
+}
+
+func viewInBrowser(url string) {
+	browser.OpenURL(url)
 }
 
 // var keyMap = struct {
