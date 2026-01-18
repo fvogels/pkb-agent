@@ -18,7 +18,7 @@ import (
 
 type Component struct {
 	tui.ComponentBase
-	child           tui.Component
+	root            tui.Component
 	rawNode         *RawNode
 	bindingDownload tui.KeyBinding
 }
@@ -33,7 +33,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode) *Component {
 			MessageQueue: messageQueue,
 		},
 		rawNode: rawNode,
-		child:   label.New(messageQueue, "backblaze label", data.NewConstant("backblaze!")),
+		root:    label.New(messageQueue, "backblaze label", data.NewConstant("backblaze!")),
 		bindingDownload: tui.KeyBinding{
 			Key:         "d",
 			Description: "download",
@@ -57,7 +57,7 @@ func (component *Component) Handle(message tui.Message) {
 		message.Respond(
 			component.Identifier,
 			component.onActivate,
-			component.child,
+			component.root,
 		)
 
 	case tui.MsgResize:
@@ -83,12 +83,12 @@ func (component *Component) onActivate() {
 }
 
 func (component *Component) Render() tui.Grid {
-	return component.child.Render()
+	return component.root.Render()
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
 	component.Size = message.Size
-	component.child.Handle(message)
+	component.root.Handle(message)
 }
 
 func downloadAndOpen(bucketName string, filename string) error {
