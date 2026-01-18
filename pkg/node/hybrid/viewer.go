@@ -29,9 +29,9 @@ type Component struct {
 }
 
 type keyBindings struct {
-	action data.Variable[list.List[tui.KeyBinding]] // Key bindings associated with the node
-	page   data.Variable[list.List[tui.KeyBinding]] // Page specific key bindings
-	all    data.Value[list.List[tui.KeyBinding]]    // Concatenation of action key bindings and page key bindings
+	actions data.Variable[list.List[tui.KeyBinding]] // Key bindings associated with the node
+	page    data.Variable[list.List[tui.KeyBinding]] // Page specific key bindings
+	all     data.Value[list.List[tui.KeyBinding]]    // Concatenation of action key bindings and page key bindings
 }
 
 func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeData) *Component {
@@ -87,11 +87,11 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 }
 
 func (component *Component) createKeyBindings(messageQueue tui.MessageQueue, bindings *keyBindings) {
-	bindings.action = data.NewVariable(list.New[tui.KeyBinding]())
+	bindings.actions = data.NewVariable(list.New[tui.KeyBinding]())
 	bindings.page = data.NewVariable(list.New[tui.KeyBinding]())
 
 	bindings.all = data.MapValue2(
-		&bindings.action,
+		&bindings.actions,
 		&bindings.page,
 		func(xs, ys list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
 			return list.Concatenate(xs, ys)
