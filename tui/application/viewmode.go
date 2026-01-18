@@ -38,7 +38,7 @@ func newViewMode(application *Application) *viewMode {
 	highlightedNodeIndex := data.MapValue(&application.model, func(m *model.Model) int { return m.HighlightedNodeIndex })
 
 	nodesView := nodeselection.New(messageQueue, selectedNodes, intersectionNodes, highlightedNodeIndex)
-	statusBar := keyview.New(messageQueue, "status bar", application.keyBindings)
+	statusBar := keyview.New(messageQueue, "status bar", application.bindings.all)
 	highlightedNode := data.MapValue3(
 		highlightedNodeIndex,
 		intersectionNodes,

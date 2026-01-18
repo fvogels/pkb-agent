@@ -39,30 +39,39 @@ type Application struct {
 	inputMode        *inputMode
 	activeMode       data.Variable[tui.Component]
 	activeModeHolder *holder.Component
-	modeBindings     data.Variable[list.List[tui.KeyBinding]]
-	nodeBindings     data.Variable[list.List[tui.KeyBinding]]
-	keyBindings      data.Value[list.List[tui.KeyBinding]]
+	bindings         keyBindings
+}
+
+type keyBindings struct {
+	mode data.Variable[list.List[tui.KeyBinding]]
+	node data.Variable[list.List[tui.KeyBinding]]
+	all  data.Value[list.List[tui.KeyBinding]]
 }
 
 func NewApplication(verbose bool) *Application {
 	application := Application{
-		verbose:      verbose,
-		running:      true,
-		logFile:      nil,
-		activeMode:   data.NewVariable[tui.Component](nil),
-		modeBindings: data.NewVariable(list.New[tui.KeyBinding]()),
-		nodeBindings: data.NewVariable(list.New[tui.KeyBinding]()),
+		verbose:    verbose,
+		running:    true,
+		logFile:    nil,
+		activeMode: data.NewVariable[tui.Component](nil),
 	}
 
-	application.keyBindings = data.MapValue2(
-		&application.modeBindings,
-		&application.nodeBindings,
+	createKeyBindings(&application.bindings)
+
+	return &application
+}
+
+func createKeyBindings(bindings *keyBindings) {
+	bindings.mode = data.NewVariable(list.New[tui.KeyBinding]())
+	bindings.node = data.NewVariable(list.New[tui.KeyBinding]())
+
+	bindings.all = data.MapValue2(
+		&bindings.mode,
+		&bindings.node,
 		func(xs list.List[tui.KeyBinding], ys list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
 			return list.Concatenate(xs, ys)
 		},
 	)
-
-	return &application
 }
 
 func (application *Application) Start() error {
@@ -219,10 +228,10 @@ func (application *Application) handleMessage(message tui.Message) {
 		application.unselectLastNode()
 
 	case messages.MsgSetModeKeyBindings:
-		application.modeBindings.Set(message.Bindings)
+		application.bindings.mode.Set(message.Bindings)
 
 	case messages.MsgSetNodeKeyBindings:
-		application.nodeBindings.Set(message.Bindings)
+		application.bindings.node.Set(message.Bindings)
 
 	case messages.MsgActivateInputMode:
 		application.switchMode(application.inputMode)
