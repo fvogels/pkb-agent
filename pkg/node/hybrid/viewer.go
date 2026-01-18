@@ -52,6 +52,8 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 
 	component.actionKeyBindings = data.NewVariable(list.New[tui.KeyBinding]())
 	component.pageKeyBindings = data.NewVariable(list.New[tui.KeyBinding]())
+
+	// keyBindings should be kept equal to the concatenation of actionKeyBindings and pageKeyBindings
 	component.keyBindings = data.MapValue2(
 		&component.actionKeyBindings,
 		&component.pageKeyBindings,
@@ -59,6 +61,8 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 			return list.Concatenate(xs, ys)
 		},
 	)
+
+	// Whenever keyBindings change, send a message
 	component.keyBindings.Observe(func() {
 		messageQueue.Enqueue(messages.MsgSetNodeKeyBindings{
 			Bindings: component.keyBindings.Get(),
