@@ -339,6 +339,7 @@ func (application *Application) selectHighlightedNode() {
 	application.updateModel(func(model *model.Model) {
 		model.SelectHighlightedNode()
 		model.DetermineIntersectionNodes()
+		model.HighlightedNodeIndex = 0
 	})
 }
 
