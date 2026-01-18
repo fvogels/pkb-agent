@@ -20,14 +20,18 @@ type Component struct {
 	data                   *nodeData // (strong) pointer to the node data, keeps information alive while viewer exists
 	activePageIndex        data.Variable[int]
 	pageViewers            []tui.Component
-	actionKeyBindings      data.Variable[list.List[tui.KeyBinding]] // Key bindings associated with the node
-	pageKeyBindings        data.Variable[list.List[tui.KeyBinding]] // Page specific key bindings
-	keyBindings            data.Value[list.List[tui.KeyBinding]]    // Concatenation of action key bindings and page key bindings
+	bindings               keyBindings
 	activePageViewer       data.Value[tui.Component]
 	activePageViewerHolder holder.Component
 	pageStatus             data.Value[string]
 	pageStatusView         tui.Component
 	root                   tui.Component
+}
+
+type keyBindings struct {
+	action data.Variable[list.List[tui.KeyBinding]] // Key bindings associated with the node
+	page   data.Variable[list.List[tui.KeyBinding]] // Page specific key bindings
+	all    data.Value[list.List[tui.KeyBinding]]    // Concatenation of action key bindings and page key bindings
 }
 
 func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeData) *Component {
@@ -45,24 +49,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 	pages := nodeData.pages
 	component.pageViewers = component.createPageViewers(messageQueue, pages)
 
-	component.actionKeyBindings = data.NewVariable(list.New[tui.KeyBinding]())
-	component.pageKeyBindings = data.NewVariable(list.New[tui.KeyBinding]())
-
-	// keyBindings should be kept equal to the concatenation of actionKeyBindings and pageKeyBindings
-	component.keyBindings = data.MapValue2(
-		&component.actionKeyBindings,
-		&component.pageKeyBindings,
-		func(xs, ys list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
-			return list.Concatenate(xs, ys)
-		},
-	)
-
-	// Whenever keyBindings change, send a message
-	component.keyBindings.Observe(func() {
-		messageQueue.Enqueue(messages.MsgSetNodeKeyBindings{
-			Bindings: component.keyBindings.Get(),
-		})
-	})
+	component.createKeyBindings(messageQueue, &component.bindings)
 
 	if len(pages) == 0 {
 		component.activePageViewer = data.NewConstant[tui.Component](empty.NewPageComponent(messageQueue))
@@ -97,6 +84,25 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 	)
 
 	return &component
+}
+
+func (component *Component) createKeyBindings(messageQueue tui.MessageQueue, bindings *keyBindings) {
+	bindings.action = data.NewVariable(list.New[tui.KeyBinding]())
+	bindings.page = data.NewVariable(list.New[tui.KeyBinding]())
+
+	bindings.all = data.MapValue2(
+		&bindings.action,
+		&bindings.page,
+		func(xs, ys list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
+			return list.Concatenate(xs, ys)
+		},
+	)
+
+	bindings.all.Observe(func() {
+		messageQueue.Enqueue(messages.MsgSetNodeKeyBindings{
+			Bindings: bindings.all.Get(),
+		})
+	})
 }
 
 func (component *Component) createPageViewers(messageQueue tui.MessageQueue, pages []page.Page) []tui.Component {
@@ -140,7 +146,7 @@ func (component *Component) onActivate() {
 }
 
 func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindings) {
-	component.pageKeyBindings.Set(message.Bindings)
+	component.bindings.page.Set(message.Bindings)
 }
 
 func (component *Component) Render() tui.Grid {
