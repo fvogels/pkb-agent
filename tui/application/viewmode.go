@@ -23,6 +23,7 @@ type viewMode struct {
 	tui.ComponentBase
 	application                 *Application
 	statusBar                   tui.Component
+	highlightedNode             data.Value[*pkg.Node]
 	highlightedNodeViewer       data.Value[tui.Component]
 	highlightedNodeViewerHolder *holder.Component
 	nodes                       *nodeselection.Component
@@ -38,15 +39,25 @@ func newViewMode(application *Application) *viewMode {
 
 	nodesView := nodeselection.New(messageQueue, selectedNodes, intersectionNodes, highlightedNodeIndex)
 	statusBar := keyview.New(messageQueue, "status bar", application.keyBindings)
-	highlightedNodeViewer := data.MapValue3(
+	highlightedNode := data.MapValue3(
 		highlightedNodeIndex,
 		intersectionNodes,
 		selectedNodes,
-		func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) tui.Component {
+		func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) *pkg.Node {
 			if intersectionNodes.Size() > 0 {
-				return intersectionNodes.At(highlightedNodeIndex).GetViewer(messageQueue)
+				return intersectionNodes.At(highlightedNodeIndex)
 			} else if selectedNodes.Size() > 0 {
-				return selectedNodes.At(selectedNodes.Size() - 1).GetViewer(messageQueue)
+				return selectedNodes.At(selectedNodes.Size() - 1)
+			} else {
+				return nil
+			}
+		},
+	)
+	highlightedNodeViewer := data.MapValue(
+		highlightedNode,
+		func(highlightedNode *pkg.Node) tui.Component {
+			if highlightedNode != nil {
+				return highlightedNode.GetViewer(messageQueue)
 			} else {
 				return nil
 			}

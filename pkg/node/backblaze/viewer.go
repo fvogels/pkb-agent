@@ -33,7 +33,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode) *Component {
 			MessageQueue: messageQueue,
 		},
 		rawNode: rawNode,
-		root:    createRoot(messageQueue),
+		root:    createRoot(messageQueue, rawNode),
 		bindingDownload: tui.KeyBinding{
 			Key:         "d",
 			Description: "download",
@@ -51,7 +51,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode) *Component {
 	return &component
 }
 
-func createRoot(messageQueue tui.MessageQueue) tui.Component {
+func createRoot(messageQueue tui.MessageQueue, rawNode *RawNode) tui.Component {
 	return label.New(messageQueue, "backblaze label", data.NewConstant("backblaze!"))
 }
 
