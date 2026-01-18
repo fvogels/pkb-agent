@@ -34,10 +34,8 @@ type Application struct {
 	messageQueue     tui.MessageQueue
 	screenSize       tui.Size
 	graph            *pkg.Graph
+	mode             mode
 	model            data.Variable[*model.Model]
-	viewMode         *viewMode
-	inputMode        *inputMode
-	activeMode       data.Variable[tui.Component]
 	activeModeHolder *holder.Component
 	bindings         keyBindings
 }
@@ -48,12 +46,17 @@ type keyBindings struct {
 	all  data.Value[list.List[tui.KeyBinding]]
 }
 
+type mode struct {
+	view   *viewMode
+	input  *inputMode
+	active data.Variable[tui.Component]
+}
+
 func NewApplication(verbose bool) *Application {
 	application := Application{
-		verbose:    verbose,
-		running:    true,
-		logFile:    nil,
-		activeMode: data.NewVariable[tui.Component](nil),
+		verbose: verbose,
+		running: true,
+		logFile: nil,
 	}
 
 	createKeyBindings(&application.bindings)
@@ -91,15 +94,21 @@ func (application *Application) Start() error {
 	}
 
 	application.model = data.NewVariable(model.New(application.graph))
-	application.viewMode = newViewMode(application)
-	application.inputMode = newInputMode(application)
-	application.activeModeHolder = holder.New(application.messageQueue, &application.activeMode)
 
-	application.switchMode(application.viewMode)
+	application.createModes(&application.mode)
+	application.activeModeHolder = holder.New(application.messageQueue, &application.mode.active)
+
+	application.switchMode(application.mode.view)
 
 	application.eventLoop()
 
 	return nil
+}
+
+func (application *Application) createModes(mode *mode) {
+	mode.view = newViewMode(application)
+	mode.input = newInputMode(application)
+	mode.active = data.NewVariable[tui.Component](nil)
 }
 
 func (application *Application) Close() {
@@ -214,7 +223,7 @@ func (application *Application) handleMessage(message tui.Message) {
 
 	switch message := message.(type) {
 	case tui.MsgUpdateLayout:
-		application.activeMode.Get().Handle(tui.MsgResize{
+		application.mode.active.Get().Handle(tui.MsgResize{
 			Size: application.screenSize,
 		})
 
@@ -234,19 +243,19 @@ func (application *Application) handleMessage(message tui.Message) {
 		application.bindings.node.Set(message.Bindings)
 
 	case messages.MsgActivateInputMode:
-		application.switchMode(application.inputMode)
+		application.switchMode(application.mode.input)
 
 	case tui.MsgCommand:
 		message.Command()
 
 	default:
-		application.activeMode.Get().Handle(message)
+		application.mode.active.Get().Handle(message)
 	}
 }
 
 func (application *Application) Render() {
 	screen := application.screen
-	activeMode := application.activeMode
+	activeMode := application.mode.active
 
 	screen.Clear()
 
@@ -335,7 +344,7 @@ func (application *Application) findIndexOfIntersectionNode(intersectionNodes []
 }
 
 func (application *Application) switchMode(mode tui.Component) {
-	application.activeMode.Set(mode)
+	application.mode.active.Set(mode)
 }
 
 func (application *Application) updateModel(updater func(model *model.Model)) {

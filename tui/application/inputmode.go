@@ -122,7 +122,7 @@ func (mode *inputMode) onKey(message tui.MsgKey) {
 	switch message.Key {
 	case "Enter":
 		mode.application.selectHighlightedAndClearInput()
-		mode.application.switchMode(mode.application.viewMode)
+		mode.application.switchMode(mode.application.mode.view)
 
 	default:
 		mode.root.Handle(message)
