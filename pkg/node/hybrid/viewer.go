@@ -20,9 +20,9 @@ type Component struct {
 	data                   *nodeData // (strong) pointer to the node data, keeps information alive while viewer exists
 	activePageIndex        data.Variable[int]
 	pageViewers            []tui.Component
-	actionKeyBindings      data.Variable[list.List[tui.KeyBinding]]
-	pageKeyBindings        data.Variable[list.List[tui.KeyBinding]]
-	keyBindings            data.Value[list.List[tui.KeyBinding]]
+	actionKeyBindings      data.Variable[list.List[tui.KeyBinding]] // Key bindings associated with the node
+	pageKeyBindings        data.Variable[list.List[tui.KeyBinding]] // Page specific key bindings
+	keyBindings            data.Value[list.List[tui.KeyBinding]]    // Concatenation of action key bindings and page key bindings
 	activePageViewer       data.Value[tui.Component]
 	activePageViewerHolder holder.Component
 	pageStatus             data.Value[string]
@@ -43,12 +43,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 	}
 
 	pages := nodeData.pages
-	component.pageViewers = make([]tui.Component, len(pages))
-
-	for pageIndex, page := range pages {
-		viewer := page.CreateViewer(messageQueue)
-		component.pageViewers[pageIndex] = viewer
-	}
+	component.pageViewers = component.createPageViewers(messageQueue, pages)
 
 	component.actionKeyBindings = data.NewVariable(list.New[tui.KeyBinding]())
 	component.pageKeyBindings = data.NewVariable(list.New[tui.KeyBinding]())
@@ -102,6 +97,17 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 	)
 
 	return &component
+}
+
+func (component *Component) createPageViewers(messageQueue tui.MessageQueue, pages []page.Page) []tui.Component {
+	pageViewers := make([]tui.Component, len(pages))
+
+	for pageIndex, page := range pages {
+		viewer := page.CreateViewer(messageQueue)
+		pageViewers[pageIndex] = viewer
+	}
+
+	return pageViewers
 }
 
 func (component *Component) Handle(message tui.Message) {
