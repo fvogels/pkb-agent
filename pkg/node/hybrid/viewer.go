@@ -3,6 +3,7 @@ package hybrid
 import (
 	"fmt"
 	"pkb-agent/persistent/list"
+	"pkb-agent/pkg/node"
 	"pkb-agent/pkg/node/hybrid/page"
 	"pkb-agent/pkg/node/hybrid/page/empty"
 	"pkb-agent/tui"
@@ -29,7 +30,7 @@ type Component struct {
 }
 
 type keyBindings struct {
-	actions data.Variable[list.List[tui.KeyBinding]] // Key bindings associated with the node
+	actions []tui.KeyBinding                         // Key bindings associated with the node
 	page    data.Variable[list.List[tui.KeyBinding]] // Page specific key bindings
 	all     data.Value[list.List[tui.KeyBinding]]    // Concatenation of action key bindings and page key bindings
 }
@@ -49,7 +50,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 	pages := nodeData.pages
 	component.pageViewers = component.createPageViewers(messageQueue, pages)
 
-	component.createKeyBindings(messageQueue, &component.bindings)
+	component.createKeyBindings(messageQueue, nodeData, &component.bindings)
 
 	if len(pages) == 0 {
 		component.activePageViewer = data.NewConstant[tui.Component](empty.NewPageComponent(messageQueue))
@@ -86,15 +87,14 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 	return &component
 }
 
-func (component *Component) createKeyBindings(messageQueue tui.MessageQueue, bindings *keyBindings) {
-	bindings.actions = data.NewVariable(list.New[tui.KeyBinding]())
+func (component *Component) createKeyBindings(messageQueue tui.MessageQueue, nodeData *nodeData, bindings *keyBindings) {
+	bindings.actions = component.createActionKeyBindings(nodeData.actions)
 	bindings.page = data.NewVariable(list.New[tui.KeyBinding]())
 
-	bindings.all = data.MapValue2(
-		&bindings.actions,
+	bindings.all = data.MapValue(
 		&bindings.page,
-		func(xs, ys list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
-			return list.Concatenate(xs, ys)
+		func(pageBindings list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
+			return list.Concatenate(list.FromSlice(bindings.actions), pageBindings)
 		},
 	)
 
@@ -103,6 +103,30 @@ func (component *Component) createKeyBindings(messageQueue tui.MessageQueue, bin
 			Bindings: bindings.all.Get(),
 		})
 	})
+}
+
+func (component *Component) createActionKeyBindings(actions []node.Action) []tui.KeyBinding {
+	keys := []rune{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'}
+	keyBindings := make([]tui.KeyBinding, len(actions))
+
+	for index, action := range actions {
+		actionCopy := action
+		description := action.GetDescription()
+		key := string(keys[index])
+		keyBindings[index] = tui.KeyBinding{
+			Key:         key,
+			Description: description,
+			Message: tui.MsgCommand{
+				Command: func() {
+					go func() {
+						actionCopy.Perform()
+					}()
+				},
+			},
+		}
+	}
+
+	return keyBindings
 }
 
 func (component *Component) createPageViewers(messageQueue tui.MessageQueue, pages []page.Page) []tui.Component {
@@ -169,6 +193,10 @@ func (component *Component) withActivePage(f func(page page.Page, viewer tui.Com
 }
 
 func (component *Component) onKey(message tui.MsgKey) {
+	if tui.HandleKeyBindings(component.MessageQueue, message, component.bindings.actions...) {
+		return
+	}
+
 	switch message.Key {
 	case "Tab":
 		component.withActivePage(func(page page.Page, viewer tui.Component) {
