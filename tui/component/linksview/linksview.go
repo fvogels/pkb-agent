@@ -1,7 +1,6 @@
 package linksview
 
 import (
-	"log/slog"
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
@@ -47,7 +46,6 @@ func (component *Component) Handle(message tui.Message) {
 }
 
 func (component *Component) onStateUpdated() {
-	slog.Debug("!!!")
 	component.MessageQueue.Enqueue(messages.MsgSetNodeKeyBindings{
 		Bindings: list.FromItems[tui.KeyBinding](
 			tui.KeyBinding{
