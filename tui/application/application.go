@@ -13,7 +13,6 @@ import (
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/model"
 	"pkb-agent/util/pathlib"
-	"reflect"
 	"slices"
 	"strings"
 	"time"
@@ -72,6 +71,11 @@ func createKeyBindings(bindings *keyBindings) {
 		&bindings.mode,
 		&bindings.node,
 		func(xs list.List[tui.KeyBinding], ys list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
+			slog.Debug(
+				"updating keybindings",
+				"xs", list.String(xs, func(b tui.KeyBinding) string { return b.Key }),
+				"ys", list.String(ys, func(b tui.KeyBinding) string { return b.Key }),
+			)
 			return list.Concatenate(xs, ys)
 		},
 	)
@@ -219,7 +223,7 @@ func (application *Application) HandleEvent(event tcell.Event) {
 }
 
 func (application *Application) handleMessage(message tui.Message) {
-	slog.Debug("Application handles message", slog.String("messageType", reflect.TypeOf(message).String()))
+	slog.Debug("Application handles message", slog.String("message", message.String()))
 
 	switch message := message.(type) {
 	case tui.MsgUpdateLayout:

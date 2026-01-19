@@ -1,6 +1,11 @@
 package tui
 
-import "github.com/gdamore/tcell/v3"
+import (
+	"log/slog"
+	"runtime"
+
+	"github.com/gdamore/tcell/v3"
+)
 
 type MessageQueue interface {
 	Enqueue(Message)
@@ -22,6 +27,16 @@ func NewMessageQueue(queue chan tcell.Event) MessageQueue {
 }
 
 func (queue *messageQueue) Enqueue(message Message) {
+	{
+		_, file, line, _ := runtime.Caller(1)
+		slog.Debug(
+			"Message enqueued",
+			slog.String("file", file),
+			slog.Int("line", line),
+			slog.String("message", message.String()),
+		)
+	}
+
 	wrapper := EventMessage{
 		Message: message,
 	}

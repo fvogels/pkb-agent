@@ -1,6 +1,7 @@
 package node
 
 import (
+	"fmt"
 	"io"
 	"pkb-agent/tui"
 	"pkb-agent/util/pathlib"
@@ -31,4 +32,8 @@ type Loader interface {
 
 type MsgUpdateNodeViewerBindings struct {
 	KeyBindings []key.Binding
+}
+
+func (message MsgUpdateNodeViewerBindings) String() string {
+	return fmt.Sprintf("MsgUpdateNodeViewerBindings[...]")
 }

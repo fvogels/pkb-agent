@@ -1,7 +1,6 @@
 package docksouth
 
 import (
-	"log/slog"
 	"pkb-agent/tui"
 	"pkb-agent/util/uid"
 )
@@ -55,12 +54,6 @@ func (component *Component) Render() tui.Grid {
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
-	slog.Debug(
-		"docksouth resized",
-		slog.String("name", component.Name),
-		slog.Int("width", message.Size.Width),
-		slog.Int("height", message.Size.Height),
-	)
 	component.Size = message.Size
 	component.updateLayout()
 }

@@ -1,7 +1,6 @@
 package docknorth
 
 import (
-	"log/slog"
 	"pkb-agent/tui"
 	"pkb-agent/util/uid"
 )
@@ -67,7 +66,6 @@ func (component *Component) onResize(message tui.MsgResize) {
 
 func (component *Component) updateLayout() {
 	width := component.Size.Width
-	dockedChildHeight := component.dockedChildHeight
 	mainChildHeight := component.Size.Height - component.dockedChildHeight
 
 	dockedChildSizeMessage := tui.MsgResize{
@@ -85,12 +83,4 @@ func (component *Component) updateLayout() {
 		},
 	}
 	component.mainChild.Handle(mainChildSizeMessage)
-
-	slog.Debug(
-		"updated layout in docknorth",
-		slog.String("name", component.Name),
-		slog.Int("totalHeight", component.Size.Height),
-		slog.Int("dockedChildHeight", dockedChildHeight),
-		slog.Int("mainChildHeight", mainChildHeight),
-	)
 }

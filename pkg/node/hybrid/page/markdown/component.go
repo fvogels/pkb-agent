@@ -19,6 +19,10 @@ type pageComponent struct {
 
 type msgCopySnippet struct{}
 
+func (message msgCopySnippet) String() string {
+	return "msgCopySnippet"
+}
+
 func NewPageComponent(messageQueue tui.MessageQueue, parent *Page) *pageComponent {
 	source := data.NewConstant(parent.source)
 

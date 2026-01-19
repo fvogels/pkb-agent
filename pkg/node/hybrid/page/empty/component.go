@@ -16,6 +16,10 @@ type pageComponent struct {
 
 type msgCopySnippet struct{}
 
+func (message msgCopySnippet) String() string {
+	return "msgCopySnippet"
+}
+
 func NewPageComponent(messageQueue tui.MessageQueue) *pageComponent {
 	component := pageComponent{
 		ComponentBase: tui.ComponentBase{
