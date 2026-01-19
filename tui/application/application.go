@@ -245,6 +245,9 @@ func (application *Application) handleMessage(message tui.Message) {
 	case messages.MsgActivateInputMode:
 		application.switchMode(application.mode.input)
 
+	case messages.MsgSwitchLinksView:
+		application.switchLinksView()
+
 	case tui.MsgCommand:
 		message.Command()
 
@@ -351,6 +354,12 @@ func (application *Application) updateModel(updater func(model *model.Model)) {
 	updatedModel := *application.model.Get()
 	updater(&updatedModel)
 	application.model.Set(&updatedModel)
+}
+
+func (application *Application) switchLinksView() {
+	application.updateModel(func(model *model.Model) {
+		model.ShowNodeLinks = !model.ShowNodeLinks
+	})
 }
 
 func (application *Application) selectHighlightedNode() {

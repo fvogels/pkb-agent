@@ -29,4 +29,10 @@ var (
 		Description: "search",
 		Message:     messages.MsgActivateInputMode{},
 	}
+
+	BindingSwitchLinksView = tui.KeyBinding{
+		Key:         "*",
+		Description: "links",
+		Message:     messages.MsgSwitchLinksView{},
+	}
 )

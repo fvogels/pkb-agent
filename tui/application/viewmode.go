@@ -10,6 +10,7 @@ import (
 	"pkb-agent/tui/component/docksouth"
 	"pkb-agent/tui/component/holder"
 	"pkb-agent/tui/component/keyview"
+	"pkb-agent/tui/component/linksview"
 	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/model"
@@ -57,7 +58,11 @@ func newViewMode(application *Application) *viewMode {
 		highlightedNode,
 		func(highlightedNode *pkg.Node) tui.Component {
 			if highlightedNode != nil {
-				return highlightedNode.GetViewer(messageQueue)
+				if application.model.Get().ShowNodeLinks {
+					return linksview.New(messageQueue)
+				} else {
+					return highlightedNode.GetViewer(messageQueue)
+				}
 			} else {
 				return nil
 			}
@@ -127,6 +132,7 @@ func (mode *viewMode) onActivate() {
 			BindingSelect,
 			BindingUnselect,
 			BindingSearch,
+			BindingSwitchLinksView,
 		),
 	})
 }
@@ -138,6 +144,7 @@ func (mode *viewMode) onKey(message tui.MsgKey) {
 		BindingSelect,
 		BindingUnselect,
 		BindingSearch,
+		BindingSwitchLinksView,
 	}
 
 	if !tui.HandleKeyBindings(application.messageQueue, message, activeBindings...) {
