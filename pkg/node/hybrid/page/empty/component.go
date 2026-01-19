@@ -42,12 +42,9 @@ func (component *pageComponent) Handle(message tui.Message) {
 	case tui.MsgKey:
 		component.onKey(message)
 
-	case tui.MsgActivate:
-		message.Respond(
-			component.Identifier,
-			component.onActivate,
-			component.child,
-		)
+	case tui.MsgStateUpdated:
+		component.child.Handle(message)
+		component.onStateUpdated()
 
 	default:
 		component.child.Handle(message)
@@ -58,7 +55,7 @@ func (component *pageComponent) onKey(message tui.MsgKey) {
 	// No key bindings for this page
 }
 
-func (component *pageComponent) onActivate() {
+func (component *pageComponent) onStateUpdated() {
 	component.MessageQueue.Enqueue(page.MsgSetPageKeyBindings{
 		Bindings: list.FromItems[tui.KeyBinding](),
 	})

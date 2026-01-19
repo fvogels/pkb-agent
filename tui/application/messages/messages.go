@@ -23,7 +23,7 @@ type MsgSetModeKeyBindings struct {
 }
 
 func (message MsgSetModeKeyBindings) String() string {
-	return fmt.Sprintf("MsgSelectHighlightedNode[Bindings=%s]", list.String(message.Bindings, func(b tui.KeyBinding) string { return b.Key }))
+	return fmt.Sprintf("MsgSetModeKeyBindings[Bindings=%s]", list.String(message.Bindings, func(b tui.KeyBinding) string { return b.Key }))
 }
 
 type MsgSetNodeKeyBindings struct {

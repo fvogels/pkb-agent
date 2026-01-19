@@ -21,29 +21,26 @@ func New(messageQueue tui.MessageQueue, child data.Value[tui.Component]) *Compon
 		child: child,
 	}
 
-	// Make sure that whenever a new component is put in, it is activated and resized
-	child.Observe(func() {
-		component.MessageQueue.Enqueue(tui.MsgActivate{Recipient: component.child.Get().GetIdentifier()})
-		component.MessageQueue.Enqueue(tui.MsgUpdateLayout{})
-	})
-
 	return &component
 }
 
 func (component *Component) Handle(message tui.Message) {
+	child := component.child.Get()
+
 	switch message := message.(type) {
 	case tui.MsgResize:
 		component.onResize(message)
 
-	case tui.MsgActivate:
-		message.Respond(
-			component.Identifier,
-			func() {},
-			component.child.Get(),
-		)
+	case tui.MsgStateUpdated:
+		if child != nil {
+			child.Handle(message)
+			child.Handle(tui.MsgResize{Size: component.Size})
+		}
 
 	default:
-		component.child.Get().Handle(message)
+		if child != nil {
+			component.child.Get().Handle(message)
+		}
 	}
 }
 

@@ -97,40 +97,37 @@ func newInputMode(application *Application) *inputMode {
 	return &result
 }
 
-func (mode *inputMode) Render() tui.Grid {
-	return mode.root.Render()
+func (component *inputMode) Render() tui.Grid {
+	return component.root.Render()
 }
 
-func (mode *inputMode) Handle(message tui.Message) {
+func (component *inputMode) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgKey:
-		mode.onKey(message)
+		component.onKey(message)
 
-	case tui.MsgActivate:
-		message.Respond(
-			mode.Identifier,
-			mode.onActivate,
-			mode.root,
-		)
+	case tui.MsgStateUpdated:
+		component.root.Handle(message)
+		component.onStateUpdated()
 
 	default:
-		mode.root.Handle(message)
+		component.root.Handle(message)
 	}
 }
 
-func (mode *inputMode) onKey(message tui.MsgKey) {
+func (component *inputMode) onKey(message tui.MsgKey) {
 	switch message.Key {
 	case "Enter":
-		mode.application.selectHighlightedAndClearInput()
-		mode.application.switchMode(mode.application.mode.view)
+		component.application.selectHighlightedAndClearInput()
+		component.application.switchMode(component.application.mode.view)
 
 	default:
-		mode.root.Handle(message)
+		component.root.Handle(message)
 	}
 }
 
-func (mode *inputMode) onActivate() {
-	mode.application.messageQueue.Enqueue(messages.MsgSetModeKeyBindings{
+func (component *inputMode) onStateUpdated() {
+	component.application.messageQueue.Enqueue(messages.MsgSetModeKeyBindings{
 		Bindings: list.New[tui.KeyBinding](),
 	})
 }

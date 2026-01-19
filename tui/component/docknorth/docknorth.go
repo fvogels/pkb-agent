@@ -35,14 +35,6 @@ func (component *Component) Handle(message tui.Message) {
 	case tui.MsgResize:
 		component.onResize(message)
 
-	case tui.MsgActivate:
-		message.Respond(
-			component.Identifier,
-			func() {},
-			component.mainChild,
-			component.dockedChild,
-		)
-
 	default:
 		component.mainChild.Handle(message)
 		component.dockedChild.Handle(message)

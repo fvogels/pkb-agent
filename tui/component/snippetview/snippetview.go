@@ -31,7 +31,6 @@ func New(messageQueue tui.MessageQueue, source data.Value[Source]) *Component {
 		formattedSource: data.NewVariable(""),
 	}
 	component.child = ansiview.New(messageQueue, &component.formattedSource)
-	component.source.Observe(func() { component.reformatMarkdown() })
 
 	return &component
 }
@@ -41,13 +40,12 @@ func (component *Component) Handle(message tui.Message) {
 	case tui.MsgResize:
 		component.onResize(message)
 
-	case tui.MsgActivate:
-		message.Respond(
-			component.Identifier,
-			func() {},
-			component.child,
-		)
+	case tui.MsgStateUpdated:
+		component.onStateUpdated()
+		component.child.Handle(message)
 
+	default:
+		component.child.Handle(message)
 	}
 }
 
@@ -58,6 +56,10 @@ func (component *Component) Render() tui.Grid {
 func (component *Component) onResize(message tui.MsgResize) {
 	component.Size = message.Size
 	component.child.Handle(message)
+	component.reformatMarkdown()
+}
+
+func (component *Component) onStateUpdated() {
 	component.reformatMarkdown()
 }
 

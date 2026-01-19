@@ -11,6 +11,7 @@ type Model struct {
 	IntersectionNodes    list.List[*pkg.Node]
 	HighlightedNodeIndex int
 	Input                string
+	SearchMode           bool
 	ShowNodeLinks        bool // Whether to show node contents (false) or node links/backlinks (true)
 }
 
@@ -24,6 +25,7 @@ func New(graph *pkg.Graph) *Model {
 		SelectedNodes:        selectedNodes,
 		IntersectionNodes:    intersectionNodes,
 		HighlightedNodeIndex: highlightedNodeIndex,
+		SearchMode:           false,
 		ShowNodeLinks:        false,
 	}
 

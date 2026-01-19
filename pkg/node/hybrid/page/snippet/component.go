@@ -13,9 +13,9 @@ import (
 
 type pageComponent struct {
 	tui.ComponentBase
-	parent        *Page
-	snippetViewer *snippetview.Component
-	bindingCopy   tui.KeyBinding
+	parent      *Page
+	child       *snippetview.Component
+	bindingCopy tui.KeyBinding
 }
 
 type msgCopySnippet struct{}
@@ -36,8 +36,8 @@ func NewPageComponent(messageQueue tui.MessageQueue, parent *Page) *pageComponen
 			Name:         "nameless snippet page",
 			MessageQueue: messageQueue,
 		},
-		parent:        parent,
-		snippetViewer: snippetview.New(messageQueue, source),
+		parent: parent,
+		child:  snippetview.New(messageQueue, source),
 		bindingCopy: tui.KeyBinding{
 			Key:         "c",
 			Description: "copy",
@@ -49,7 +49,7 @@ func NewPageComponent(messageQueue tui.MessageQueue, parent *Page) *pageComponen
 }
 
 func (component *pageComponent) Render() tui.Grid {
-	return component.snippetViewer.Render()
+	return component.child.Render()
 }
 
 func (component *pageComponent) Handle(message tui.Message) {
@@ -60,15 +60,12 @@ func (component *pageComponent) Handle(message tui.Message) {
 	case msgCopySnippet:
 		component.onCopySnippet()
 
-	case tui.MsgActivate:
-		message.Respond(
-			component.Identifier,
-			component.onActivate,
-			component.snippetViewer,
-		)
+	case tui.MsgStateUpdated:
+		component.child.Handle(message)
+		component.onStateUpdated()
 
 	default:
-		component.snippetViewer.Handle(message)
+		component.child.Handle(message)
 	}
 }
 
@@ -80,7 +77,7 @@ func (component *pageComponent) onCopySnippet() {
 	clipboard.Write(clipboard.FmtText, ([]byte)(component.parent.source))
 }
 
-func (component *pageComponent) onActivate() {
+func (component *pageComponent) onStateUpdated() {
 	component.MessageQueue.Enqueue(page.MsgSetPageKeyBindings{
 		Bindings: list.FromItems(
 			component.bindingCopy,

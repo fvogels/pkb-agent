@@ -142,12 +142,9 @@ func (component *Component) createPageViewers(messageQueue tui.MessageQueue, pag
 
 func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
-	case tui.MsgActivate:
-		message.Respond(
-			component.Identifier,
-			component.onActivate,
-			component.root,
-		)
+	case tui.MsgStateUpdated:
+		component.root.Handle(message)
+		component.onStateUpdated()
 
 	case tui.MsgResize:
 		component.onResize(message)
@@ -163,7 +160,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) onActivate() {
+func (component *Component) onStateUpdated() {
 	if len(component.pageViewers) > 0 {
 		component.setActivePage(0)
 	}

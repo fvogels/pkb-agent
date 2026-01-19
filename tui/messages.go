@@ -10,32 +10,6 @@ const (
 	Everyone = -1
 )
 
-type MsgActivate struct {
-	Recipient int
-}
-
-func (message MsgActivate) String() string {
-	return fmt.Sprintf("MsgActivate[Recipient=%d]", message.Recipient)
-}
-
-func (message MsgActivate) ShouldRespond(identifier int) bool {
-	return message.Recipient == Everyone || message.Recipient == identifier
-}
-
-func (message MsgActivate) Respond(receiver int, onActivate func(), children ...Component) {
-	if message.ShouldRespond(receiver) {
-		onActivate()
-
-		for _, child := range children {
-			child.Handle(MsgActivate{Recipient: Everyone})
-		}
-	} else {
-		for _, child := range children {
-			child.Handle(message)
-		}
-	}
-}
-
 type MsgResize struct {
 	Size Size
 }
@@ -49,13 +23,13 @@ type MsgKey struct {
 }
 
 func (message MsgKey) String() string {
-	return fmt.Sprintf("MsgKeyKey=%s]", message.Key)
+	return fmt.Sprintf("MsgKey[Key=%s]", message.Key)
 }
 
 type MsgUpdateLayout struct{}
 
 func (message MsgUpdateLayout) String() string {
-	return fmt.Sprintf("MsgCommand[...]")
+	return "MsgCommand"
 }
 
 type MsgCommand struct {
@@ -64,4 +38,10 @@ type MsgCommand struct {
 
 func (message MsgCommand) String() string {
 	return "MsgCommand[...]"
+}
+
+type MsgStateUpdated struct{}
+
+func (message MsgStateUpdated) String() string {
+	return "MsgStateUpdated"
 }

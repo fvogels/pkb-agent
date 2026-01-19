@@ -57,18 +57,18 @@ func createRoot(messageQueue tui.MessageQueue, rawNode *RawNode) tui.Component {
 
 func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
-	case tui.MsgActivate:
-		message.Respond(
-			component.Identifier,
-			component.onActivate,
-			component.root,
-		)
+	case tui.MsgStateUpdated:
+		component.root.Handle(message)
+		component.onStateUpdated()
 
 	case tui.MsgResize:
 		component.onResize(message)
 
 	case tui.MsgKey:
 		component.onKey(message)
+
+	default:
+		component.root.Handle(message)
 	}
 }
 
@@ -80,7 +80,7 @@ func (component *Component) onKey(message tui.MsgKey) {
 	)
 }
 
-func (component *Component) onActivate() {
+func (component *Component) onStateUpdated() {
 	component.MessageQueue.Enqueue(messages.MsgSetNodeKeyBindings{
 		Bindings: list.FromItems(component.bindingDownload),
 	})

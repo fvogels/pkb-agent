@@ -99,13 +99,6 @@ func (component *Component) Handle(message tui.Message) {
 	case tui.MsgKey:
 		component.onKey(message)
 
-	case tui.MsgActivate:
-		message.Respond(
-			component.Identifier,
-			func() {},
-			component.child,
-		)
-
 	default:
 		component.child.Handle(message)
 	}

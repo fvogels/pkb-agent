@@ -43,12 +43,9 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode) *Component {
 
 func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
-	case tui.MsgActivate:
-		message.Respond(
-			component.Identifier,
-			component.onActivate,
-			component.child,
-		)
+	case tui.MsgStateUpdated:
+		component.child.Handle(message)
+		component.onStateUpdated()
 
 	case tui.MsgResize:
 		component.onResize(message)
@@ -66,7 +63,7 @@ func (component *Component) onKey(message tui.MsgKey) {
 	)
 }
 
-func (component *Component) onActivate() {
+func (component *Component) onStateUpdated() {
 	component.MessageQueue.Enqueue(messages.MsgSetNodeKeyBindings{
 		Bindings: list.FromItems(
 			component.bindingOpenInBrowser,

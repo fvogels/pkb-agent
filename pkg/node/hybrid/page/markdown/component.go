@@ -51,12 +51,9 @@ func (component *pageComponent) Handle(message tui.Message) {
 	case msgCopySnippet:
 		component.onCopySnippet()
 
-	case tui.MsgActivate:
-		message.Respond(
-			component.Identifier,
-			component.onActivate,
-			component.markdownViewer,
-		)
+	case tui.MsgStateUpdated:
+		component.markdownViewer.Handle(message)
+		component.onStateUpdated()
 
 	default:
 		component.markdownViewer.Handle(message)
@@ -71,7 +68,7 @@ func (component *pageComponent) onCopySnippet() {
 	clipboard.Write(clipboard.FmtText, ([]byte)(component.parent.source))
 }
 
-func (component *pageComponent) onActivate() {
+func (component *pageComponent) onStateUpdated() {
 	component.MessageQueue.Enqueue(page.MsgSetPageKeyBindings{
 		Bindings: list.FromItems[tui.KeyBinding](),
 	})

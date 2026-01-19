@@ -37,6 +37,7 @@ func newViewMode(application *Application) *viewMode {
 	selectedNodes := data.MapValue(&application.model, func(m *model.Model) list.List[*pkg.Node] { return m.SelectedNodes })
 	intersectionNodes := data.MapValue(&application.model, func(m *model.Model) list.List[*pkg.Node] { return m.IntersectionNodes })
 	highlightedNodeIndex := data.MapValue(&application.model, func(m *model.Model) int { return m.HighlightedNodeIndex })
+	linkViewActive := data.MapValue(&application.model, func(m *model.Model) bool { return m.ShowNodeLinks })
 
 	nodesView := nodeselection.New(messageQueue, selectedNodes, intersectionNodes, highlightedNodeIndex)
 	statusBar := keyview.New(messageQueue, "status bar", application.bindings.all)
@@ -54,12 +55,13 @@ func newViewMode(application *Application) *viewMode {
 			}
 		},
 	)
-	highlightedNodeViewer := data.MapValue(
+	highlightedNodeViewer := data.MapValue2(
 		highlightedNode,
-		func(highlightedNode *pkg.Node) tui.Component {
+		linkViewActive,
+		func(highlightedNode *pkg.Node, linkViewActive bool) tui.Component {
 			if highlightedNode != nil {
-				if application.model.Get().ShowNodeLinks {
-					return linksview.New(messageQueue)
+				if linkViewActive {
+					return linksview.New(messageQueue, highlightedNode)
 				} else {
 					return highlightedNode.GetViewer(messageQueue)
 				}
@@ -103,29 +105,26 @@ func newViewMode(application *Application) *viewMode {
 	return &result
 }
 
-func (mode *viewMode) Render() tui.Grid {
-	return mode.root.Render()
+func (component *viewMode) Render() tui.Grid {
+	return component.root.Render()
 }
 
-func (mode *viewMode) Handle(message tui.Message) {
+func (component *viewMode) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgKey:
-		mode.onKey(message)
+		component.onKey(message)
 
-	case tui.MsgActivate:
-		message.Respond(
-			mode.Identifier,
-			mode.onActivate,
-			mode.root,
-		)
+	case tui.MsgStateUpdated:
+		component.root.Handle(message)
+		component.onStateUpdated()
 
 	default:
-		mode.root.Handle(message)
+		component.root.Handle(message)
 	}
 }
 
-func (mode *viewMode) onActivate() {
-	messageQueue := mode.application.messageQueue
+func (component *viewMode) onStateUpdated() {
+	messageQueue := component.application.messageQueue
 	messageQueue.Enqueue(messages.MsgSetModeKeyBindings{
 		Bindings: list.FromItems(
 			BindingQuit,
@@ -137,8 +136,8 @@ func (mode *viewMode) onActivate() {
 	})
 }
 
-func (mode *viewMode) onKey(message tui.MsgKey) {
-	application := mode.application
+func (component *viewMode) onKey(message tui.MsgKey) {
+	application := component.application
 	activeBindings := []tui.KeyBinding{
 		BindingQuit,
 		BindingSelect,
@@ -148,6 +147,6 @@ func (mode *viewMode) onKey(message tui.MsgKey) {
 	}
 
 	if !tui.HandleKeyBindings(application.messageQueue, message, activeBindings...) {
-		mode.root.Handle(message)
+		component.root.Handle(message)
 	}
 }

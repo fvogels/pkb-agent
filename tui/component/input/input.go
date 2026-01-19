@@ -20,8 +20,8 @@ type Component struct {
 
 func New(messageQueue tui.MessageQueue, contents data.Value[string]) *Component {
 	style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
-	subComponent := label.New(messageQueue, "input[label]", contents)
-	subComponent.SetStyle(&style)
+	child := label.New(messageQueue, "input[label]", contents)
+	child.SetStyle(&style)
 
 	component := Component{
 		ComponentBase: tui.ComponentBase{
@@ -32,7 +32,7 @@ func New(messageQueue tui.MessageQueue, contents data.Value[string]) *Component 
 		contents: contents,
 		style:    &style,
 		onChange: nil,
-		child:    subComponent,
+		child:    child,
 	}
 
 	return &component
@@ -54,12 +54,8 @@ func (component *Component) Handle(message tui.Message) {
 	case tui.MsgKey:
 		component.onKey(message)
 
-	case tui.MsgActivate:
-		message.Respond(
-			component.Identifier,
-			func() {},
-			component.child,
-		)
+	default:
+		component.child.Handle(message)
 	}
 }
 

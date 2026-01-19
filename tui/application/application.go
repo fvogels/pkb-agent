@@ -103,6 +103,7 @@ func (application *Application) Start() error {
 	application.activeModeHolder = holder.New(application.messageQueue, &application.mode.active)
 
 	application.switchMode(application.mode.view)
+	application.messageQueue.Enqueue(tui.MsgStateUpdated{})
 
 	application.eventLoop()
 
@@ -318,6 +319,7 @@ func (application *Application) loadGraph() error {
 
 	graph, err := pkg.LoadGraph(path, loader)
 	if err != nil {
+		slog.Debug("Error occurred", slog.String("message", err.Error()))
 		return err
 	}
 	slog.Debug("Graph loaded", slog.String("loadTime", time.Since(before).String()))
@@ -358,6 +360,7 @@ func (application *Application) updateModel(updater func(model *model.Model)) {
 	updatedModel := *application.model.Get()
 	updater(&updatedModel)
 	application.model.Set(&updatedModel)
+	application.messageQueue.Enqueue(tui.MsgStateUpdated{})
 }
 
 func (application *Application) switchLinksView() {

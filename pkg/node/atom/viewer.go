@@ -29,24 +29,19 @@ func NewViewer(messageQueue tui.MessageQueue) *Component {
 
 func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
-	case tui.MsgActivate:
-		message.Respond(
-			component.Identifier,
-			component.onActivate,
-			component.child,
-		)
+	case tui.MsgStateUpdated:
+		component.child.Handle(message)
+		component.onStateUpdated()
 
-	case tui.MsgResize:
-		component.onResize(message)
+	default:
+		component.child.Handle(message)
 	}
 }
 
-func (component *Component) onActivate() {
+func (component *Component) onStateUpdated() {
 	component.MessageQueue.Enqueue(messages.MsgSetNodeKeyBindings{
 		Bindings: list.New[tui.KeyBinding](),
 	})
-
-	component.child.Handle(tui.MsgActivate{Recipient: tui.Everyone})
 }
 
 func (component *Component) Render() tui.Grid {
