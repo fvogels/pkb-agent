@@ -86,15 +86,6 @@ func (rawNode *RawNode) CreateViewer(messageQueue tui.MessageQueue) tui.Componen
 	return NewViewer(messageQueue, rawNode, data)
 }
 
-// func (rawNode *RawNode) GetViewer() tea.Model {
-// data, err := rawNode.getData()
-// if err != nil {
-// 	panic("error loading data")
-// }
-
-// return NewViewer(rawNode, data)
-// }
-
 func (rawNode *RawNode) Serialize(writer io.Writer) error {
 	// bufferSize := 0
 	// bufferSize += 4              // type id
