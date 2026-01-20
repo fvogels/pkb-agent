@@ -16,6 +16,11 @@ type Component interface {
 	Render() Grid
 }
 
+type MeasurableComponent interface {
+	Component
+	Measure() Size
+}
+
 type ComponentBase struct {
 	Identifier   int
 	Name         string
