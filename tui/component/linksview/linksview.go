@@ -7,6 +7,7 @@ import (
 	"pkb-agent/tui/application/messages"
 	"pkb-agent/tui/component/captioned"
 	"pkb-agent/tui/component/stringsview"
+	"pkb-agent/tui/component/vstack"
 	"pkb-agent/tui/data"
 	"pkb-agent/util/uid"
 
@@ -36,14 +37,31 @@ func New(messageQueue tui.MessageQueue, node *pkg.Node) *Component {
 
 func createRoot(messageQueue tui.MessageQueue, node *pkg.Node) tui.Component {
 	style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
+
 	links := data.NewConstant(getLinkItems(node, &style))
 	linksCaption := data.NewConstant([]rune("Links"))
 
-	return captioned.New(
-		&messageQueue,
+	backLinks := data.NewConstant(getBacklinkItems(node, &style))
+	backlinksCaption := data.NewConstant([]rune("Backlinks"))
+
+	linksRoot := captioned.NewMeasurable(
+		messageQueue,
 		linksCaption,
 		stringsview.New(messageQueue, links),
 	)
+
+	backlinksRoot := captioned.NewMeasurable(
+		messageQueue,
+		backlinksCaption,
+		stringsview.New(messageQueue, backLinks),
+	)
+
+	root := vstack.New(
+		messageQueue,
+		list.FromItems[tui.MeasurableComponent](linksRoot, backlinksRoot),
+	)
+
+	return root
 }
 
 func (component *Component) Render() tui.Grid {
@@ -69,6 +87,22 @@ func (component *Component) onStateUpdated() {
 
 func getLinkItems(node *pkg.Node, style *tui.Style) list.List[stringsview.Item] {
 	linkedNodesList := list.FromSlice(node.GetLinks())
+
+	return list.MapList(
+		linkedNodesList,
+		func(linkedNode *pkg.Node) stringsview.Item {
+			name := linkedNode.GetName()
+
+			return stringsview.Item{
+				Runes: []rune(name),
+				Style: style,
+			}
+		},
+	)
+}
+
+func getBacklinkItems(node *pkg.Node, style *tui.Style) list.List[stringsview.Item] {
+	linkedNodesList := list.FromSlice(node.GetBacklinks())
 
 	return list.MapList(
 		linkedNodesList,
