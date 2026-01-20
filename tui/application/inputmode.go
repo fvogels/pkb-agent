@@ -122,7 +122,7 @@ func (component *inputMode) onKey(message tui.MsgKey) {
 		component.application.switchMode(component.application.mode.view)
 
 	default:
-		component.root.Handle(message)
+		component.inputField.Handle(message)
 	}
 }
 
