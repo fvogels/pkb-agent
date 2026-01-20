@@ -75,3 +75,22 @@ func (component *Component) EnsureItemIsVisible(index int) {
 		}
 	}
 }
+
+func (component *Component) Measure() tui.Size {
+	measuredWidth := 0
+	items := component.items.Get()
+
+	for index := range items.Size() {
+		item := items.At(index)
+		itemWidth := len(item.Runes)
+
+		if itemWidth > measuredWidth {
+			measuredWidth = itemWidth
+		}
+	}
+
+	return tui.Size{
+		Width:  measuredWidth,
+		Height: items.Size(),
+	}
+}
