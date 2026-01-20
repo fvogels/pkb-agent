@@ -35,4 +35,16 @@ var (
 		Description: "links",
 		Message:     messages.MsgSwitchLinksView{},
 	}
+
+	BindingLockNodes = tui.KeyBinding{
+		Key:         "l",
+		Description: "lock",
+		Message:     messages.MsgLockSelectedNodes{},
+	}
+
+	BindingUnlockNodes = tui.KeyBinding{
+		Key:         "u",
+		Description: "unlock",
+		Message:     messages.MsgUnlockSelectedNodes{},
+	}
 )

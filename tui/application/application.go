@@ -253,6 +253,12 @@ func (application *Application) handleMessage(message tui.Message) {
 	case messages.MsgSwitchLinksView:
 		application.switchLinksView()
 
+	case messages.MsgLockSelectedNodes:
+		application.lockSelectedNodes()
+
+	case messages.MsgUnlockSelectedNodes:
+		application.unlockSelectedNodes()
+
 	case tui.MsgCommand:
 		message.Command()
 
@@ -414,4 +420,16 @@ func (application *Application) updateInputAndHighlightBestMatch(newInput string
 
 func (application *Application) createMessageQueue() {
 	application.messageQueue = tui.NewMessageQueue(application.screen.EventQ())
+}
+
+func (application *Application) lockSelectedNodes() {
+	application.updateModel(func(model *model.Model) {
+		model.LockSelectedNodes()
+	})
+}
+
+func (application *Application) unlockSelectedNodes() {
+	application.updateModel(func(model *model.Model) {
+		model.UnlockSelectedNodes()
+	})
 }

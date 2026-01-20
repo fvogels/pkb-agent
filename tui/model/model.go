@@ -7,6 +7,7 @@ import (
 
 type Model struct {
 	Graph                *pkg.Graph
+	LockedNodeCount      int
 	SelectedNodes        list.List[*pkg.Node]
 	IntersectionNodes    list.List[*pkg.Node]
 	HighlightedNodeIndex int
@@ -49,7 +50,15 @@ func (model *Model) SelectHighlightedNode() {
 func (model *Model) UnselectLastNode() {
 	selectedNodes := model.SelectedNodes
 
-	if selectedNodes.Size() > 0 {
+	if selectedNodes.Size() > model.LockedNodeCount {
 		model.SelectedNodes = list.DropLast(selectedNodes)
 	}
+}
+
+func (model *Model) LockSelectedNodes() {
+	model.LockedNodeCount = model.SelectedNodes.Size()
+}
+
+func (model *Model) UnlockSelectedNodes() {
+	model.LockedNodeCount = 0
 }

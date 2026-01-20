@@ -57,3 +57,15 @@ type MsgSwitchLinksView struct{}
 func (message MsgSwitchLinksView) String() string {
 	return "MsgSwitchLinksView"
 }
+
+type MsgLockSelectedNodes struct{}
+
+func (message MsgLockSelectedNodes) String() string {
+	return "MsgLockSelectedNodes"
+}
+
+type MsgUnlockSelectedNodes struct{}
+
+func (message MsgUnlockSelectedNodes) String() string {
+	return "MsgUnlockSelectedNodes"
+}
