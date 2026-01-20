@@ -144,7 +144,6 @@ func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgStateUpdated:
 		component.root.Handle(message)
-		component.onStateUpdated()
 
 	case tui.MsgResize:
 		component.onResize(message)
@@ -157,12 +156,6 @@ func (component *Component) Handle(message tui.Message) {
 
 	default:
 		component.root.Handle(message)
-	}
-}
-
-func (component *Component) onStateUpdated() {
-	if len(component.pageViewers) > 0 {
-		component.setActivePage(0)
 	}
 }
 
@@ -199,6 +192,8 @@ func (component *Component) onKey(message tui.MsgKey) {
 		component.withActivePage(func(page page.Page, viewer tui.Component) {
 			component.setActivePage((component.activePageIndex.Get() + 1) % len(component.pageViewers))
 		})
+		component.Handle(tui.MsgStateUpdated{})
+		component.Handle(tui.MsgResize{Size: component.Size})
 
 	default:
 		component.withActivePage(func(page page.Page, viewer tui.Component) {
