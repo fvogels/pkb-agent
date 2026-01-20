@@ -21,8 +21,8 @@ func newGrid(parent *Component) tui.Grid {
 	return &grid
 }
 
-func (grid *grid) GetSize() tui.Size {
-	childSize := grid.childGrid.GetSize()
+func (grid *grid) Size() tui.Size {
+	childSize := grid.childGrid.Size()
 
 	return tui.Size{
 		Width:  childSize.Width + 2,
@@ -30,15 +30,15 @@ func (grid *grid) GetSize() tui.Size {
 	}
 }
 
-func (grid *grid) Get(position tui.Position) tui.Cell {
+func (grid *grid) At(position tui.Position) tui.Cell {
 	if tui.SafeMode && !grid.isValidPosition(position) {
-		size := grid.GetSize()
+		size := grid.Size()
 		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d", position.X, position.Y, size.Width, size.Height))
 	}
 
 	x := position.X
 	y := position.Y
-	size := grid.GetSize()
+	size := grid.Size()
 	width := size.Width
 	height := size.Height
 
@@ -76,7 +76,7 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 		style = grid.parent.style
 		char = tcell.RuneHLine
 	} else {
-		cell := grid.childGrid.Get(tui.Position{X: x - 1, Y: y - 1})
+		cell := grid.childGrid.At(tui.Position{X: x - 1, Y: y - 1})
 		style = cell.Style
 		char = cell.Contents
 		onClick = cell.OnClick
@@ -92,7 +92,7 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 func (grid *grid) isValidPosition(position tui.Position) bool {
 	x := position.X
 	y := position.Y
-	size := grid.GetSize()
+	size := grid.Size()
 
 	return 0 <= x && x < size.Width && 0 <= y && y < size.Height
 }

@@ -94,11 +94,11 @@ func translateStyle(ansiStyle ansi.Style) *tui.Style {
 	return &tuiStyle
 }
 
-func (grid *ansiGrid) GetSize() tui.Size {
+func (grid *ansiGrid) Size() tui.Size {
 	return grid.size
 }
 
-func (grid *ansiGrid) Get(position tui.Position) tui.Cell {
+func (grid *ansiGrid) At(position tui.Position) tui.Cell {
 	x := position.X
 	y := position.Y
 

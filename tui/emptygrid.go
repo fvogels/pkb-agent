@@ -21,11 +21,11 @@ type emptyGrid struct {
 	style *Style
 }
 
-func (grid *emptyGrid) GetSize() Size {
+func (grid *emptyGrid) Size() Size {
 	return grid.size
 }
 
-func (grid *emptyGrid) Get(Position) Cell {
+func (grid *emptyGrid) At(Position) Cell {
 	cell := Cell{
 		Contents: ' ',
 		Style:    grid.style,

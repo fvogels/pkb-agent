@@ -17,11 +17,11 @@ func newGrid(parent *Component, childGrids list.List[tui.Grid]) tui.Grid {
 	}
 }
 
-func (grid *grid) GetSize() tui.Size {
+func (grid *grid) Size() tui.Size {
 	return grid.parent.Size
 }
 
-func (grid *grid) Get(position tui.Position) tui.Cell {
+func (grid *grid) At(position tui.Position) tui.Cell {
 	if !grid.isValidPosition(position) {
 		panic("invalid position")
 	}
@@ -30,8 +30,8 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 	y := position.Y
 	i := 0
 
-	for i < grid.childGrids.Size() && y >= grid.childGrids.At(i).GetSize().Height {
-		y -= grid.childGrids.At(i).GetSize().Height
+	for i < grid.childGrids.Size() && y >= grid.childGrids.At(i).Size().Height {
+		y -= grid.childGrids.At(i).Size().Height
 		i++
 	}
 
@@ -42,7 +42,7 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 			OnClick:  nil,
 		}
 	} else {
-		return grid.childGrids.At(i).Get(tui.Position{X: x, Y: y})
+		return grid.childGrids.At(i).At(tui.Position{X: x, Y: y})
 	}
 }
 

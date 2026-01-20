@@ -16,17 +16,17 @@ func newGrid(size tui.Size, ansiGrid tui.Grid, emptyStyle *tui.Style) tui.Grid {
 	}
 }
 
-func (graph *grid) GetSize() tui.Size {
+func (graph *grid) Size() tui.Size {
 	return graph.size
 }
 
-func (graph *grid) Get(position tui.Position) tui.Cell {
+func (graph *grid) At(position tui.Position) tui.Cell {
 	x := position.X
 	y := position.Y
-	gridSize := graph.ansiGrid.GetSize()
+	gridSize := graph.ansiGrid.Size()
 
 	if x < gridSize.Width && y < gridSize.Height {
-		return graph.ansiGrid.Get(position)
+		return graph.ansiGrid.At(position)
 	} else {
 		return tui.Cell{
 			Contents: ' ',

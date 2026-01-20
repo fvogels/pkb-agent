@@ -8,14 +8,14 @@ type MemoryGrid struct {
 }
 
 func MaterializeGrid(grid Grid) Grid {
-	size := grid.GetSize()
+	size := grid.Size()
 	items := make([]Cell, size.Width*size.Height)
 
 	i := 0
 	for y := range size.Height {
 		for x := range size.Width {
 			position := Position{X: x, Y: y}
-			items[i] = grid.Get(position)
+			items[i] = grid.At(position)
 
 			i++
 		}
@@ -47,11 +47,11 @@ func NewMaterializedGrid(size Size, initializer func(Position) Cell) *MemoryGrid
 	return &result
 }
 
-func (grid *MemoryGrid) GetSize() Size {
+func (grid *MemoryGrid) Size() Size {
 	return grid.size
 }
 
-func (grid *MemoryGrid) Get(position Position) Cell {
+func (grid *MemoryGrid) At(position Position) Cell {
 	if SafeMode && !grid.isValidPosition(position) {
 		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d", position.X, position.Y, grid.size.Width, grid.size.Height))
 	}

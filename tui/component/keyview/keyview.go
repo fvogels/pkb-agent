@@ -71,7 +71,7 @@ func (component *Component) renderKeyBindings() tui.Grid {
 
 	x := 0
 	write := func(contents rune, style *tui.Style) {
-		if x < result.GetSize().Width {
+		if x < result.Size().Width {
 			result.Set(tui.Position{X: x, Y: 0}, tui.Cell{Contents: contents, Style: style})
 			x++
 		}

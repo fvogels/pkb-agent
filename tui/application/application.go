@@ -268,7 +268,7 @@ func (application *Application) Render() {
 	screen.Clear()
 
 	grid := activeMode.Get().Render()
-	gridSize := grid.GetSize()
+	gridSize := grid.Size()
 	runes := make([]rune, 1)
 
 	timeBeforeUpdate := time.Now()
@@ -276,7 +276,7 @@ func (application *Application) Render() {
 	for y := range gridSize.Height {
 		for x := range gridSize.Width {
 			position := tui.Position{X: x, Y: y}
-			cell := grid.Get(position)
+			cell := grid.At(position)
 			runes[0] = cell.Contents
 			screen.Put(x, y, string(runes), *cell.Style)
 		}

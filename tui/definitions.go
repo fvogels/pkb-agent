@@ -33,8 +33,8 @@ func (base *ComponentBase) GetIdentifier() int {
 }
 
 type Grid interface {
-	GetSize() Size
-	Get(position Position) Cell
+	Size() Size
+	At(position Position) Cell
 }
 
 type Style = tcell.Style

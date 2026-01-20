@@ -14,11 +14,11 @@ func newGrid(component *Component) *grid {
 	}
 }
 
-func (grid *grid) GetSize() tui.Size {
+func (grid *grid) Size() tui.Size {
 	return grid.parent.Size
 }
 
-func (grid *grid) Get(position tui.Position) tui.Cell {
+func (grid *grid) At(position tui.Position) tui.Cell {
 	if tui.SafeMode && !grid.isValidPosition(position) {
 		panic("invalid coordinates")
 	}
@@ -64,7 +64,7 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 func (grid *grid) isValidPosition(position tui.Position) bool {
 	x := position.X
 	y := position.Y
-	size := grid.GetSize()
+	size := grid.Size()
 
 	return 0 <= x && x < size.Width && 0 <= y && y < size.Height
 }

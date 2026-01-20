@@ -19,11 +19,11 @@ func newGrid(parent *Component, contents []rune) *grid {
 	return &result
 }
 
-func (grid *grid) GetSize() tui.Size {
+func (grid *grid) Size() tui.Size {
 	return grid.parent.Size
 }
 
-func (grid *grid) Get(position tui.Position) tui.Cell {
+func (grid *grid) At(position tui.Position) tui.Cell {
 	if tui.SafeMode && !grid.isValidPosition(position) {
 		size := grid.parent.Size
 		panic(fmt.Sprintf("invalid grid access: parent: %s, coordinates (%d, %d), size: %dx%d, contents: %s", grid.parent.Name, position.X, position.Y, size.Width, size.Height, string(grid.contents)))
@@ -50,7 +50,7 @@ func (grid *grid) Get(position tui.Position) tui.Cell {
 func (grid *grid) isValidPosition(position tui.Position) bool {
 	x := position.X
 	y := position.Y
-	size := grid.GetSize()
+	size := grid.Size()
 
 	return 0 <= x && x < size.Width && 0 <= y && y < size.Height
 }
