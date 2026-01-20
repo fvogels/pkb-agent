@@ -394,7 +394,9 @@ func (application *Application) highlight(index int) {
 
 func (application *Application) selectHighlightedAndClearInput() {
 	application.updateModel(func(model *model.Model) {
-		model.SelectHighlightedNode()
+		if model.IntersectionNodes.Size() > 0 {
+			model.SelectHighlightedNode()
+		}
 		model.Input = ""
 		model.DetermineIntersectionNodes()
 	})
