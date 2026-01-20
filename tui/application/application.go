@@ -102,7 +102,7 @@ func (application *Application) Start() error {
 	application.createModes(&application.mode)
 	application.activeModeHolder = holder.New(application.messageQueue, &application.mode.active)
 
-	application.switchMode(application.mode.view)
+	application.mode.active.Set(application.mode.view)
 	application.messageQueue.Enqueue(tui.MsgStateUpdated{})
 
 	application.eventLoop()
@@ -354,6 +354,7 @@ func (application *Application) findIndexOfIntersectionNode(intersectionNodes []
 
 func (application *Application) switchMode(mode tui.Component) {
 	application.mode.active.Set(mode)
+	application.messageQueue.Enqueue(tui.MsgResize{Size: application.screenSize})
 }
 
 func (application *Application) updateModel(updater func(model *model.Model)) {
