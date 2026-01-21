@@ -2,6 +2,5 @@ package data
 
 type Value[T any] interface {
 	Get() T
-	Observe(func())
 	Version() uint
 }
