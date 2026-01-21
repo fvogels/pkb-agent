@@ -98,10 +98,12 @@ func (component *Component) createKeyBindings(messageQueue tui.MessageQueue, nod
 		},
 	)
 
-	bindings.all.Observe(func() {
-		messageQueue.Enqueue(messages.MsgSetNodeKeyBindings{
-			Bindings: bindings.all.Get(),
-		})
+	bindings.all.Observe(component.signalNodeKeyBindingsUpdate)
+}
+
+func (component *Component) signalNodeKeyBindingsUpdate() {
+	component.MessageQueue.Enqueue(messages.MsgSetNodeKeyBindings{
+		Bindings: component.bindings.all.Get(),
 	})
 }
 
