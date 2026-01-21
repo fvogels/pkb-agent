@@ -2,6 +2,7 @@ package hybrid
 
 import (
 	"fmt"
+	"log/slog"
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg/node"
 	"pkb-agent/pkg/node/hybrid/page"
@@ -165,6 +166,8 @@ func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindi
 }
 
 func (component *Component) Render() tui.Grid {
+	slog.Debug("Rendering hybrid node viewer", slog.String("size", component.Size.String()))
+
 	return component.root.Render()
 }
 
