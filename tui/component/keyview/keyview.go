@@ -12,7 +12,7 @@ import (
 
 type Component struct {
 	tui.ComponentBase
-	keyBindings      data.Value[list.List[tui.KeyBinding]]
+	keyBindings      data.View[list.List[tui.KeyBinding]]
 	cachedGrid       tui.Grid
 	keyStyle         *tui.Style
 	descriptionStyle *tui.Style
@@ -30,14 +30,12 @@ func New(messageQueue tui.MessageQueue, name string, keyBindings data.Value[list
 			Name:         name,
 			MessageQueue: messageQueue,
 		},
-		keyBindings:      keyBindings,
+		keyBindings:      data.NewView(keyBindings),
 		cachedGrid:       nil,
 		keyStyle:         &keyStyle,
 		descriptionStyle: &descriptionStyle,
 		emptyStyle:       &emptyStyle,
 	}
-
-	keyBindings.Observe(func() { component.cachedGrid = nil })
 
 	return &component
 }
@@ -50,7 +48,7 @@ func (component *Component) Handle(message tui.Message) {
 }
 
 func (component *Component) Render() tui.Grid {
-	if component.cachedGrid == nil {
+	if component.keyBindings.Updated() {
 		component.cachedGrid = component.renderKeyBindings()
 	}
 
