@@ -27,28 +27,17 @@ func (value *mappedValue[T, R]) Version() uint {
 }
 
 type mappedValue2[T1, T2, R any] struct {
-	argument1        Value[T1]
-	argument2        Value[T2]
-	transformer      func(T1, T2) R
-	transformedValue R
-	dirty            bool
+	argument1   Value[T1]
+	argument2   Value[T2]
+	transformer func(T1, T2) R
 }
 
 func MapValue2[T1, T2, R any](value1 Value[T1], value2 Value[T2], transformer func(T1, T2) R) Value[R] {
 	result := mappedValue2[T1, T2, R]{
-		argument1:        value1,
-		argument2:        value2,
-		transformer:      transformer,
-		transformedValue: transformer(value1.Get(), value2.Get()),
-		dirty:            false,
+		argument1:   value1,
+		argument2:   value2,
+		transformer: transformer,
 	}
-
-	observer := func() {
-		result.dirty = true
-	}
-
-	value1.Observe(observer)
-	value2.Observe(observer)
 
 	return &result
 }
