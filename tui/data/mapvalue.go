@@ -36,8 +36,7 @@ func (value *mappedValue[T, R]) Observe(observer func()) {
 }
 
 func (value *mappedValue[T, R]) Version() uint {
-	// TODO
-	return 0
+	return value.argument.Version()
 }
 
 type mappedValue2[T1, T2, R any] struct {
@@ -81,8 +80,7 @@ func (value *mappedValue2[T1, T2, R]) Observe(observer func()) {
 }
 
 func (value *mappedValue2[T1, T2, R]) Version() uint {
-	// TODO
-	return 0
+	return value.argument1.Version() + value.argument2.Version()
 }
 
 type mappedValue3[T1, T2, T3, R any] struct {
@@ -131,6 +129,5 @@ func (value *mappedValue3[T1, T2, T3, R]) Observe(observer func()) {
 }
 
 func (value *mappedValue3[T1, T2, T3, R]) Version() uint {
-	// TODO
-	return 0
+	return value.argument1.Version() + value.argument2.Version() + value.argument3.Version()
 }
