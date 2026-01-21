@@ -1,5 +1,10 @@
 package data
 
+type memoizedValue[T any] struct {
+	original Value[T]
+	cached   T
+}
+
 func MemoizeValue[T any](value Value[T]) Value[T] {
 	result := memoizedValue[T]{
 		original: value,
@@ -9,11 +14,6 @@ func MemoizeValue[T any](value Value[T]) Value[T] {
 	value.Observe(func() { result.refresh() })
 
 	return &result
-}
-
-type memoizedValue[T any] struct {
-	original Value[T]
-	cached   T
 }
 
 func (value *memoizedValue[T]) Get() T {
