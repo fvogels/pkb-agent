@@ -10,7 +10,7 @@ import (
 
 type Component struct {
 	tui.ComponentBase
-	source          data.Value[string]
+	source          data.View[string]
 	formattedSource data.Variable[string]
 	child           *ansiview.Component
 }
@@ -22,11 +22,10 @@ func New(messageQueue tui.MessageQueue, source data.Value[string]) *Component {
 			Name:         "unnamed markdown viewer",
 			MessageQueue: messageQueue,
 		},
-		source:          source,
+		source:          data.NewView(source),
 		formattedSource: data.NewVariable(""),
 	}
 	component.child = ansiview.New(messageQueue, &component.formattedSource)
-	component.source.Observe(func() { component.reformatMarkdown() })
 
 	return &component
 }
@@ -42,6 +41,10 @@ func (component *Component) Handle(message tui.Message) {
 }
 
 func (component *Component) Render() tui.Grid {
+	if component.source.Updated() {
+		component.reformatMarkdown()
+	}
+
 	return component.child.Render()
 }
 
