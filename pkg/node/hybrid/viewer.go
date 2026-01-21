@@ -50,7 +50,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 	pages := nodeData.pages
 	component.pageViewers = component.createPageViewers(messageQueue, pages)
 
-	component.createKeyBindings(messageQueue, nodeData, &component.bindings)
+	component.createKeyBindings(nodeData, &component.bindings)
 
 	if len(pages) == 0 {
 		component.activePageViewer = data.NewConstant[tui.Component](empty.NewPageComponent(messageQueue))
@@ -87,7 +87,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 	return &component
 }
 
-func (component *Component) createKeyBindings(messageQueue tui.MessageQueue, nodeData *nodeData, bindings *keyBindings) {
+func (component *Component) createKeyBindings(nodeData *nodeData, bindings *keyBindings) {
 	bindings.actions = component.createActionKeyBindings(nodeData.actions)
 	bindings.page = data.NewVariable(list.New[tui.KeyBinding]())
 
