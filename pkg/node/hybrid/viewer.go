@@ -97,8 +97,6 @@ func (component *Component) createKeyBindings(messageQueue tui.MessageQueue, nod
 			return list.Concatenate(list.FromSlice(bindings.actions), pageBindings)
 		},
 	)
-
-	bindings.all.Observe(component.signalNodeKeyBindingsUpdate)
 }
 
 func (component *Component) signalNodeKeyBindingsUpdate() {
@@ -163,6 +161,7 @@ func (component *Component) Handle(message tui.Message) {
 
 func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindings) {
 	component.bindings.page.Set(message.Bindings)
+	component.signalNodeKeyBindingsUpdate()
 }
 
 func (component *Component) Render() tui.Grid {
