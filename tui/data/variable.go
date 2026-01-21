@@ -26,3 +26,8 @@ func (v *Variable[T]) Get() T {
 func (v *Variable[T]) Observe(observer func()) {
 	v.observers = append(v.observers, observer)
 }
+
+func (v *Variable[T]) Version() uint {
+	// TODO
+	return 0
+}

@@ -17,3 +17,7 @@ func (v *ConstantValue[T]) Get() T {
 func (v *ConstantValue[T]) Observe(observer func()) {
 	// Don't bother registering observers, they won't ever be called anyway
 }
+
+func (v *ConstantValue[T]) Version() uint {
+	return 0
+}

@@ -1,14 +1,14 @@
 package data
 
-type mappedValue[T any, U any] struct {
+type mappedValue[T any, R any] struct {
 	originalValue          Value[T]
-	transformer            func(T) U
+	transformer            func(T) R
 	dirty                  bool
-	cachedTransformedValue U
+	cachedTransformedValue R
 }
 
-func MapValue[T any, U any](value Value[T], transformer func(T) U) Value[U] {
-	result := mappedValue[T, U]{
+func MapValue[T any, R any](value Value[T], transformer func(T) R) Value[R] {
+	result := mappedValue[T, R]{
 		originalValue:          value,
 		transformer:            transformer,
 		cachedTransformedValue: transformer(value.Get()),
@@ -22,7 +22,7 @@ func MapValue[T any, U any](value Value[T], transformer func(T) U) Value[U] {
 	return &result
 }
 
-func (value *mappedValue[T, U]) Get() U {
+func (value *mappedValue[T, R]) Get() R {
 	if value.dirty {
 		value.cachedTransformedValue = value.transformer(value.originalValue.Get())
 		value.dirty = false
@@ -31,8 +31,13 @@ func (value *mappedValue[T, U]) Get() U {
 	return value.cachedTransformedValue
 }
 
-func (value *mappedValue[T, U]) Observe(observer func()) {
+func (value *mappedValue[T, R]) Observe(observer func()) {
 	value.originalValue.Observe(observer)
+}
+
+func (value *mappedValue[T, R]) Version() uint {
+	// TODO
+	return 0
 }
 
 type mappedValue2[T1, T2, R any] struct {
@@ -73,6 +78,11 @@ func (value *mappedValue2[T1, T2, R]) Get() R {
 func (value *mappedValue2[T1, T2, R]) Observe(observer func()) {
 	value.originalValue1.Observe(observer)
 	value.originalValue2.Observe(observer)
+}
+
+func (value *mappedValue2[T1, T2, R]) Version() uint {
+	// TODO
+	return 0
 }
 
 type mappedValue3[T1, T2, T3, R any] struct {
@@ -118,4 +128,9 @@ func (value *mappedValue3[T1, T2, T3, R]) Observe(observer func()) {
 	value.originalValue1.Observe(observer)
 	value.originalValue2.Observe(observer)
 	value.originalValue3.Observe(observer)
+}
+
+func (value *mappedValue3[T1, T2, T3, R]) Version() uint {
+	// TODO
+	return 0
 }
