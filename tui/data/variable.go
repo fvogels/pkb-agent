@@ -3,16 +3,21 @@ package data
 type Variable[T any] struct {
 	value     T
 	observers []func()
+	version   uint
 }
 
 func NewVariable[T any](value T) Variable[T] {
-	result := Variable[T]{value: value}
+	result := Variable[T]{
+		value:   value,
+		version: 0,
+	}
 
 	return result
 }
 
 func (v *Variable[T]) Set(value T) {
 	v.value = value
+	v.version++
 
 	for _, observer := range v.observers {
 		observer()
@@ -28,6 +33,5 @@ func (v *Variable[T]) Observe(observer func()) {
 }
 
 func (v *Variable[T]) Version() uint {
-	// TODO
-	return 0
+	return v.version
 }
