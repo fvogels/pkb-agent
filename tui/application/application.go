@@ -67,17 +67,19 @@ func createKeyBindings(bindings *keyBindings) {
 	bindings.mode = data.NewVariable(list.New[tui.KeyBinding]())
 	bindings.node = data.NewVariable(list.New[tui.KeyBinding]())
 
-	bindings.all = data.MapValue2(
-		&bindings.mode,
-		&bindings.node,
-		func(xs list.List[tui.KeyBinding], ys list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
-			slog.Debug(
-				"updating keybindings",
-				"xs", list.String(xs, func(b tui.KeyBinding) string { return b.Key }),
-				"ys", list.String(ys, func(b tui.KeyBinding) string { return b.Key }),
-			)
-			return list.Concatenate(xs, ys)
-		},
+	bindings.all = data.Cache(
+		data.MapValue2(
+			&bindings.mode,
+			&bindings.node,
+			func(xs list.List[tui.KeyBinding], ys list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
+				slog.Debug(
+					"updating keybindings",
+					"xs", list.String(xs, func(b tui.KeyBinding) string { return b.Key }),
+					"ys", list.String(ys, func(b tui.KeyBinding) string { return b.Key }),
+				)
+				return list.Concatenate(xs, ys)
+			},
+		),
 	)
 }
 

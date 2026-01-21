@@ -42,19 +42,21 @@ func newViewMode(application *Application) *viewMode {
 
 	nodesView := nodeselection.New(messageQueue, selectedNodes, intersectionNodes, highlightedNodeIndex)
 	statusBar := keyview.New(messageQueue, "status bar", application.bindings.all)
-	highlightedNode := data.MapValue3(
-		highlightedNodeIndex,
-		intersectionNodes,
-		selectedNodes,
-		func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) *pkg.Node {
-			if intersectionNodes.Size() > 0 {
-				return intersectionNodes.At(highlightedNodeIndex)
-			} else if selectedNodes.Size() > 0 {
-				return selectedNodes.At(selectedNodes.Size() - 1)
-			} else {
-				return nil
-			}
-		},
+	highlightedNode := data.Cache(
+		data.MapValue3(
+			highlightedNodeIndex,
+			intersectionNodes,
+			selectedNodes,
+			func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) *pkg.Node {
+				if intersectionNodes.Size() > 0 {
+					return intersectionNodes.At(highlightedNodeIndex)
+				} else if selectedNodes.Size() > 0 {
+					return selectedNodes.At(selectedNodes.Size() - 1)
+				} else {
+					return nil
+				}
+			},
+		),
 	)
 	highlightedNodeViewer := data.Cache(
 		data.MapValue2(

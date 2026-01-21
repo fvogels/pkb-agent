@@ -42,21 +42,23 @@ func New(messageQueue tui.MessageQueue, items data.Value[list.List[string]], sel
 		firstVisibleIndex: 0,
 	}
 
-	subComponentList := data.MapValue2(items, selectedItem, func(items list.List[string], selectedIndex int) list.List[stringsview.Item] {
-		return list.MapWithIndex(items, func(index int, item string) stringsview.Item {
-			var style *tui.Style
-			if index == selectedIndex {
-				style = component.selectedItemStyle
-			} else {
-				style = component.itemStyle
-			}
+	subComponentList := data.Cache(
+		data.MapValue2(items, selectedItem, func(items list.List[string], selectedIndex int) list.List[stringsview.Item] {
+			return list.MapWithIndex(items, func(index int, item string) stringsview.Item {
+				var style *tui.Style
+				if index == selectedIndex {
+					style = component.selectedItemStyle
+				} else {
+					style = component.itemStyle
+				}
 
-			return stringsview.Item{
-				Runes: []rune(item),
-				Style: style,
-			}
-		})
-	})
+				return stringsview.Item{
+					Runes: []rune(item),
+					Style: style,
+				}
+			})
+		}),
+	)
 
 	component.child = stringsview.New(messageQueue, subComponentList)
 

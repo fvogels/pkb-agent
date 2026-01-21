@@ -47,19 +47,21 @@ func newInputMode(application *Application) *inputMode {
 		application.highlight(value)
 	})
 
-	highlightedNodeViewer := data.MapValue3(
-		highlightedNodeIndex,
-		intersectionNodes,
-		selectedNodes,
-		func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) tui.Component {
-			if intersectionNodes.Size() > 0 {
-				return intersectionNodes.At(highlightedNodeIndex).GetViewer(messageQueue)
-			} else if selectedNodes.Size() > 0 {
-				return selectedNodes.At(selectedNodes.Size() - 1).GetViewer(messageQueue)
-			} else {
-				return nil
-			}
-		},
+	highlightedNodeViewer := data.Cache(
+		data.MapValue3(
+			highlightedNodeIndex,
+			intersectionNodes,
+			selectedNodes,
+			func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) tui.Component {
+				if intersectionNodes.Size() > 0 {
+					return intersectionNodes.At(highlightedNodeIndex).GetViewer(messageQueue)
+				} else if selectedNodes.Size() > 0 {
+					return selectedNodes.At(selectedNodes.Size() - 1).GetViewer(messageQueue)
+				} else {
+					return nil
+				}
+			},
+		),
 	)
 	highlightedNodeViewerHolder := holder.New(messageQueue, highlightedNodeViewer)
 

@@ -27,24 +27,28 @@ type Component struct {
 func New(messageQueue tui.MessageQueue, selectedNodes data.Value[list.List[*pkg.Node]], nodeIntersection data.Value[list.List[*pkg.Node]], selectedIndex data.Value[int]) *Component {
 	style := tcell.StyleDefault.Background(color.Green)
 
-	selectedNodesNames := data.MapValue(selectedNodes, func(selectedNodes list.List[*pkg.Node]) list.List[stringsview.Item] {
-		return list.MapList(selectedNodes, func(node *pkg.Node) stringsview.Item {
-			name := node.GetName()
-			item := stringsview.Item{
-				Runes: []rune(name),
-				Style: &style,
-			}
-			return item
-		})
-	})
+	selectedNodesNames := data.Cache(
+		data.MapValue(selectedNodes, func(selectedNodes list.List[*pkg.Node]) list.List[stringsview.Item] {
+			return list.MapList(selectedNodes, func(node *pkg.Node) stringsview.Item {
+				name := node.GetName()
+				item := stringsview.Item{
+					Runes: []rune(name),
+					Style: &style,
+				}
+				return item
+			})
+		}),
+	)
 
 	selectedNodesView := stringsview.New(messageQueue, selectedNodesNames)
 
-	nodeIntersectionItems := data.MapValue(nodeIntersection, func(lst list.List[*pkg.Node]) list.List[string] {
-		return list.MapList(lst, func(node *pkg.Node) string {
-			return node.GetName()
-		})
-	})
+	nodeIntersectionItems := data.Cache(
+		data.MapValue(nodeIntersection, func(lst list.List[*pkg.Node]) list.List[string] {
+			return list.MapList(lst, func(node *pkg.Node) string {
+				return node.GetName()
+			})
+		}),
+	)
 	nodeIntersectionView := stringlist.New(messageQueue, nodeIntersectionItems, selectedIndex)
 
 	root := docknorth.New(
