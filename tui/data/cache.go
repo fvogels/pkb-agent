@@ -29,7 +29,3 @@ func (c *cache[T]) Get() T {
 func (c *cache[T]) Version() uint {
 	return c.value.Version()
 }
-
-func (c *cache[T]) Observe(func()) {
-
-}
