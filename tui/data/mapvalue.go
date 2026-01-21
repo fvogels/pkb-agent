@@ -47,8 +47,8 @@ func (value *mappedValue2[T1, T2, R]) Get() R {
 }
 
 func (value *mappedValue2[T1, T2, R]) Observe(observer func()) {
-	value.argument1.Observe(observer)
-	value.argument2.Observe(observer)
+	// value.argument1.Observe(observer)
+	// value.argument2.Observe(observer)
 }
 
 func (value *mappedValue2[T1, T2, R]) Version() uint {
