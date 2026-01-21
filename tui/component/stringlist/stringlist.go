@@ -67,11 +67,6 @@ func New(messageQueue tui.MessageQueue, items data.Value[list.List[string]], sel
 		}
 	})
 
-	// ensure that selected item is visible at all times
-	selectedItem.Observe(func() {
-		component.ensureSelectedItemIsVisible()
-	})
-
 	return &component
 }
 
@@ -95,6 +90,9 @@ func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgResize:
 		component.onResize(message)
+
+	case tui.MsgStateUpdated:
+		component.onStateUpdated()
 
 	case tui.MsgKey:
 		component.onKey(message)
@@ -156,6 +154,10 @@ func (component *Component) onKey(message tui.MsgKey) {
 	case "PgUp":
 		onSelectionChanged(selectedIndex - pageSize)
 	}
+}
+
+func (component *Component) onStateUpdated() {
+	component.ensureSelectedItemIsVisible()
 }
 
 type SubComponentList struct {
