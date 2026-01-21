@@ -2,7 +2,6 @@ package cache
 
 import (
 	"pkb-agent/tui"
-	"pkb-agent/tui/data"
 	"pkb-agent/util/uid"
 )
 
@@ -13,7 +12,7 @@ type Component struct {
 	dirty  bool
 }
 
-func New(messageQueue tui.MessageQueue, child tui.Component, observables ...data.Observable) *Component {
+func New(messageQueue tui.MessageQueue, child tui.Component) *Component {
 	result := Component{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
@@ -23,17 +22,7 @@ func New(messageQueue tui.MessageQueue, child tui.Component, observables ...data
 		child: child,
 	}
 
-	result.AddInvalidators(observables...)
-
 	return &result
-}
-
-func (component *Component) AddInvalidators(observables ...data.Observable) {
-	f := func() { component.Invalidate() }
-
-	for _, observable := range observables {
-		observable.Observe(f)
-	}
 }
 
 func (component *Component) Handle(message tui.Message) {
@@ -48,7 +37,7 @@ func (component *Component) Handle(message tui.Message) {
 
 func (component *Component) Render() tui.Grid {
 	if component.dirty {
-		component.rerender()
+		component.Refresh()
 		component.dirty = false
 	}
 
@@ -65,7 +54,6 @@ func (component *Component) Invalidate() {
 	component.dirty = true
 }
 
-// rerender asks the child component to rerender itself, which overwrites the cache
-func (component *Component) rerender() {
+func (component *Component) Refresh() {
 	component.cached = tui.MaterializeGrid(component.child.Render())
 }
