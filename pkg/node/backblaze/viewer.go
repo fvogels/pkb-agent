@@ -2,6 +2,7 @@ package backblaze
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	bb "pkb-agent/backblaze"
@@ -24,6 +25,8 @@ type Component struct {
 }
 
 func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode) *Component {
+	slog.Debug("Creating new backblaze viewer")
+
 	identifier := uid.Generate()
 
 	component := Component{
@@ -33,7 +36,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode) *Component {
 			MessageQueue: messageQueue,
 		},
 		rawNode: rawNode,
-		root:    createRoot(messageQueue, rawNode),
+		root:    createRoot(messageQueue),
 		bindingDownload: tui.KeyBinding{
 			Key:         "d",
 			Description: "download",
@@ -51,7 +54,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode) *Component {
 	return &component
 }
 
-func createRoot(messageQueue tui.MessageQueue, rawNode *RawNode) tui.Component {
+func createRoot(messageQueue tui.MessageQueue) tui.Component {
 	return label.New(messageQueue, "backblaze label", data.NewConstant("backblaze!"))
 }
 
@@ -87,10 +90,22 @@ func (component *Component) onStateUpdated() {
 }
 
 func (component *Component) Render() tui.Grid {
+	slog.Debug(
+		"Rendering backblaze viewer",
+		slog.String("size", component.Size.String()),
+		slog.String("address", fmt.Sprintf("%p", component)),
+	)
+
 	return component.root.Render()
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
+	slog.Debug(
+		"Resizing backblaze viewer",
+		slog.String("size", message.Size.String()),
+		slog.String("address", fmt.Sprintf("%p", component)),
+	)
+
 	component.Size = message.Size
 	component.root.Handle(message)
 }
