@@ -18,10 +18,6 @@ func (value *mappedValue[T, R]) Get() R {
 	return value.transformer(value.argument.Get())
 }
 
-func (value *mappedValue[T, R]) Observe(observer func()) {
-	value.argument.Observe(observer)
-}
-
 func (value *mappedValue[T, R]) Version() uint {
 	return value.argument.Version()
 }
@@ -44,11 +40,6 @@ func MapValue2[T1, T2, R any](value1 Value[T1], value2 Value[T2], transformer fu
 
 func (value *mappedValue2[T1, T2, R]) Get() R {
 	return value.transformer(value.argument1.Get(), value.argument2.Get())
-}
-
-func (value *mappedValue2[T1, T2, R]) Observe(observer func()) {
-	// value.argument1.Observe(observer)
-	// value.argument2.Observe(observer)
 }
 
 func (value *mappedValue2[T1, T2, R]) Version() uint {
@@ -75,12 +66,6 @@ func MapValue3[T1, T2, T3, R any](value1 Value[T1], value2 Value[T2], value3 Val
 
 func (value *mappedValue3[T1, T2, T3, R]) Get() R {
 	return value.transformer(value.argument1.Get(), value.argument2.Get(), value.argument3.Get())
-}
-
-func (value *mappedValue3[T1, T2, T3, R]) Observe(observer func()) {
-	// value.argument1.Observe(observer)
-	// value.argument2.Observe(observer)
-	// value.argument3.Observe(observer)
 }
 
 func (value *mappedValue3[T1, T2, T3, R]) Version() uint {
