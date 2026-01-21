@@ -1,34 +1,21 @@
 package data
 
 type mappedValue[T any, R any] struct {
-	argument               Value[T]
-	transformer            func(T) R
-	dirty                  bool
-	cachedTransformedValue R
+	argument    Value[T]
+	transformer func(T) R
 }
 
 func MapValue[T any, R any](value Value[T], transformer func(T) R) Value[R] {
 	result := mappedValue[T, R]{
-		argument:               value,
-		transformer:            transformer,
-		cachedTransformedValue: transformer(value.Get()),
-		dirty:                  false,
+		argument:    value,
+		transformer: transformer,
 	}
-
-	value.Observe(func() {
-		result.dirty = true
-	})
 
 	return &result
 }
 
 func (value *mappedValue[T, R]) Get() R {
-	if value.dirty {
-		value.cachedTransformedValue = value.transformer(value.argument.Get())
-		value.dirty = false
-	}
-
-	return value.cachedTransformedValue
+	return value.transformer(value.argument.Get())
 }
 
 func (value *mappedValue[T, R]) Observe(observer func()) {
