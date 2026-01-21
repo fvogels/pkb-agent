@@ -1,6 +1,7 @@
 package application
 
 import (
+	"log/slog"
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
@@ -55,20 +56,23 @@ func newViewMode(application *Application) *viewMode {
 			}
 		},
 	)
-	highlightedNodeViewer := data.MapValue2(
-		highlightedNode,
-		linkViewActive,
-		func(highlightedNode *pkg.Node, linkViewActive bool) tui.Component {
-			if highlightedNode != nil {
-				if linkViewActive {
-					return linksview.New(messageQueue, highlightedNode)
+	highlightedNodeViewer := data.Cache(
+		data.MapValue2(
+			highlightedNode,
+			linkViewActive,
+			func(highlightedNode *pkg.Node, linkViewActive bool) tui.Component {
+				if highlightedNode != nil {
+					if linkViewActive {
+						return linksview.New(messageQueue, highlightedNode)
+					} else {
+						slog.Debug("Creating viewer")
+						return highlightedNode.GetViewer(messageQueue)
+					}
 				} else {
-					return highlightedNode.GetViewer(messageQueue)
+					return nil
 				}
-			} else {
-				return nil
-			}
-		},
+			},
+		),
 	)
 	highlightedNodeViewerHolder := holder.New(messageQueue, highlightedNodeViewer)
 
