@@ -1,6 +1,7 @@
 package linksview
 
 import (
+	"log/slog"
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
@@ -65,6 +66,7 @@ func createRoot(messageQueue tui.MessageQueue, node *pkg.Node) tui.Component {
 }
 
 func (component *Component) Render() tui.Grid {
+	slog.Debug("Rendering linksview", slog.String("size", component.Size.String()))
 	return component.root.Render()
 }
 
