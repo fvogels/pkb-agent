@@ -70,7 +70,6 @@ func New(messageQueue tui.MessageQueue, selectedNodes data.Value[list.List[*pkg.
 	}
 
 	component.updateLayout()
-	selectedNodes.Observe(func() { component.updateLayout() })
 
 	return &component
 }
@@ -83,6 +82,9 @@ func (component *Component) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgResize:
 		component.onResize(message)
+
+	case tui.MsgStateUpdated:
+		component.onStateUpdated()
 
 	default:
 		component.root.Handle(message)
@@ -101,4 +103,8 @@ func (component *Component) onResize(message tui.MsgResize) {
 func (component *Component) updateLayout() {
 	selectedNodeCount := component.selectedNodes.Get().Size()
 	component.root.SetDockerChildHeight(selectedNodeCount)
+}
+
+func (component *Component) onStateUpdated() {
+	component.updateLayout()
 }

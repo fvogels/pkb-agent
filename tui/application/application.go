@@ -412,7 +412,7 @@ func (application *Application) updateInputAndHighlightBestMatch(newInput string
 	lowerCasedNewInput := strings.ToLower(newInput)
 
 	application.updateModel(func(model *model.Model) {
-		model.Input = newInput
+		model.Input = lowerCasedNewInput
 		model.DetermineIntersectionNodes()
 		model.HighlightedNodeIndex = application.findIndexOfIntersectionNode(list.ToSlice(model.IntersectionNodes), lowerCasedNewInput)
 	})
