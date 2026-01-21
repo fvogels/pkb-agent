@@ -54,11 +54,7 @@ func MapValue2[T1, T2, R any](value1 Value[T1], value2 Value[T2], transformer fu
 }
 
 func (value *mappedValue2[T1, T2, R]) Get() R {
-	if value.dirty {
-		value.transformedValue = value.transformer(value.argument1.Get(), value.argument2.Get())
-		value.dirty = false
-	}
-	return value.transformedValue
+	return value.transformer(value.argument1.Get(), value.argument2.Get())
 }
 
 func (value *mappedValue2[T1, T2, R]) Observe(observer func()) {
