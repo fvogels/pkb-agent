@@ -33,7 +33,7 @@ func (grid *grid) Size() tui.Size {
 func (grid *grid) At(position tui.Position) tui.Cell {
 	if tui.SafeMode && !grid.isValidPosition(position) {
 		size := grid.Size()
-		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d", position.X, position.Y, size.Width, size.Height))
+		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d in component %s", position.X, position.Y, size.Width, size.Height, grid.parent.Name))
 	}
 
 	x := position.X
