@@ -36,12 +36,14 @@ func newInputMode(application *Application) *inputMode {
 	intersectionNodes := data.MapValue(&application.model, func(m *model.Model) list.List[*pkg.Node] { return m.IntersectionNodes })
 	highlightedNodeIndex := data.MapValue(&application.model, func(m *model.Model) int { return m.HighlightedNodeIndex })
 	searchString := data.MapValue(&application.model, func(m *model.Model) string { return m.Input })
+	lockCount := data.MapValue(&application.model, func(m *model.Model) int { return m.LockedNodeCount })
 
 	nodesView := nodeselection.New(
 		messageQueue,
 		selectedNodes,
 		intersectionNodes,
 		highlightedNodeIndex,
+		lockCount,
 	)
 	nodesView.SetOnSelectionChanged(func(value int) {
 		application.highlight(value)

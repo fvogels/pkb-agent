@@ -16,6 +16,7 @@ import (
 
 type Component struct {
 	tui.ComponentBase
+	lockCount            data.Value[int]
 	selectedNodes        data.Value[list.List[*pkg.Node]]
 	nodeIntersection     data.Value[list.List[*pkg.Node]]
 	selectedIndex        data.Value[int]
@@ -24,16 +25,25 @@ type Component struct {
 	root                 *docknorth.Component
 }
 
-func New(messageQueue tui.MessageQueue, selectedNodes data.Value[list.List[*pkg.Node]], nodeIntersection data.Value[list.List[*pkg.Node]], selectedIndex data.Value[int]) *Component {
-	style := tcell.StyleDefault.Background(color.Green)
+func New(messageQueue tui.MessageQueue, selectedNodes data.Value[list.List[*pkg.Node]], nodeIntersection data.Value[list.List[*pkg.Node]], selectedIndex data.Value[int], lockCount data.Value[int]) *Component {
+	lockedStyle := tcell.StyleDefault.Background(color.Red)
+	unlockedStyle := tcell.StyleDefault.Background(color.Green)
 
 	selectedNodesNames := data.Cache(
-		data.MapValue(selectedNodes, func(selectedNodes list.List[*pkg.Node]) list.List[stringsview.Item] {
-			return list.MapList(selectedNodes, func(node *pkg.Node) stringsview.Item {
+		data.MapValue2(selectedNodes, lockCount, func(selectedNodes list.List[*pkg.Node], lockCount int) list.List[stringsview.Item] {
+			return list.MapWithIndex(selectedNodes, func(index int, node *pkg.Node) stringsview.Item {
 				name := node.GetName()
+
+				var style *tui.Style
+				if index < lockCount {
+					style = &lockedStyle
+				} else {
+					style = &unlockedStyle
+				}
+
 				item := stringsview.Item{
 					Runes: []rune(name),
-					Style: &style,
+					Style: style,
 				}
 				return item
 			})

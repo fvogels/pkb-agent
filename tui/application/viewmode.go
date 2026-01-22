@@ -39,8 +39,9 @@ func newViewMode(application *Application) *viewMode {
 	intersectionNodes := data.MapValue(&application.model, func(m *model.Model) list.List[*pkg.Node] { return m.IntersectionNodes })
 	highlightedNodeIndex := data.MapValue(&application.model, func(m *model.Model) int { return m.HighlightedNodeIndex })
 	linkViewActive := data.MapValue(&application.model, func(m *model.Model) bool { return m.ShowNodeLinks })
+	lockCount := data.MapValue(&application.model, func(m *model.Model) int { return m.LockedNodeCount })
 
-	nodesView := nodeselection.New(messageQueue, selectedNodes, intersectionNodes, highlightedNodeIndex)
+	nodesView := nodeselection.New(messageQueue, selectedNodes, intersectionNodes, highlightedNodeIndex, lockCount)
 	statusBar := keyview.New(messageQueue, "status bar", application.bindings.all)
 	highlightedNode := data.Cache(
 		data.MapValue3(
