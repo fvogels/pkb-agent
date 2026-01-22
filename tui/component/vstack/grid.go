@@ -4,6 +4,7 @@ import (
 	"pkb-agent/persistent/list"
 	"pkb-agent/tui"
 	"pkb-agent/tui/position"
+	"pkb-agent/tui/size"
 )
 
 type grid struct {
@@ -18,7 +19,7 @@ func newGrid(parent *Component, childGrids list.List[tui.Grid]) tui.Grid {
 	}
 }
 
-func (grid *grid) Size() tui.Size {
+func (grid *grid) Size() size.Size {
 	return grid.parent.Size
 }
 

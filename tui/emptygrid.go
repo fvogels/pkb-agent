@@ -2,12 +2,13 @@ package tui
 
 import (
 	"pkb-agent/tui/position"
+	"pkb-agent/tui/size"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
 )
 
-func NewEmptyGrid(size Size) Grid {
+func NewEmptyGrid(size size.Size) Grid {
 	style := tcell.StyleDefault.Foreground(color.Reset).Background(color.Reset)
 
 	result := emptyGrid{
@@ -19,11 +20,11 @@ func NewEmptyGrid(size Size) Grid {
 }
 
 type emptyGrid struct {
-	size  Size
+	size  size.Size
 	style *Style
 }
 
-func (grid *emptyGrid) Size() Size {
+func (grid *emptyGrid) Size() size.Size {
 	return grid.size
 }
 

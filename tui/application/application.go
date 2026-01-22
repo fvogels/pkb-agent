@@ -13,6 +13,7 @@ import (
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/model"
 	"pkb-agent/tui/position"
+	"pkb-agent/tui/size"
 	"pkb-agent/util/pathlib"
 	"slices"
 	"strings"
@@ -32,7 +33,7 @@ type Application struct {
 	logFile          *os.File
 	screen           tcell.Screen
 	messageQueue     tui.MessageQueue
-	screenSize       tui.Size
+	screenSize       size.Size
 	graph            *pkg.Graph
 	mode             mode
 	model            data.Variable[*model.Model]
@@ -189,7 +190,7 @@ func (application *Application) HandleEvent(event tcell.Event) {
 			slog.Int("height", height),
 		)
 
-		application.screenSize = tui.Size{
+		application.screenSize = size.Size{
 			Width:  width,
 			Height: height,
 		}

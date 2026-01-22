@@ -3,6 +3,7 @@ package ansigrid
 import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/position"
+	"pkb-agent/tui/size"
 	"strings"
 
 	"github.com/gdamore/tcell/v3"
@@ -10,7 +11,7 @@ import (
 )
 
 type ansiGrid struct {
-	size      tui.Size
+	size      size.Size
 	cells     [][]tui.Cell
 	emptyCell tui.Cell
 }
@@ -32,7 +33,7 @@ func Parse(str string, emptyStyle *tui.Style) tui.Grid {
 	height := len(cells)
 
 	return &ansiGrid{
-		size: tui.Size{
+		size: size.Size{
 			Width:  width,
 			Height: height,
 		},
@@ -95,7 +96,7 @@ func translateStyle(ansiStyle ansi.Style) *tui.Style {
 	return &tuiStyle
 }
 
-func (grid *ansiGrid) Size() tui.Size {
+func (grid *ansiGrid) Size() size.Size {
 	return grid.size
 }
 

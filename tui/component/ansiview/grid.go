@@ -3,15 +3,16 @@ package ansiview
 import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/position"
+	"pkb-agent/tui/size"
 )
 
 type grid struct {
-	size       tui.Size
+	size       size.Size
 	ansiGrid   tui.Grid
 	emptyStyle *tui.Style
 }
 
-func newGrid(size tui.Size, ansiGrid tui.Grid, emptyStyle *tui.Style) tui.Grid {
+func newGrid(size size.Size, ansiGrid tui.Grid, emptyStyle *tui.Style) tui.Grid {
 	return &grid{
 		size:       size,
 		ansiGrid:   ansiGrid,
@@ -19,7 +20,7 @@ func newGrid(size tui.Size, ansiGrid tui.Grid, emptyStyle *tui.Style) tui.Grid {
 	}
 }
 
-func (graph *grid) Size() tui.Size {
+func (graph *grid) Size() size.Size {
 	return graph.size
 }
 

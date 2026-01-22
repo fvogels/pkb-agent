@@ -1,6 +1,9 @@
 package tui
 
-import "fmt"
+import (
+	"fmt"
+	"pkb-agent/tui/size"
+)
 
 type Message interface {
 	String() string
@@ -11,7 +14,7 @@ const (
 )
 
 type MsgResize struct {
-	Size Size
+	Size size.Size
 }
 
 func (message MsgResize) String() string {

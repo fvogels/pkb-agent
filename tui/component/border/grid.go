@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"pkb-agent/tui"
 	"pkb-agent/tui/position"
+	"pkb-agent/tui/size"
 
 	"github.com/gdamore/tcell/v3"
 )
@@ -22,10 +23,10 @@ func newGrid(parent *Component) tui.Grid {
 	return &grid
 }
 
-func (grid *grid) Size() tui.Size {
+func (grid *grid) Size() size.Size {
 	childSize := grid.childGrid.Size()
 
-	return tui.Size{
+	return size.Size{
 		Width:  childSize.Width + 2,
 		Height: childSize.Height + 2,
 	}

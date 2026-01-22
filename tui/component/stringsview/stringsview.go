@@ -5,6 +5,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/debug"
+	"pkb-agent/tui/size"
 	"pkb-agent/util/uid"
 
 	"github.com/gdamore/tcell/v3"
@@ -79,7 +80,7 @@ func (component *Component) EnsureItemIsVisible(index int) {
 	}
 }
 
-func (component *Component) Measure() tui.Size {
+func (component *Component) Measure() size.Size {
 	measuredWidth := 0
 	items := component.items.Get()
 
@@ -92,7 +93,7 @@ func (component *Component) Measure() tui.Size {
 		}
 	}
 
-	return tui.Size{
+	return size.Size{
 		Width:  measuredWidth,
 		Height: items.Size(),
 	}

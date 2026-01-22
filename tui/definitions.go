@@ -1,8 +1,8 @@
 package tui
 
 import (
-	"fmt"
 	"pkb-agent/tui/position"
+	"pkb-agent/tui/size"
 
 	"github.com/gdamore/tcell/v3"
 )
@@ -19,14 +19,14 @@ type Component interface {
 
 type MeasurableComponent interface {
 	Component
-	Measure() Size
+	Measure() size.Size
 }
 
 type ComponentBase struct {
 	Identifier   int
 	Name         string
 	MessageQueue MessageQueue
-	Size         Size
+	Size         size.Size
 }
 
 func (base *ComponentBase) GetIdentifier() int {
@@ -34,7 +34,7 @@ func (base *ComponentBase) GetIdentifier() int {
 }
 
 type Grid interface {
-	Size() Size
+	Size() size.Size
 	At(position position.Position) Cell
 }
 
@@ -44,13 +44,4 @@ type Cell struct {
 	Contents rune
 	Style    *Style
 	OnClick  func()
-}
-
-type Size struct {
-	Width  int
-	Height int
-}
-
-func (size Size) String() string {
-	return fmt.Sprintf("%dx%d", size.Width, size.Height)
 }

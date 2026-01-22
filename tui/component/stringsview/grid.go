@@ -3,6 +3,7 @@ package stringsview
 import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/position"
+	"pkb-agent/tui/size"
 )
 
 type grid struct {
@@ -15,7 +16,7 @@ func newGrid(component *Component) *grid {
 	}
 }
 
-func (grid *grid) Size() tui.Size {
+func (grid *grid) Size() size.Size {
 	return grid.parent.Size
 }
 

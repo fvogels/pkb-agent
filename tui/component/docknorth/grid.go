@@ -3,16 +3,17 @@ package docknorth
 import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/position"
+	"pkb-agent/tui/size"
 )
 
 type grid struct {
-	size            tui.Size
+	size            size.Size
 	mainChildGrid   tui.Grid
 	dockedChildGrid tui.Grid
 	boundary        int // Y-coordinate of where docked child ends
 }
 
-func (grid *grid) Size() tui.Size {
+func (grid *grid) Size() size.Size {
 	return grid.size
 }
 

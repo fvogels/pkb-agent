@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/size"
 	"pkb-agent/util/uid"
 	"reflect"
 
@@ -71,7 +72,7 @@ func (component *Component) onResize(message tui.MsgResize) {
 	component.Size = message.Size
 
 	childSizeMessage := tui.MsgResize{
-		Size: tui.Size{
+		Size: size.Size{
 			Width:  message.Size.Width,
 			Height: component.Size.Height - 1,
 		},
@@ -79,7 +80,7 @@ func (component *Component) onResize(message tui.MsgResize) {
 	component.child.Handle(childSizeMessage)
 }
 
-func (component *MeasurableComponent) Measure() tui.Size {
+func (component *MeasurableComponent) Measure() size.Size {
 	child := component.child
 	measurableChild, ok := child.(tui.MeasurableComponent)
 	if !ok {
@@ -88,7 +89,7 @@ func (component *MeasurableComponent) Measure() tui.Size {
 
 	childSize := measurableChild.Measure()
 
-	return tui.Size{
+	return size.Size{
 		Width:  childSize.Width,
 		Height: childSize.Height + 1,
 	}

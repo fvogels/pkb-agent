@@ -3,11 +3,12 @@ package tui
 import (
 	"fmt"
 	"pkb-agent/tui/position"
+	"pkb-agent/tui/size"
 )
 
 type MemoryGrid struct {
 	items []Cell
-	size  Size
+	size  size.Size
 }
 
 func MaterializeGrid(grid Grid) Grid {
@@ -30,7 +31,7 @@ func MaterializeGrid(grid Grid) Grid {
 	}
 }
 
-func NewMaterializedGrid(size Size, initializer func(position.Position) Cell) *MemoryGrid {
+func NewMaterializedGrid(size size.Size, initializer func(position.Position) Cell) *MemoryGrid {
 	items := make([]Cell, size.Width*size.Height)
 
 	i := 0
@@ -50,7 +51,7 @@ func NewMaterializedGrid(size Size, initializer func(position.Position) Cell) *M
 	return &result
 }
 
-func (grid *MemoryGrid) Size() Size {
+func (grid *MemoryGrid) Size() size.Size {
 	return grid.size
 }
 

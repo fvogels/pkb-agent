@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"pkb-agent/tui"
 	"pkb-agent/tui/position"
+	"pkb-agent/tui/size"
 )
 
 type grid struct {
@@ -20,7 +21,7 @@ func newGrid(parent *Component, contents []rune) *grid {
 	return &result
 }
 
-func (grid *grid) Size() tui.Size {
+func (grid *grid) Size() size.Size {
 	return grid.parent.Size
 }
 

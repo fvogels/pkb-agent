@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"pkb-agent/tui"
 	"pkb-agent/tui/debug"
+	"pkb-agent/tui/size"
 	"pkb-agent/util/uid"
 )
 
@@ -62,7 +63,7 @@ func (component *Component) updateLayout() {
 	mainChildHeight := component.Size.Height - component.dockedChildHeight
 
 	dockedChildSizeMessage := tui.MsgResize{
-		Size: tui.Size{
+		Size: size.Size{
 			Width:  width,
 			Height: dockedChildHeight,
 		},
@@ -70,7 +71,7 @@ func (component *Component) updateLayout() {
 	component.dockedChild.Handle(dockedChildSizeMessage)
 
 	mainChildSizeMessage := tui.MsgResize{
-		Size: tui.Size{
+		Size: size.Size{
 			Width:  width,
 			Height: mainChildHeight,
 		},

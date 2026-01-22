@@ -3,6 +3,7 @@ package border
 import (
 	"log/slog"
 	"pkb-agent/tui"
+	"pkb-agent/tui/size"
 	"pkb-agent/util/uid"
 )
 
@@ -46,7 +47,7 @@ func (component *Component) onResize(message tui.MsgResize) {
 	component.Size = message.Size
 
 	childSizeMessage := tui.MsgResize{
-		Size: tui.Size{
+		Size: size.Size{
 			Width:  message.Size.Width - 2,
 			Height: component.Size.Height - 2,
 		},
