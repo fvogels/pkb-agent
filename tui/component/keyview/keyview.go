@@ -1,9 +1,11 @@
 package keyview
 
 import (
+	"log/slog"
 	"pkb-agent/persistent/list"
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/debug"
 	"pkb-agent/util/uid"
 
 	"github.com/gdamore/tcell/v3"
@@ -41,6 +43,8 @@ func New(messageQueue tui.MessageQueue, name string, keyBindings data.Value[list
 }
 
 func (component *Component) Handle(message tui.Message) {
+	debug.LogMessage(message)
+
 	switch message := message.(type) {
 	case tui.MsgResize:
 		component.onResize(message)
@@ -48,7 +52,9 @@ func (component *Component) Handle(message tui.Message) {
 }
 
 func (component *Component) Render() tui.Grid {
-	if component.keyBindings.Updated() {
+	slog.Debug("Rendering keyview")
+
+	if component.keyBindings.Updated() || component.cachedGrid == nil {
 		component.cachedGrid = component.renderKeyBindings()
 	}
 
