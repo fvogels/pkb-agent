@@ -1,7 +1,6 @@
 package node
 
 import (
-	"fmt"
 	"io"
 	"pkb-agent/tui"
 	"pkb-agent/util/pathlib"
@@ -35,5 +34,5 @@ type MsgUpdateNodeViewerBindings struct {
 }
 
 func (message MsgUpdateNodeViewerBindings) String() string {
-	return fmt.Sprintf("MsgUpdateNodeViewerBindings[...]")
+	return "MsgUpdateNodeViewerBindings[...]"
 }
