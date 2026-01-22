@@ -96,6 +96,7 @@ func newInputMode(application *Application) *inputMode {
 		application: application,
 		inputField:  inputField,
 		root:        root,
+		nodes:       nodesView,
 	}
 
 	return &result
@@ -127,6 +128,7 @@ func (component *inputMode) onKey(message tui.MsgKey) {
 
 	default:
 		component.inputField.Handle(message)
+		component.nodes.Handle(message)
 	}
 }
 
