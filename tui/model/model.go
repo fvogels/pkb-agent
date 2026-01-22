@@ -34,7 +34,11 @@ func New(graph *pkg.Graph) *Model {
 }
 
 func (model *Model) GetHighlightedNode() *pkg.Node {
-	return model.IntersectionNodes.At(model.HighlightedNodeIndex)
+	if model.HighlightedNodeIndex < model.IntersectionNodes.Size() {
+		return model.IntersectionNodes.At(model.HighlightedNodeIndex)
+	} else {
+		return nil
+	}
 }
 
 func (model *Model) DetermineIntersectionNodes() {
@@ -43,8 +47,11 @@ func (model *Model) DetermineIntersectionNodes() {
 
 func (model *Model) SelectHighlightedNode() {
 	highlightedNode := model.GetHighlightedNode()
-	updatedSelectedNodes := list.Append(model.SelectedNodes, highlightedNode)
-	model.SelectedNodes = updatedSelectedNodes
+
+	if highlightedNode != nil {
+		updatedSelectedNodes := list.Append(model.SelectedNodes, highlightedNode)
+		model.SelectedNodes = updatedSelectedNodes
+	}
 }
 
 func (model *Model) UnselectLastNode() {
