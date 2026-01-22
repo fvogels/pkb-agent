@@ -126,6 +126,10 @@ func (component *searchMode) onKey(message tui.MsgKey) {
 		component.application.selectHighlightedAndClearInput()
 		component.application.switchMode(component.application.mode.view)
 
+	case "Esc":
+		component.application.clearInput()
+		component.application.switchMode(component.application.mode.view)
+
 	default:
 		component.inputField.Handle(message)
 		component.nodes.Handle(message)
