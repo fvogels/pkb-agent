@@ -11,9 +11,10 @@ import (
 const TypeID uint32 = 2
 
 type RawNode struct {
-	name  string
-	url   string
-	links []string
+	name        string
+	url         string
+	links       []string
+	description string
 }
 
 func (node *RawNode) GetName() string {
@@ -21,7 +22,10 @@ func (node *RawNode) GetName() string {
 }
 
 func (node *RawNode) GetSearchStrings() []string {
-	return util.Words(strings.ToLower(util.RemoveAccents(node.name)))
+	searchStringsFromName := util.Words(strings.ToLower(util.RemoveAccents(node.name)))
+	searchStringsFromDescription := util.Words(strings.ToLower(util.RemoveAccents(node.description)))
+
+	return append(searchStringsFromName, searchStringsFromDescription...)
 }
 
 func (node *RawNode) GetLinks() []string {

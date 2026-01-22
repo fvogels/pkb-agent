@@ -99,9 +99,10 @@ func (loader *Loader) convertEntryToNode(entry *entry) (*RawNode, error) {
 	}
 
 	node := RawNode{
-		name:  entry.Name,
-		url:   entry.URL,
-		links: entry.Links,
+		name:        entry.Name,
+		url:         entry.URL,
+		links:       entry.Links,
+		description: entry.Description,
 	}
 
 	return &node, nil
