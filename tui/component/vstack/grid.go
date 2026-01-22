@@ -3,6 +3,7 @@ package vstack
 import (
 	"pkb-agent/persistent/list"
 	"pkb-agent/tui"
+	"pkb-agent/tui/position"
 )
 
 type grid struct {
@@ -21,13 +22,13 @@ func (grid *grid) Size() tui.Size {
 	return grid.parent.Size
 }
 
-func (grid *grid) At(position tui.Position) tui.Cell {
-	if !grid.isValidPosition(position) {
+func (grid *grid) At(pos position.Position) tui.Cell {
+	if !grid.isValidPosition(pos) {
 		panic("invalid position")
 	}
 
-	x := position.X
-	y := position.Y
+	x := pos.X
+	y := pos.Y
 	i := 0
 
 	for i < grid.childGrids.Size() && y >= grid.childGrids.At(i).Size().Height {
@@ -42,13 +43,13 @@ func (grid *grid) At(position tui.Position) tui.Cell {
 			OnClick:  nil,
 		}
 	} else {
-		return grid.childGrids.At(i).At(tui.Position{X: x, Y: y})
+		return grid.childGrids.At(i).At(position.Position{X: x, Y: y})
 	}
 }
 
-func (grid *grid) isValidPosition(position tui.Position) bool {
-	x := position.X
-	y := position.Y
+func (grid *grid) isValidPosition(pos position.Position) bool {
+	x := pos.X
+	y := pos.Y
 	size := grid.parent.Size
 	width := size.Width
 	height := size.Height

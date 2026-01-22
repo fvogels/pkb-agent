@@ -12,6 +12,7 @@ import (
 	"pkb-agent/tui/component/holder"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/model"
+	"pkb-agent/tui/position"
 	"pkb-agent/util/pathlib"
 	"slices"
 	"strings"
@@ -216,7 +217,7 @@ func (application *Application) HandleEvent(event tcell.Event) {
 
 		// case *tcell.EventMouse:
 		// 	x, y := event.Position()
-		// 	position := tui.Position{X: x, Y: y}
+		// 	position := position.Position{X: x, Y: y}
 		// 	clickHandler := grid.Get(position).OnClick
 
 		// 	if clickHandler != nil && event.Buttons() == tcell.Button1 {
@@ -283,7 +284,7 @@ func (application *Application) Render() {
 
 	for y := range gridSize.Height {
 		for x := range gridSize.Width {
-			position := tui.Position{X: x, Y: y}
+			position := position.Position{X: x, Y: y}
 			cell := grid.At(position)
 			runes[0] = cell.Contents
 			screen.Put(x, y, string(runes), *cell.Style)

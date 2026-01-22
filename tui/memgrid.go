@@ -1,6 +1,9 @@
 package tui
 
-import "fmt"
+import (
+	"fmt"
+	"pkb-agent/tui/position"
+)
 
 type MemoryGrid struct {
 	items []Cell
@@ -14,7 +17,7 @@ func MaterializeGrid(grid Grid) Grid {
 	i := 0
 	for y := range size.Height {
 		for x := range size.Width {
-			position := Position{X: x, Y: y}
+			position := position.Position{X: x, Y: y}
 			items[i] = grid.At(position)
 
 			i++
@@ -27,13 +30,13 @@ func MaterializeGrid(grid Grid) Grid {
 	}
 }
 
-func NewMaterializedGrid(size Size, initializer func(Position) Cell) *MemoryGrid {
+func NewMaterializedGrid(size Size, initializer func(position.Position) Cell) *MemoryGrid {
 	items := make([]Cell, size.Width*size.Height)
 
 	i := 0
 	for y := range size.Height {
 		for x := range size.Width {
-			position := Position{X: x, Y: y}
+			position := position.Position{X: x, Y: y}
 			items[i] = initializer(position)
 			i++
 		}
@@ -51,7 +54,7 @@ func (grid *MemoryGrid) Size() Size {
 	return grid.size
 }
 
-func (grid *MemoryGrid) At(position Position) Cell {
+func (grid *MemoryGrid) At(position position.Position) Cell {
 	if SafeMode && !grid.isValidPosition(position) {
 		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d", position.X, position.Y, grid.size.Width, grid.size.Height))
 	}
@@ -59,7 +62,7 @@ func (grid *MemoryGrid) At(position Position) Cell {
 	return grid.items[grid.computeIndexOfPosition(position)]
 }
 
-func (grid *MemoryGrid) Set(position Position, cell Cell) {
+func (grid *MemoryGrid) Set(position position.Position, cell Cell) {
 	if SafeMode && !grid.isValidPosition(position) {
 		panic("invalid position")
 	}
@@ -67,7 +70,7 @@ func (grid *MemoryGrid) Set(position Position, cell Cell) {
 	grid.items[grid.computeIndexOfPosition(position)] = cell
 }
 
-func (grid *MemoryGrid) isValidPosition(position Position) bool {
+func (grid *MemoryGrid) isValidPosition(position position.Position) bool {
 	if position.X < 0 {
 		return false
 	}
@@ -84,7 +87,7 @@ func (grid *MemoryGrid) isValidPosition(position Position) bool {
 	return true
 }
 
-func (grid *MemoryGrid) computeIndexOfPosition(position Position) int {
+func (grid *MemoryGrid) computeIndexOfPosition(position position.Position) int {
 	width := grid.size.Width
 	x := position.X
 	y := position.Y

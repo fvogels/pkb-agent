@@ -2,6 +2,7 @@ package docksouth
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/tui/position"
 )
 
 type grid struct {
@@ -15,24 +16,24 @@ func (grid *grid) Size() tui.Size {
 	return grid.size
 }
 
-func (grid *grid) At(position tui.Position) tui.Cell {
-	if tui.SafeMode && !grid.isValidPosition(position) {
+func (grid *grid) At(pos position.Position) tui.Cell {
+	if tui.SafeMode && !grid.isValidPosition(pos) {
 		panic("invalid coordinates")
 	}
 
-	if position.Y < grid.boundary {
-		return grid.mainChildGrid.At(position)
+	if pos.Y < grid.boundary {
+		return grid.mainChildGrid.At(pos)
 	} else {
-		return grid.dockedChildGrid.At(tui.Position{
-			X: position.X,
-			Y: position.Y - grid.boundary,
+		return grid.dockedChildGrid.At(position.Position{
+			X: pos.X,
+			Y: pos.Y - grid.boundary,
 		})
 	}
 }
 
-func (grid *grid) isValidPosition(position tui.Position) bool {
-	x := position.X
-	y := position.Y
+func (grid *grid) isValidPosition(pos position.Position) bool {
+	x := pos.X
+	y := pos.Y
 	size := grid.Size()
 
 	return 0 <= x && x < size.Width && 0 <= y && y < size.Height

@@ -3,6 +3,7 @@ package label
 import (
 	"fmt"
 	"pkb-agent/tui"
+	"pkb-agent/tui/position"
 )
 
 type grid struct {
@@ -23,7 +24,7 @@ func (grid *grid) Size() tui.Size {
 	return grid.parent.Size
 }
 
-func (grid *grid) At(position tui.Position) tui.Cell {
+func (grid *grid) At(position position.Position) tui.Cell {
 	if tui.SafeMode && !grid.isValidPosition(position) {
 		size := grid.parent.Size
 		panic(fmt.Sprintf("invalid grid access: parent: %s, coordinates (%d, %d), size: %dx%d, contents: %s", grid.parent.Name, position.X, position.Y, size.Width, size.Height, string(grid.contents)))
@@ -47,7 +48,7 @@ func (grid *grid) At(position tui.Position) tui.Cell {
 	return cell
 }
 
-func (grid *grid) isValidPosition(position tui.Position) bool {
+func (grid *grid) isValidPosition(position position.Position) bool {
 	x := position.X
 	y := position.Y
 	size := grid.Size()

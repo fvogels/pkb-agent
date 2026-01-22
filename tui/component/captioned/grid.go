@@ -3,6 +3,7 @@ package captioned
 import (
 	"fmt"
 	"pkb-agent/tui"
+	"pkb-agent/tui/position"
 )
 
 type grid struct {
@@ -28,14 +29,14 @@ func (grid *grid) Size() tui.Size {
 	}
 }
 
-func (grid *grid) At(position tui.Position) tui.Cell {
-	if tui.SafeMode && !grid.isValidPosition(position) {
+func (grid *grid) At(pos position.Position) tui.Cell {
+	if tui.SafeMode && !grid.isValidPosition(pos) {
 		size := grid.Size()
-		panic(fmt.Sprintf("invalid position %s, size %s", position.String(), size.String()))
+		panic(fmt.Sprintf("invalid position %s, size %s", pos.String(), size.String()))
 	}
 
-	x := position.X
-	y := position.Y
+	x := pos.X
+	y := pos.Y
 	caption := grid.parent.caption.Get()
 	captionStyle := grid.parent.captionStyle
 
@@ -54,14 +55,14 @@ func (grid *grid) At(position tui.Position) tui.Cell {
 			OnClick:  func() {},
 		}
 	} else {
-		return grid.childGrid.At(tui.Position{
+		return grid.childGrid.At(position.Position{
 			X: x,
 			Y: y - 1,
 		})
 	}
 }
 
-func (grid *grid) isValidPosition(position tui.Position) bool {
+func (grid *grid) isValidPosition(position position.Position) bool {
 	x := position.X
 	y := position.Y
 	size := grid.Size()

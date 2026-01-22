@@ -1,6 +1,9 @@
 package ansiview
 
-import "pkb-agent/tui"
+import (
+	"pkb-agent/tui"
+	"pkb-agent/tui/position"
+)
 
 type grid struct {
 	size       tui.Size
@@ -20,7 +23,7 @@ func (graph *grid) Size() tui.Size {
 	return graph.size
 }
 
-func (graph *grid) At(position tui.Position) tui.Cell {
+func (graph *grid) At(position position.Position) tui.Cell {
 	x := position.X
 	y := position.Y
 	gridSize := graph.ansiGrid.Size()

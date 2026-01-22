@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"pkb-agent/tui/position"
 
 	"github.com/gdamore/tcell/v3"
 )
@@ -34,7 +35,7 @@ func (base *ComponentBase) GetIdentifier() int {
 
 type Grid interface {
 	Size() Size
-	At(position Position) Cell
+	At(position position.Position) Cell
 }
 
 type Style = tcell.Style
@@ -43,15 +44,6 @@ type Cell struct {
 	Contents rune
 	Style    *Style
 	OnClick  func()
-}
-
-type Position struct {
-	X int
-	Y int
-}
-
-func (position Position) String() string {
-	return fmt.Sprintf("(%d, %d)", position.X, position.Y)
 }
 
 type Size struct {

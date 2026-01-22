@@ -2,6 +2,7 @@ package stringsview
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/tui/position"
 )
 
 type grid struct {
@@ -18,7 +19,7 @@ func (grid *grid) Size() tui.Size {
 	return grid.parent.Size
 }
 
-func (grid *grid) At(position tui.Position) tui.Cell {
+func (grid *grid) At(position position.Position) tui.Cell {
 	if tui.SafeMode && !grid.isValidPosition(position) {
 		panic("invalid coordinates")
 	}
@@ -61,7 +62,7 @@ func (grid *grid) At(position tui.Position) tui.Cell {
 	return cell
 }
 
-func (grid *grid) isValidPosition(position tui.Position) bool {
+func (grid *grid) isValidPosition(position position.Position) bool {
 	x := position.X
 	y := position.Y
 	size := grid.Size()

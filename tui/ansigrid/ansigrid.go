@@ -2,6 +2,7 @@ package ansigrid
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/tui/position"
 	"strings"
 
 	"github.com/gdamore/tcell/v3"
@@ -98,7 +99,7 @@ func (grid *ansiGrid) Size() tui.Size {
 	return grid.size
 }
 
-func (grid *ansiGrid) At(position tui.Position) tui.Cell {
+func (grid *ansiGrid) At(position position.Position) tui.Cell {
 	x := position.X
 	y := position.Y
 

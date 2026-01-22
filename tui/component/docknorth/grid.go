@@ -1,6 +1,9 @@
 package docknorth
 
-import "pkb-agent/tui"
+import (
+	"pkb-agent/tui"
+	"pkb-agent/tui/position"
+)
 
 type grid struct {
 	size            tui.Size
@@ -13,22 +16,22 @@ func (grid *grid) Size() tui.Size {
 	return grid.size
 }
 
-func (grid *grid) At(position tui.Position) tui.Cell {
-	if tui.SafeMode && !grid.isValidPosition(position) {
+func (grid *grid) At(pos position.Position) tui.Cell {
+	if tui.SafeMode && !grid.isValidPosition(pos) {
 		panic("invalid coordinates")
 	}
 
-	if position.Y < grid.boundary {
-		return grid.dockedChildGrid.At(position)
+	if pos.Y < grid.boundary {
+		return grid.dockedChildGrid.At(pos)
 	} else {
-		return grid.mainChildGrid.At(tui.Position{
-			X: position.X,
-			Y: position.Y - grid.boundary,
+		return grid.mainChildGrid.At(position.Position{
+			X: pos.X,
+			Y: pos.Y - grid.boundary,
 		})
 	}
 }
 
-func (grid *grid) isValidPosition(position tui.Position) bool {
+func (grid *grid) isValidPosition(position position.Position) bool {
 	x := position.X
 	y := position.Y
 	size := grid.Size()

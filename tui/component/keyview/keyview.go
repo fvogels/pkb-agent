@@ -6,6 +6,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/debug"
+	"pkb-agent/tui/position"
 	"pkb-agent/util/uid"
 
 	"github.com/gdamore/tcell/v3"
@@ -71,12 +72,12 @@ func (component *Component) renderKeyBindings() tui.Grid {
 		Contents: ' ',
 		Style:    component.emptyStyle,
 	}
-	result := tui.NewMaterializedGrid(component.Size, func(tui.Position) tui.Cell { return cell })
+	result := tui.NewMaterializedGrid(component.Size, func(position.Position) tui.Cell { return cell })
 
 	x := 0
 	write := func(contents rune, style *tui.Style) {
 		if x < result.Size().Width {
-			result.Set(tui.Position{X: x, Y: 0}, tui.Cell{Contents: contents, Style: style})
+			result.Set(position.Position{X: x, Y: 0}, tui.Cell{Contents: contents, Style: style})
 			x++
 		}
 	}

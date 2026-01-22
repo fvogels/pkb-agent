@@ -3,6 +3,7 @@ package border
 import (
 	"fmt"
 	"pkb-agent/tui"
+	"pkb-agent/tui/position"
 
 	"github.com/gdamore/tcell/v3"
 )
@@ -30,14 +31,14 @@ func (grid *grid) Size() tui.Size {
 	}
 }
 
-func (grid *grid) At(position tui.Position) tui.Cell {
-	if tui.SafeMode && !grid.isValidPosition(position) {
+func (grid *grid) At(pos position.Position) tui.Cell {
+	if tui.SafeMode && !grid.isValidPosition(pos) {
 		size := grid.Size()
-		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d in component %s", position.X, position.Y, size.Width, size.Height, grid.parent.Name))
+		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d in component %s", pos.X, pos.Y, size.Width, size.Height, grid.parent.Name))
 	}
 
-	x := position.X
-	y := position.Y
+	x := pos.X
+	y := pos.Y
 	size := grid.Size()
 	width := size.Width
 	height := size.Height
@@ -76,7 +77,7 @@ func (grid *grid) At(position tui.Position) tui.Cell {
 		style = grid.parent.style
 		char = tcell.RuneHLine
 	} else {
-		cell := grid.childGrid.At(tui.Position{X: x - 1, Y: y - 1})
+		cell := grid.childGrid.At(position.Position{X: x - 1, Y: y - 1})
 		style = cell.Style
 		char = cell.Contents
 		onClick = cell.OnClick
@@ -89,7 +90,7 @@ func (grid *grid) At(position tui.Position) tui.Cell {
 	}
 }
 
-func (grid *grid) isValidPosition(position tui.Position) bool {
+func (grid *grid) isValidPosition(position position.Position) bool {
 	x := position.X
 	y := position.Y
 	size := grid.Size()

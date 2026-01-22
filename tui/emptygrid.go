@@ -1,6 +1,8 @@
 package tui
 
 import (
+	"pkb-agent/tui/position"
+
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
 )
@@ -25,7 +27,7 @@ func (grid *emptyGrid) Size() Size {
 	return grid.size
 }
 
-func (grid *emptyGrid) At(Position) Cell {
+func (grid *emptyGrid) At(position.Position) Cell {
 	cell := Cell{
 		Contents: ' ',
 		Style:    grid.style,
