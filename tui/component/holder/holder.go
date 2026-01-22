@@ -3,6 +3,7 @@ package holder
 import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/debug"
 	"pkb-agent/util/uid"
 )
 
@@ -25,6 +26,8 @@ func New(messageQueue tui.MessageQueue, child data.Value[tui.Component]) *Compon
 }
 
 func (component *Component) Handle(message tui.Message) {
+	debug.LogMessage(message)
+
 	child := component.child.Get()
 
 	switch message := message.(type) {

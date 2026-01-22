@@ -2,6 +2,7 @@ package docknorth
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/tui/debug"
 	"pkb-agent/util/uid"
 )
 
@@ -31,6 +32,8 @@ func (component *Component) SetDockerChildHeight(height int) {
 }
 
 func (component *Component) Handle(message tui.Message) {
+	debug.LogMessage(message)
+
 	switch message := message.(type) {
 	case tui.MsgResize:
 		component.onResize(message)

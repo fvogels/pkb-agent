@@ -1,7 +1,9 @@
 package docksouth
 
 import (
+	"log/slog"
 	"pkb-agent/tui"
+	"pkb-agent/tui/debug"
 	"pkb-agent/util/uid"
 )
 
@@ -26,6 +28,8 @@ func New(messageQueue tui.MessageQueue, name string, mainChild tui.Component, do
 }
 
 func (component *Component) Handle(message tui.Message) {
+	debug.LogMessage(message)
+
 	switch message := message.(type) {
 	case tui.MsgResize:
 		component.onResize(message)
@@ -37,6 +41,8 @@ func (component *Component) Handle(message tui.Message) {
 }
 
 func (component *Component) Render() tui.Grid {
+	slog.Debug("Rendering docksouth", slog.String("name", component.Name))
+
 	return &grid{
 		size:            component.Size,
 		mainChildGrid:   component.mainChild.Render(),

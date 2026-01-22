@@ -1,6 +1,8 @@
 package docksouth
 
-import "pkb-agent/tui"
+import (
+	"pkb-agent/tui"
+)
 
 type grid struct {
 	size            tui.Size

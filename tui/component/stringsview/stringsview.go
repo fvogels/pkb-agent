@@ -4,6 +4,7 @@ import (
 	"pkb-agent/persistent/list"
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/debug"
 	"pkb-agent/util/uid"
 
 	"github.com/gdamore/tcell/v3"
@@ -50,6 +51,8 @@ func (component *Component) SetOnItemClicked(onItemClicked func(int)) {
 }
 
 func (component *Component) Handle(message tui.Message) {
+	debug.LogMessage(message)
+
 	switch message := message.(type) {
 	case tui.MsgResize:
 		component.onResize(message)
