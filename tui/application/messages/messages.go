@@ -34,10 +34,10 @@ func (message MsgSetNodeKeyBindings) String() string {
 	return fmt.Sprintf("MsgSetNodeKeyBindings[Bindings=%s]", list.String(message.Bindings, func(b tui.KeyBinding) string { return b.Key }))
 }
 
-type MsgActivateInputMode struct{}
+type MsgActivateSearchMode struct{}
 
-func (message MsgActivateInputMode) String() string {
-	return "MsgActivateInputMode"
+func (message MsgActivateSearchMode) String() string {
+	return "MsgActivateSearchMode"
 }
 
 type MsgActivateViewMode struct{}

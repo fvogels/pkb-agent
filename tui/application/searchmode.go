@@ -19,7 +19,7 @@ import (
 	"github.com/gdamore/tcell/v3/color"
 )
 
-type inputMode struct {
+type searchMode struct {
 	tui.ComponentBase
 	application                 *Application
 	inputField                  *input.Component
@@ -29,7 +29,7 @@ type inputMode struct {
 	root                        tui.Component
 }
 
-func newInputMode(application *Application) *inputMode {
+func newSearchMode(application *Application) *searchMode {
 	messageQueue := application.messageQueue
 
 	selectedNodes := data.MapValue(&application.model, func(m *model.Model) list.List[*pkg.Node] { return m.SelectedNodes })
@@ -87,10 +87,10 @@ func newInputMode(application *Application) *inputMode {
 		1,
 	)
 
-	result := inputMode{
+	result := searchMode{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
-			Name:         "input mode",
+			Name:         "search mode",
 			MessageQueue: messageQueue,
 		},
 		application: application,
@@ -102,11 +102,11 @@ func newInputMode(application *Application) *inputMode {
 	return &result
 }
 
-func (component *inputMode) Render() tui.Grid {
+func (component *searchMode) Render() tui.Grid {
 	return component.root.Render()
 }
 
-func (component *inputMode) Handle(message tui.Message) {
+func (component *searchMode) Handle(message tui.Message) {
 	switch message := message.(type) {
 	case tui.MsgKey:
 		component.onKey(message)
@@ -120,7 +120,7 @@ func (component *inputMode) Handle(message tui.Message) {
 	}
 }
 
-func (component *inputMode) onKey(message tui.MsgKey) {
+func (component *searchMode) onKey(message tui.MsgKey) {
 	switch message.Key {
 	case "Enter":
 		component.application.selectHighlightedAndClearInput()
@@ -132,7 +132,7 @@ func (component *inputMode) onKey(message tui.MsgKey) {
 	}
 }
 
-func (component *inputMode) onStateUpdated() {
+func (component *searchMode) onStateUpdated() {
 	component.application.messageQueue.Enqueue(messages.MsgSetModeKeyBindings{
 		Bindings: list.New[tui.KeyBinding](),
 	})

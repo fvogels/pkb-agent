@@ -27,7 +27,7 @@ var (
 	BindingSearch = tui.KeyBinding{
 		Key:         "/",
 		Description: "search",
-		Message:     messages.MsgActivateInputMode{},
+		Message:     messages.MsgActivateSearchMode{},
 	}
 
 	BindingSwitchLinksView = tui.KeyBinding{

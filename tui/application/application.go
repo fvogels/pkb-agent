@@ -47,7 +47,7 @@ type keyBindings struct {
 
 type mode struct {
 	view   *viewMode
-	input  *inputMode
+	search *searchMode
 	active data.Variable[tui.Component]
 }
 
@@ -114,7 +114,7 @@ func (application *Application) Start() error {
 
 func (application *Application) createModes(mode *mode) {
 	mode.view = newViewMode(application)
-	mode.input = newInputMode(application)
+	mode.search = newSearchMode(application)
 	mode.active = data.NewVariable[tui.Component](nil)
 }
 
@@ -249,8 +249,8 @@ func (application *Application) handleMessage(message tui.Message) {
 	case messages.MsgSetNodeKeyBindings:
 		application.bindings.node.Set(message.Bindings)
 
-	case messages.MsgActivateInputMode:
-		application.switchMode(application.mode.input)
+	case messages.MsgActivateSearchMode:
+		application.switchMode(application.mode.search)
 
 	case messages.MsgSwitchLinksView:
 		application.switchLinksView()
