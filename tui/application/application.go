@@ -338,6 +338,8 @@ func (application *Application) loadGraph() error {
 }
 
 func (application *Application) findIndexOfIntersectionNode(intersectionNodes []*pkg.Node, target string) int {
+	target = strings.ToLower(target)
+
 	bestMatchIndex, found := slices.BinarySearchFunc(
 		intersectionNodes,
 		target,
@@ -407,6 +409,21 @@ func (application *Application) selectHighlightedAndClearInput() {
 		}
 		model.Input = ""
 		model.DetermineIntersectionNodes()
+	})
+}
+
+func (application *Application) clearInput() {
+	application.updateModel(func(model *model.Model) {
+		highlightedNode := model.GetHighlightedNode()
+
+		model.Input = ""
+		model.DetermineIntersectionNodes()
+
+		if highlightedNode != nil {
+			index := application.findIndexOfIntersectionNode(list.ToSlice(model.IntersectionNodes), highlightedNode.GetName())
+			slog.Debug("!!!", "name", highlightedNode.GetName(), "index", index)
+			model.HighlightedNodeIndex = index
+		}
 	})
 }
 
