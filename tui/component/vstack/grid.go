@@ -2,17 +2,17 @@ package vstack
 
 import (
 	"pkb-agent/persistent/list"
-	"pkb-agent/tui"
+	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/tui/position"
 	"pkb-agent/tui/size"
 )
 
 type grid struct {
 	parent     *Component
-	childGrids list.List[tui.Grid]
+	childGrids list.List[tuigrid.Grid]
 }
 
-func newGrid(parent *Component, childGrids list.List[tui.Grid]) tui.Grid {
+func newGrid(parent *Component, childGrids list.List[tuigrid.Grid]) tuigrid.Grid {
 	return &grid{
 		parent:     parent,
 		childGrids: childGrids,
@@ -23,7 +23,7 @@ func (grid *grid) Size() size.Size {
 	return grid.parent.Size
 }
 
-func (grid *grid) At(pos position.Position) tui.Cell {
+func (grid *grid) At(pos position.Position) tuigrid.Cell {
 	if !grid.isValidPosition(pos) {
 		panic("invalid position")
 	}
@@ -38,7 +38,7 @@ func (grid *grid) At(pos position.Position) tui.Cell {
 	}
 
 	if i == grid.childGrids.Size() {
-		return tui.Cell{
+		return tuigrid.Cell{
 			Contents: ' ',
 			Style:    grid.parent.emptyStyle,
 			OnClick:  nil,

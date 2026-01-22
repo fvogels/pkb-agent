@@ -2,13 +2,14 @@ package cache
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/tui/grid"
 	"pkb-agent/util/uid"
 )
 
 type Component struct {
 	tui.ComponentBase
 	child  tui.Component
-	cached tui.Grid
+	cached grid.Grid
 	dirty  bool
 }
 
@@ -35,7 +36,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() grid.Grid {
 	if component.dirty {
 		component.Refresh()
 		component.dirty = false

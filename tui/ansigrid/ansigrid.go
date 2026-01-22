@@ -2,6 +2,7 @@ package ansigrid
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/tui/grid"
 	"pkb-agent/tui/position"
 	"pkb-agent/tui/size"
 	"strings"
@@ -12,12 +13,12 @@ import (
 
 type ansiGrid struct {
 	size      size.Size
-	cells     [][]tui.Cell
-	emptyCell tui.Cell
+	cells     [][]grid.Cell
+	emptyCell grid.Cell
 }
 
-func Parse(str string, emptyStyle *tui.Style) tui.Grid {
-	cells := [][]tui.Cell{}
+func Parse(str string, emptyStyle *tui.Style) grid.Grid {
+	cells := [][]grid.Cell{}
 	strings.Lines(str)(func(line string) bool {
 		cells = append(cells, parseLine(line))
 		return true
@@ -38,7 +39,7 @@ func Parse(str string, emptyStyle *tui.Style) tui.Grid {
 			Height: height,
 		},
 		cells: cells,
-		emptyCell: tui.Cell{
+		emptyCell: grid.Cell{
 			Contents: ' ',
 			Style:    emptyStyle,
 			OnClick:  nil,
@@ -46,9 +47,9 @@ func Parse(str string, emptyStyle *tui.Style) tui.Grid {
 	}
 }
 
-func parseLine(line string) []tui.Cell {
+func parseLine(line string) []grid.Cell {
 	iterator := ansi.NewIterator(line)
-	cells := []tui.Cell{}
+	cells := []grid.Cell{}
 
 	for {
 		char, style, ok := iterator.Next()
@@ -56,7 +57,7 @@ func parseLine(line string) []tui.Cell {
 			return cells
 		}
 
-		cell := tui.Cell{
+		cell := grid.Cell{
 			Contents: char,
 			Style:    translateStyle(style),
 			OnClick:  nil,
@@ -100,7 +101,7 @@ func (grid *ansiGrid) Size() size.Size {
 	return grid.size
 }
 
-func (grid *ansiGrid) At(position position.Position) tui.Cell {
+func (grid *ansiGrid) At(position position.Position) grid.Cell {
 	x := position.X
 	y := position.Y
 

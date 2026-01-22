@@ -3,6 +3,7 @@ package label
 import (
 	"fmt"
 	"pkb-agent/tui"
+	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/tui/position"
 	"pkb-agent/tui/size"
 )
@@ -25,7 +26,7 @@ func (grid *grid) Size() size.Size {
 	return grid.parent.Size
 }
 
-func (grid *grid) At(position position.Position) tui.Cell {
+func (grid *grid) At(position position.Position) tuigrid.Cell {
 	if tui.SafeMode && !grid.isValidPosition(position) {
 		size := grid.parent.Size
 		panic(fmt.Sprintf("invalid grid access: parent: %s, coordinates (%d, %d), size: %dx%d, contents: %s", grid.parent.Name, position.X, position.Y, size.Width, size.Height, string(grid.contents)))
@@ -41,7 +42,7 @@ func (grid *grid) At(position position.Position) tui.Cell {
 		contents = ' '
 	}
 
-	cell := tui.Cell{
+	cell := tuigrid.Cell{
 		Contents: contents,
 		Style:    grid.parent.style,
 	}

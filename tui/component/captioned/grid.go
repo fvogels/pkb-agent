@@ -3,16 +3,17 @@ package captioned
 import (
 	"fmt"
 	"pkb-agent/tui"
+	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/tui/position"
 	"pkb-agent/tui/size"
 )
 
 type grid struct {
 	parent    *Component
-	childGrid tui.Grid
+	childGrid tuigrid.Grid
 }
 
-func newGrid(parent *Component) tui.Grid {
+func newGrid(parent *Component) tuigrid.Grid {
 	grid := grid{
 		parent:    parent,
 		childGrid: parent.child.Render(),
@@ -30,7 +31,7 @@ func (grid *grid) Size() size.Size {
 	}
 }
 
-func (grid *grid) At(pos position.Position) tui.Cell {
+func (grid *grid) At(pos position.Position) tuigrid.Cell {
 	if tui.SafeMode && !grid.isValidPosition(pos) {
 		size := grid.Size()
 		panic(fmt.Sprintf("invalid position %s, size %s", pos.String(), size.String()))
@@ -50,7 +51,7 @@ func (grid *grid) At(pos position.Position) tui.Cell {
 			contents = ' '
 		}
 
-		return tui.Cell{
+		return tuigrid.Cell{
 			Contents: contents,
 			Style:    captionStyle,
 			OnClick:  func() {},

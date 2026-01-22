@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"pkb-agent/tui/grid"
 	"pkb-agent/tui/position"
 	"pkb-agent/tui/size"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/gdamore/tcell/v3/color"
 )
 
-func NewEmptyGrid(size size.Size) Grid {
+func NewEmptyGrid(size size.Size) grid.Grid {
 	style := tcell.StyleDefault.Foreground(color.Reset).Background(color.Reset)
 
 	result := emptyGrid{
@@ -24,14 +25,14 @@ type emptyGrid struct {
 	style *Style
 }
 
-func (grid *emptyGrid) Size() size.Size {
-	return grid.size
+func (g *emptyGrid) Size() size.Size {
+	return g.size
 }
 
-func (grid *emptyGrid) At(position.Position) Cell {
-	cell := Cell{
+func (g *emptyGrid) At(position.Position) grid.Cell {
+	cell := grid.Cell{
 		Contents: ' ',
-		Style:    grid.style,
+		Style:    g.style,
 	}
 
 	return cell

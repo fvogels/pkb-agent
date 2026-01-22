@@ -14,6 +14,7 @@ import (
 	"pkb-agent/tui/component/linksview"
 	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/grid"
 	"pkb-agent/tui/model"
 	"pkb-agent/util/uid"
 
@@ -112,7 +113,7 @@ func newViewMode(application *Application) *viewMode {
 	return &result
 }
 
-func (component *viewMode) Render() tui.Grid {
+func (component *viewMode) Render() grid.Grid {
 	return component.root.Render()
 }
 

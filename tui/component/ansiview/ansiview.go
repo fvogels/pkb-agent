@@ -4,6 +4,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/ansigrid"
 	"pkb-agent/tui/data"
+	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/util/uid"
 
 	"github.com/gdamore/tcell/v3"
@@ -13,7 +14,7 @@ import (
 type Component struct {
 	tui.ComponentBase
 	rawContents data.Value[string]
-	ansiGrid    data.Value[tui.Grid]
+	ansiGrid    data.Value[tuigrid.Grid]
 	emptyStyle  *tui.Style
 }
 
@@ -27,7 +28,7 @@ func New(messageQueue tui.MessageQueue, contents data.Value[string]) *Component 
 			Name:         "nameless ansiview",
 		},
 		rawContents: contents,
-		ansiGrid: data.MapValue(contents, func(s string) tui.Grid {
+		ansiGrid: data.MapValue(contents, func(s string) tuigrid.Grid {
 			return ansigrid.Parse(s, &emptyStyle)
 		}),
 		emptyStyle: &emptyStyle,
@@ -47,7 +48,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() tuigrid.Grid {
 	size := component.Size
 	grid := component.ansiGrid.Get()
 	style := component.emptyStyle

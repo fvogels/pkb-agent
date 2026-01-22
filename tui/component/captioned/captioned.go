@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
+	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/tui/size"
 	"pkb-agent/util/uid"
 	"reflect"
@@ -54,7 +55,7 @@ func (component *Component) SetCaptionStyle(style *tui.Style) {
 	component.captionStyle = style
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() tuigrid.Grid {
 	return newGrid(component)
 }
 

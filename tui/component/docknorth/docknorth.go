@@ -3,6 +3,7 @@ package docknorth
 import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/debug"
+	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/tui/size"
 	"pkb-agent/util/uid"
 )
@@ -45,7 +46,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() tuigrid.Grid {
 	return &grid{
 		size:            component.Size,
 		mainChildGrid:   component.mainChild.Render(),

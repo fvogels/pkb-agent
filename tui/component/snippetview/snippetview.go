@@ -4,6 +4,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/ansiview"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/grid"
 	"pkb-agent/util/syntaxhighlighting"
 	"pkb-agent/util/uid"
 )
@@ -49,7 +50,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() grid.Grid {
 	return component.child.Render()
 }
 

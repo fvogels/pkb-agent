@@ -13,6 +13,7 @@ import (
 	"pkb-agent/tui/component/holder"
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/grid"
 	"pkb-agent/util/uid"
 )
 
@@ -165,7 +166,7 @@ func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindi
 	component.signalNodeKeyBindingsUpdate()
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() grid.Grid {
 	slog.Debug("Rendering hybrid node viewer", slog.String("size", component.Size.String()))
 
 	return component.root.Render()

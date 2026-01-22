@@ -9,6 +9,7 @@ import (
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/debug"
+	"pkb-agent/tui/grid"
 	"pkb-agent/util/uid"
 )
 
@@ -52,7 +53,7 @@ func (component *Component) onStateUpdated() {
 	})
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() grid.Grid {
 	slog.Debug(
 		"Rendering atom view",
 		slog.String("size", component.Size.String()),

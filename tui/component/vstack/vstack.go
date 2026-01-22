@@ -3,6 +3,7 @@ package vstack
 import (
 	"pkb-agent/persistent/list"
 	"pkb-agent/tui"
+	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/tui/size"
 	"pkb-agent/util/uid"
 
@@ -61,10 +62,10 @@ func (component *Component) onResize(message tui.MsgResize) {
 	}
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() tuigrid.Grid {
 	childGrids := list.MapList(
 		component.children,
-		func(child tui.MeasurableComponent) tui.Grid {
+		func(child tui.MeasurableComponent) tuigrid.Grid {
 			return child.Render()
 		},
 	)

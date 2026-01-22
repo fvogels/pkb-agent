@@ -1,7 +1,7 @@
 package tui
 
 import (
-	"pkb-agent/tui/position"
+	"pkb-agent/tui/grid"
 	"pkb-agent/tui/size"
 
 	"github.com/gdamore/tcell/v3"
@@ -14,7 +14,7 @@ const (
 type Component interface {
 	GetIdentifier() int
 	Handle(Message)
-	Render() Grid
+	Render() grid.Grid
 }
 
 type MeasurableComponent interface {
@@ -33,15 +33,4 @@ func (base *ComponentBase) GetIdentifier() int {
 	return base.Identifier
 }
 
-type Grid interface {
-	Size() size.Size
-	At(position position.Position) Cell
-}
-
 type Style = tcell.Style
-
-type Cell struct {
-	Contents rune
-	Style    *Style
-	OnClick  func()
-}

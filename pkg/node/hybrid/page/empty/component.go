@@ -6,6 +6,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/grid"
 	"pkb-agent/util/uid"
 )
 
@@ -33,7 +34,7 @@ func NewPageComponent(messageQueue tui.MessageQueue) *pageComponent {
 	return &component
 }
 
-func (component *pageComponent) Render() tui.Grid {
+func (component *pageComponent) Render() grid.Grid {
 	return component.child.Render()
 }
 

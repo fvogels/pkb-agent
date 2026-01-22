@@ -4,6 +4,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/debug"
+	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/util/uid"
 
 	"github.com/gdamore/tcell/v3"
@@ -42,7 +43,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() tuigrid.Grid {
 	return newGrid(component, []rune(component.contents.Get()))
 }
 

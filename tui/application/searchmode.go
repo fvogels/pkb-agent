@@ -12,6 +12,7 @@ import (
 	"pkb-agent/tui/component/input"
 	"pkb-agent/tui/component/nodeselection"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/grid"
 	"pkb-agent/tui/model"
 	"pkb-agent/util/uid"
 
@@ -102,7 +103,7 @@ func newSearchMode(application *Application) *searchMode {
 	return &result
 }
 
-func (component *searchMode) Render() tui.Grid {
+func (component *searchMode) Render() grid.Grid {
 	return component.root.Render()
 }
 

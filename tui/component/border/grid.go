@@ -3,6 +3,7 @@ package border
 import (
 	"fmt"
 	"pkb-agent/tui"
+	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/tui/position"
 	"pkb-agent/tui/size"
 
@@ -11,10 +12,10 @@ import (
 
 type grid struct {
 	parent    *Component
-	childGrid tui.Grid
+	childGrid tuigrid.Grid
 }
 
-func newGrid(parent *Component) tui.Grid {
+func newGrid(parent *Component) tuigrid.Grid {
 	grid := grid{
 		parent:    parent,
 		childGrid: parent.child.Render(),
@@ -32,15 +33,15 @@ func (grid *grid) Size() size.Size {
 	}
 }
 
-func (grid *grid) At(pos position.Position) tui.Cell {
-	if tui.SafeMode && !grid.isValidPosition(pos) {
-		size := grid.Size()
-		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d in component %s", pos.X, pos.Y, size.Width, size.Height, grid.parent.Name))
+func (g *grid) At(pos position.Position) tuigrid.Cell {
+	if tui.SafeMode && !g.isValidPosition(pos) {
+		size := g.Size()
+		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d in component %s", pos.X, pos.Y, size.Width, size.Height, g.parent.Name))
 	}
 
 	x := pos.X
 	y := pos.Y
-	size := grid.Size()
+	size := g.Size()
 	width := size.Width
 	height := size.Height
 
@@ -49,7 +50,7 @@ func (grid *grid) At(pos position.Position) tui.Cell {
 	var onClick func()
 
 	if x == 0 {
-		style = grid.parent.style
+		style = g.parent.style
 
 		if y == 0 {
 			// Upper left corner
@@ -62,7 +63,7 @@ func (grid *grid) At(pos position.Position) tui.Cell {
 			char = tcell.RuneVLine
 		}
 	} else if x == width-1 {
-		style = grid.parent.style
+		style = g.parent.style
 
 		if y == 0 {
 			// Upper right corner
@@ -75,26 +76,26 @@ func (grid *grid) At(pos position.Position) tui.Cell {
 			char = tcell.RuneVLine
 		}
 	} else if y == 0 || y == height-1 {
-		style = grid.parent.style
+		style = g.parent.style
 		char = tcell.RuneHLine
 	} else {
-		cell := grid.childGrid.At(position.Position{X: x - 1, Y: y - 1})
+		cell := g.childGrid.At(position.Position{X: x - 1, Y: y - 1})
 		style = cell.Style
 		char = cell.Contents
 		onClick = cell.OnClick
 	}
 
-	return tui.Cell{
+	return tuigrid.Cell{
 		Contents: char,
 		Style:    style,
 		OnClick:  onClick,
 	}
 }
 
-func (grid *grid) isValidPosition(position position.Position) bool {
+func (g *grid) isValidPosition(position position.Position) bool {
 	x := position.X
 	y := position.Y
-	size := grid.Size()
+	size := g.Size()
 
 	return 0 <= x && x < size.Width && 0 <= y && y < size.Height
 }

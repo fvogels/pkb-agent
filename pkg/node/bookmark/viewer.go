@@ -6,6 +6,7 @@ import (
 	"pkb-agent/tui/application/messages"
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/grid"
 	"pkb-agent/util/uid"
 
 	"github.com/pkg/browser"
@@ -71,7 +72,7 @@ func (component *Component) onStateUpdated() {
 	})
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() grid.Grid {
 	return component.child.Render()
 }
 

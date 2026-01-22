@@ -12,6 +12,7 @@ import (
 	"pkb-agent/tui/application/messages"
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/grid"
 	"pkb-agent/util/pathlib"
 	"pkb-agent/util/uid"
 	"pkb-agent/util/zipfile"
@@ -89,7 +90,7 @@ func (component *Component) onStateUpdated() {
 	})
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() grid.Grid {
 	slog.Debug(
 		"Rendering backblaze viewer",
 		slog.String("size", component.Size.String()),

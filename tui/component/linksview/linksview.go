@@ -11,6 +11,7 @@ import (
 	"pkb-agent/tui/component/vstack"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/debug"
+	"pkb-agent/tui/grid"
 	"pkb-agent/util/uid"
 
 	"github.com/gdamore/tcell/v3"
@@ -66,7 +67,7 @@ func createRoot(messageQueue tui.MessageQueue, node *pkg.Node) tui.Component {
 	return root
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() grid.Grid {
 	slog.Debug("Rendering linksview", slog.String("size", component.Size.String()))
 	return component.root.Render()
 }

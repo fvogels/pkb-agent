@@ -8,6 +8,7 @@ import (
 	"pkb-agent/tui/component/stringlist"
 	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/grid"
 	"pkb-agent/util/uid"
 
 	"github.com/gdamore/tcell/v3"
@@ -105,7 +106,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() grid.Grid {
 	return component.root.Render()
 }
 

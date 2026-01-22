@@ -2,6 +2,7 @@ package stringsview
 
 import (
 	"pkb-agent/tui"
+	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/tui/position"
 	"pkb-agent/tui/size"
 )
@@ -20,7 +21,7 @@ func (grid *grid) Size() size.Size {
 	return grid.parent.Size
 }
 
-func (grid *grid) At(position position.Position) tui.Cell {
+func (grid *grid) At(position position.Position) tuigrid.Cell {
 	if tui.SafeMode && !grid.isValidPosition(position) {
 		panic("invalid coordinates")
 	}
@@ -54,7 +55,7 @@ func (grid *grid) At(position position.Position) tui.Cell {
 		onClick = func() { grid.parent.onItemClicked(currentItemIndex) }
 	}
 
-	cell := tui.Cell{
+	cell := tuigrid.Cell{
 		Contents: contents,
 		Style:    style,
 		OnClick:  onClick,

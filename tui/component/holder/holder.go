@@ -4,6 +4,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/debug"
+	"pkb-agent/tui/grid"
 	"pkb-agent/util/uid"
 )
 
@@ -47,7 +48,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() tui.Grid {
+func (component *Component) Render() grid.Grid {
 	child := component.child.Get()
 
 	if child != nil {

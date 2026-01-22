@@ -6,6 +6,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/component/snippetview"
 	"pkb-agent/tui/data"
+	"pkb-agent/tui/grid"
 	"pkb-agent/util/uid"
 
 	"golang.design/x/clipboard"
@@ -48,7 +49,7 @@ func NewPageComponent(messageQueue tui.MessageQueue, parent *Page) *pageComponen
 	return &component
 }
 
-func (component *pageComponent) Render() tui.Grid {
+func (component *pageComponent) Render() grid.Grid {
 	return component.child.Render()
 }
 
