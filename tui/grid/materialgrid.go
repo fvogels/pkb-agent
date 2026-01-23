@@ -1,20 +1,19 @@
-package tui
+package grid
 
 import (
 	"fmt"
-	"pkb-agent/tui/grid"
 	"pkb-agent/tui/position"
 	"pkb-agent/tui/size"
 )
 
 type MemoryGrid struct {
-	items []grid.Cell
+	items []Cell
 	size  size.Size
 }
 
-func MaterializeGrid(g grid.Grid) grid.Grid {
+func MaterializeGrid(g Grid) Grid {
 	size := g.Size()
-	items := make([]grid.Cell, size.Width*size.Height)
+	items := make([]Cell, size.Width*size.Height)
 
 	i := 0
 	for y := range size.Height {
@@ -32,8 +31,8 @@ func MaterializeGrid(g grid.Grid) grid.Grid {
 	}
 }
 
-func NewMaterializedGrid(size size.Size, initializer func(position.Position) grid.Cell) *MemoryGrid {
-	items := make([]grid.Cell, size.Width*size.Height)
+func NewMaterializedGrid(size size.Size, initializer func(position.Position) Cell) *MemoryGrid {
+	items := make([]Cell, size.Width*size.Height)
 
 	i := 0
 	for y := range size.Height {
@@ -56,16 +55,16 @@ func (grid *MemoryGrid) Size() size.Size {
 	return grid.size
 }
 
-func (grid *MemoryGrid) At(position position.Position) grid.Cell {
-	if SafeMode && !grid.isValidPosition(position) {
+func (grid *MemoryGrid) At(position position.Position) Cell {
+	if !grid.isValidPosition(position) {
 		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d", position.X, position.Y, grid.size.Width, grid.size.Height))
 	}
 
 	return grid.items[grid.computeIndexOfPosition(position)]
 }
 
-func (grid *MemoryGrid) Set(position position.Position, cell grid.Cell) {
-	if SafeMode && !grid.isValidPosition(position) {
+func (grid *MemoryGrid) Set(position position.Position, cell Cell) {
+	if !grid.isValidPosition(position) {
 		panic("invalid position")
 	}
 

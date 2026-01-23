@@ -56,5 +56,5 @@ func (component *Component) Invalidate() {
 }
 
 func (component *Component) Refresh() {
-	component.cached = tui.MaterializeGrid(component.child.Render())
+	component.cached = grid.MaterializeGrid(component.child.Render())
 }

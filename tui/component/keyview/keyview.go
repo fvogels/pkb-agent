@@ -6,7 +6,7 @@ import (
 	"pkb-agent/tui"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/debug"
-	"pkb-agent/tui/grid"
+	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/tui/position"
 	"pkb-agent/util/uid"
 
@@ -17,7 +17,7 @@ import (
 type Component struct {
 	tui.ComponentBase
 	keyBindings      data.View[list.List[tui.KeyBinding]]
-	cachedGrid       grid.Grid
+	cachedGrid       tuigrid.Grid
 	keyStyle         *tui.Style
 	descriptionStyle *tui.Style
 	emptyStyle       *tui.Style
@@ -53,7 +53,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() grid.Grid {
+func (component *Component) Render() tuigrid.Grid {
 	slog.Debug("Rendering keyview")
 
 	if component.keyBindings.Updated() || component.cachedGrid == nil {
@@ -68,17 +68,17 @@ func (component *Component) onResize(message tui.MsgResize) {
 	component.cachedGrid = nil
 }
 
-func (component *Component) renderKeyBindings() grid.Grid {
-	cell := grid.Cell{
+func (component *Component) renderKeyBindings() tuigrid.Grid {
+	cell := tuigrid.Cell{
 		Contents: ' ',
 		Style:    component.emptyStyle,
 	}
-	result := tui.NewMaterializedGrid(component.Size, func(position.Position) grid.Cell { return cell })
+	result := tuigrid.NewMaterializedGrid(component.Size, func(position.Position) tuigrid.Cell { return cell })
 
 	x := 0
 	write := func(contents rune, style *tui.Style) {
 		if x < result.Size().Width {
-			result.Set(position.Position{X: x, Y: 0}, grid.Cell{Contents: contents, Style: style})
+			result.Set(position.Position{X: x, Y: 0}, tuigrid.Cell{Contents: contents, Style: style})
 			x++
 		}
 	}
