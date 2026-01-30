@@ -122,7 +122,14 @@ func downloadAndOpen(bucketName string, filename string) error {
 		return err
 	}
 
-	buffer, err := client.DownloadToBuffer(ctx, bucketName, filename, 1, func(bytesDownloaded int) {})
+	buffer, err := client.DownloadToBuffer(ctx, bucketName, filename, 1, func(bytesDownloaded int) {
+		slog.Debug(
+			"Received bytes",
+			slog.String("bucketName", bucketName),
+			slog.String("filename", filename),
+			slog.Int("bytesDownloaded", bytesDownloaded),
+		)
+	})
 	if err != nil {
 		slog.Error(
 			"Failed to download file from Backblaze",
@@ -132,12 +139,22 @@ func downloadAndOpen(bucketName string, filename string) error {
 		return err
 	}
 
+	slog.Debug(
+		"Unpacking zipfile",
+		slog.String("bucket", bucketName),
+		slog.String("filename", filename),
+	)
 	zippedFiles, err := zipfile.Unpack(buffer)
 	if err != nil {
 		slog.Error("Failed to unzip files")
 		return err
 	}
 
+	slog.Debug(
+		"Writing file to disk",
+		slog.String("bucket", bucketName),
+		slog.String("filename", filename),
+	)
 	zippedFile := zippedFiles[0]
 	path, err := zippedFile.SaveToDirectory(pathlib.New("."))
 	if err != nil {
@@ -145,6 +162,11 @@ func downloadAndOpen(bucketName string, filename string) error {
 		return err
 	}
 
+	slog.Debug(
+		"Opening file with default viewer",
+		slog.String("bucket", bucketName),
+		slog.String("filename", filename),
+	)
 	if err := extern.OpenUsingDefaultViewer(path); err != nil {
 		slog.Error("Failed to open downloaded file using default viewer")
 		return err
