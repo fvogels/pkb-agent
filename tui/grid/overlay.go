@@ -10,7 +10,7 @@ type overlay struct {
 	layers []Grid
 }
 
-func NewOverlay(size size.Size, layers []Grid) Grid {
+func OverlayGrids(size size.Size, layers ...Grid) Grid {
 	return &overlay{
 		size:   size,
 		layers: layers,

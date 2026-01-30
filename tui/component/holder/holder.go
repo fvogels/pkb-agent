@@ -54,7 +54,7 @@ func (component *Component) Render() grid.Grid {
 	if child != nil {
 		return child.Render()
 	} else {
-		return tui.NewEmptyGrid(component.Size)
+		return grid.NewEmptyGrid(component.Size)
 	}
 }
 
