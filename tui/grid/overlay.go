@@ -8,7 +8,7 @@ type overlay struct {
 	layers []FiniteGrid
 }
 
-func OverlayGrids(layers ...FiniteGrid) Grid {
+func Overlay(layers ...FiniteGrid) Grid {
 	return &overlay{
 		layers: layers,
 	}
