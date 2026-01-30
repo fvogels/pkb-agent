@@ -22,7 +22,7 @@ func (grid *grid) Size() size.Size {
 }
 
 func (grid *grid) At(position position.Position) tuigrid.Cell {
-	if tui.SafeMode && !grid.isValidPosition(position) {
+	if !grid.isValidPosition(position) {
 		panic("invalid coordinates")
 	}
 
@@ -65,9 +65,5 @@ func (grid *grid) At(position position.Position) tuigrid.Cell {
 }
 
 func (grid *grid) isValidPosition(position position.Position) bool {
-	x := position.X
-	y := position.Y
-	size := grid.Size()
-
-	return 0 <= x && x < size.Width && 0 <= y && y < size.Height
+	return grid.Size().IsValidPosition(position)
 }

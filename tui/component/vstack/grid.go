@@ -48,12 +48,6 @@ func (grid *grid) At(pos position.Position) tuigrid.Cell {
 	}
 }
 
-func (grid *grid) isValidPosition(pos position.Position) bool {
-	x := pos.X
-	y := pos.Y
-	size := grid.parent.Size
-	width := size.Width
-	height := size.Height
-
-	return 0 <= x && x < width && 0 <= y && y < height
+func (grid *grid) isValidPosition(position position.Position) bool {
+	return grid.Size().IsValidPosition(position)
 }

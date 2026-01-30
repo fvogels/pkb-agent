@@ -34,7 +34,7 @@ func (grid *grid) Size() size.Size {
 }
 
 func (g *grid) At(pos position.Position) tuigrid.Cell {
-	if tui.SafeMode && !g.isValidPosition(pos) {
+	if !g.isValidPosition(pos) {
 		size := g.Size()
 		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d in component %s", pos.X, pos.Y, size.Width, size.Height, g.parent.Name))
 	}
@@ -93,9 +93,5 @@ func (g *grid) At(pos position.Position) tuigrid.Cell {
 }
 
 func (g *grid) isValidPosition(position position.Position) bool {
-	x := position.X
-	y := position.Y
-	size := g.Size()
-
-	return 0 <= x && x < size.Width && 0 <= y && y < size.Height
+	return g.Size().IsValidPosition(position)
 }
