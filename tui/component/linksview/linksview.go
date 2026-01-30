@@ -67,7 +67,7 @@ func createRoot(messageQueue tui.MessageQueue, node *pkg.Node) tui.Component {
 	return root
 }
 
-func (component *Component) Render() grid.Grid {
+func (component *Component) Render() grid.FiniteGrid {
 	slog.Debug("Rendering linksview", slog.String("size", component.Size.String()))
 	return component.root.Render()
 }

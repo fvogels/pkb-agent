@@ -55,7 +55,7 @@ func (component *Component) SetCaptionStyle(style *tui.Style) {
 	component.captionStyle = style
 }
 
-func (component *Component) Render() tuigrid.Grid {
+func (component *Component) Render() tuigrid.FiniteGrid {
 	return newGrid(component)
 }
 

@@ -14,7 +14,7 @@ const (
 type Component interface {
 	GetIdentifier() int
 	Handle(Message)
-	Render() grid.Grid
+	Render() grid.FiniteGrid
 }
 
 type MeasurableComponent interface {

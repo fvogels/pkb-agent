@@ -90,7 +90,7 @@ func (component *Component) onStateUpdated() {
 	})
 }
 
-func (component *Component) Render() grid.Grid {
+func (component *Component) Render() grid.FiniteGrid {
 	slog.Debug(
 		"Rendering backblaze viewer",
 		slog.String("size", component.Size.String()),

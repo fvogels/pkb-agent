@@ -9,10 +9,10 @@ import (
 
 type grid struct {
 	parent     *Component
-	childGrids list.List[tuigrid.Grid]
+	childGrids list.List[tuigrid.FiniteGrid]
 }
 
-func newGrid(parent *Component, childGrids list.List[tuigrid.Grid]) tuigrid.Grid {
+func newGrid(parent *Component, childGrids list.List[tuigrid.FiniteGrid]) tuigrid.FiniteGrid {
 	return &grid{
 		parent:     parent,
 		childGrids: childGrids,

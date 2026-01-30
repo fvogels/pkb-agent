@@ -8,7 +8,7 @@ import (
 	"github.com/gdamore/tcell/v3/color"
 )
 
-func NewEmptyGrid(size size.Size) Grid {
+func NewEmptyGrid(size size.Size) FiniteGrid {
 	style := tcell.StyleDefault.Foreground(color.Reset).Background(color.Reset)
 
 	result := emptyGrid{

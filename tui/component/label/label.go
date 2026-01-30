@@ -43,7 +43,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() tuigrid.Grid {
+func (component *Component) Render() tuigrid.FiniteGrid {
 	return newGrid(component, []rune(component.contents.Get()))
 }
 

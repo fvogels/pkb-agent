@@ -113,7 +113,7 @@ func newViewMode(application *Application) *viewMode {
 	return &result
 }
 
-func (component *viewMode) Render() grid.Grid {
+func (component *viewMode) Render() grid.FiniteGrid {
 	return component.root.Render()
 }
 

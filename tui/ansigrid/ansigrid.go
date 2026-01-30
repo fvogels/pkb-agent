@@ -17,7 +17,7 @@ type ansiGrid struct {
 	emptyCell grid.Cell
 }
 
-func Parse(str string, emptyStyle *tui.Style) grid.Grid {
+func Parse(str string, emptyStyle *tui.Style) grid.FiniteGrid {
 	cells := [][]grid.Cell{}
 	strings.Lines(str)(func(line string) bool {
 		cells = append(cells, parseLine(line))

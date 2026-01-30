@@ -40,7 +40,7 @@ func NewPageComponent(messageQueue tui.MessageQueue, parent *Page) *pageComponen
 	return &component
 }
 
-func (component *pageComponent) Render() grid.Grid {
+func (component *pageComponent) Render() grid.FiniteGrid {
 	return component.markdownViewer.Render()
 }
 

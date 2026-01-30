@@ -7,6 +7,10 @@ type Size struct {
 	Height int
 }
 
+type Sized interface {
+	Size() Size
+}
+
 func (size Size) String() string {
 	return fmt.Sprintf("%dx%d", size.Width, size.Height)
 }

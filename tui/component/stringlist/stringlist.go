@@ -108,7 +108,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() grid.Grid {
+func (component *Component) Render() grid.FiniteGrid {
 	return component.child.Render()
 }
 

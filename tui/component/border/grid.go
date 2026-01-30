@@ -12,10 +12,10 @@ import (
 
 type grid struct {
 	parent    *Component
-	childGrid tuigrid.Grid
+	childGrid tuigrid.FiniteGrid
 }
 
-func newGrid(parent *Component) tuigrid.Grid {
+func newGrid(parent *Component) tuigrid.FiniteGrid {
 	grid := grid{
 		parent:    parent,
 		childGrid: parent.child.Render(),

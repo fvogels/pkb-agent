@@ -8,8 +8,12 @@ import (
 )
 
 type Grid interface {
-	Size() size.Size
 	At(position position.Position) Cell
+}
+
+type FiniteGrid interface {
+	Grid
+	size.Sized
 }
 
 type Cell struct {

@@ -7,10 +7,10 @@ import (
 
 type overlay struct {
 	size   size.Size
-	layers []Grid
+	layers []FiniteGrid
 }
 
-func OverlayGrids(size size.Size, layers ...Grid) Grid {
+func OverlayGrids(size size.Size, layers ...FiniteGrid) FiniteGrid {
 	return &overlay{
 		size:   size,
 		layers: layers,

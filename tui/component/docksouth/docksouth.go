@@ -42,7 +42,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() tuigrid.Grid {
+func (component *Component) Render() tuigrid.FiniteGrid {
 	slog.Debug("Rendering docksouth", slog.String("name", component.Name))
 
 	return &grid{

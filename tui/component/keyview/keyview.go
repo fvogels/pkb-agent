@@ -17,7 +17,7 @@ import (
 type Component struct {
 	tui.ComponentBase
 	keyBindings      data.View[list.List[tui.KeyBinding]]
-	cachedGrid       tuigrid.Grid
+	cachedGrid       tuigrid.FiniteGrid
 	keyStyle         *tui.Style
 	descriptionStyle *tui.Style
 	emptyStyle       *tui.Style
@@ -53,7 +53,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() tuigrid.Grid {
+func (component *Component) Render() tuigrid.FiniteGrid {
 	slog.Debug("Rendering keyview")
 
 	if component.keyBindings.Updated() || component.cachedGrid == nil {
@@ -68,7 +68,7 @@ func (component *Component) onResize(message tui.MsgResize) {
 	component.cachedGrid = nil
 }
 
-func (component *Component) renderKeyBindings() tuigrid.Grid {
+func (component *Component) renderKeyBindings() tuigrid.FiniteGrid {
 	cell := tuigrid.Cell{
 		Contents: ' ',
 		Style:    component.emptyStyle,

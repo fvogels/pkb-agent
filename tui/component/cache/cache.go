@@ -9,7 +9,7 @@ import (
 type Component struct {
 	tui.ComponentBase
 	child  tui.Component
-	cached grid.Grid
+	cached grid.FiniteGrid
 	dirty  bool
 }
 
@@ -36,7 +36,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() grid.Grid {
+func (component *Component) Render() grid.FiniteGrid {
 	if component.dirty {
 		component.Refresh()
 		component.dirty = false

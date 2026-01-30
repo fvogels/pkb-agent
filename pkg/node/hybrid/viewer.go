@@ -166,7 +166,7 @@ func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindi
 	component.signalNodeKeyBindingsUpdate()
 }
 
-func (component *Component) Render() grid.Grid {
+func (component *Component) Render() grid.FiniteGrid {
 	slog.Debug("Rendering hybrid node viewer", slog.String("size", component.Size.String()))
 
 	return component.root.Render()

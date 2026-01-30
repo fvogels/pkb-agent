@@ -9,11 +9,11 @@ import (
 
 type grid struct {
 	size       size.Size
-	ansiGrid   tuigrid.Grid
+	ansiGrid   tuigrid.FiniteGrid
 	emptyStyle *tui.Style
 }
 
-func newGrid(size size.Size, ansiGrid tuigrid.Grid, emptyStyle *tui.Style) tuigrid.Grid {
+func newGrid(size size.Size, ansiGrid tuigrid.FiniteGrid, emptyStyle *tui.Style) tuigrid.FiniteGrid {
 	return &grid{
 		size:       size,
 		ansiGrid:   ansiGrid,

@@ -103,7 +103,7 @@ func newSearchMode(application *Application) *searchMode {
 	return &result
 }
 
-func (component *searchMode) Render() grid.Grid {
+func (component *searchMode) Render() grid.FiniteGrid {
 	return component.root.Render()
 }
 

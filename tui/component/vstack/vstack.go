@@ -62,10 +62,10 @@ func (component *Component) onResize(message tui.MsgResize) {
 	}
 }
 
-func (component *Component) Render() tuigrid.Grid {
+func (component *Component) Render() tuigrid.FiniteGrid {
 	childGrids := list.MapList(
 		component.children,
-		func(child tui.MeasurableComponent) tuigrid.Grid {
+		func(child tui.MeasurableComponent) tuigrid.FiniteGrid {
 			return child.Render()
 		},
 	)

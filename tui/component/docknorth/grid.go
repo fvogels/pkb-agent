@@ -9,8 +9,8 @@ import (
 
 type grid struct {
 	size            size.Size
-	mainChildGrid   tuigrid.Grid
-	dockedChildGrid tuigrid.Grid
+	mainChildGrid   tuigrid.FiniteGrid
+	dockedChildGrid tuigrid.FiniteGrid
 	boundary        int // Y-coordinate of where docked child ends
 }
 

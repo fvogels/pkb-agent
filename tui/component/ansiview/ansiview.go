@@ -14,7 +14,7 @@ import (
 type Component struct {
 	tui.ComponentBase
 	rawContents data.Value[string]
-	ansiGrid    data.Value[tuigrid.Grid]
+	ansiGrid    data.Value[tuigrid.FiniteGrid]
 	emptyStyle  *tui.Style
 }
 
@@ -28,7 +28,7 @@ func New(messageQueue tui.MessageQueue, contents data.Value[string]) *Component 
 			Name:         "nameless ansiview",
 		},
 		rawContents: contents,
-		ansiGrid: data.MapValue(contents, func(s string) tuigrid.Grid {
+		ansiGrid: data.MapValue(contents, func(s string) tuigrid.FiniteGrid {
 			return ansigrid.Parse(s, &emptyStyle)
 		}),
 		emptyStyle: &emptyStyle,
@@ -48,7 +48,7 @@ func (component *Component) Handle(message tui.Message) {
 	}
 }
 
-func (component *Component) Render() tuigrid.Grid {
+func (component *Component) Render() tuigrid.FiniteGrid {
 	size := component.Size
 	grid := component.ansiGrid.Get()
 	style := component.emptyStyle

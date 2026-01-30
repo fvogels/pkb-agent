@@ -53,7 +53,7 @@ func (component *Component) onStateUpdated() {
 	})
 }
 
-func (component *Component) Render() grid.Grid {
+func (component *Component) Render() grid.FiniteGrid {
 	slog.Debug(
 		"Rendering atom view",
 		slog.String("size", component.Size.String()),

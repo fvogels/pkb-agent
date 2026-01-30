@@ -11,7 +11,7 @@ type MemoryGrid struct {
 	size  size.Size
 }
 
-func MaterializeGrid(g Grid) Grid {
+func MaterializeGrid(g FiniteGrid) FiniteGrid {
 	size := g.Size()
 	items := make([]Cell, size.Width*size.Height)
 
