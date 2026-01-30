@@ -2,6 +2,7 @@ package docknorth
 
 import (
 	"pkb-agent/tui"
+	"pkb-agent/tui/data"
 	"pkb-agent/tui/debug"
 	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/tui/size"
@@ -12,10 +13,10 @@ type Component struct {
 	tui.ComponentBase
 	mainChild         tui.Component
 	dockedChild       tui.Component
-	dockedChildHeight int
+	dockedChildHeight data.Value[int]
 }
 
-func New(messageQueue tui.MessageQueue, name string, dockedChild tui.Component, mainChild tui.Component, dockedChildHeight int) *Component {
+func New(messageQueue tui.MessageQueue, name string, dockedChild tui.Component, mainChild tui.Component, dockedChildHeight data.Value[int]) *Component {
 	return &Component{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
@@ -28,10 +29,10 @@ func New(messageQueue tui.MessageQueue, name string, dockedChild tui.Component, 
 	}
 }
 
-func (component *Component) SetDockerChildHeight(height int) {
-	component.dockedChildHeight = height
-	component.updateLayout()
-}
+// func (component *Component) SetDockerChildHeight(height int) {
+// 	component.dockedChildHeight = height
+// 	component.updateLayout()
+// }
 
 func (component *Component) Handle(message tui.Message) {
 	debug.LogMessage(message)
@@ -51,7 +52,7 @@ func (component *Component) Render() tuigrid.FiniteGrid {
 		size:            component.Size,
 		mainChildGrid:   component.mainChild.Render(),
 		dockedChildGrid: component.dockedChild.Render(),
-		boundary:        component.dockedChildHeight,
+		boundary:        component.dockedChildHeight.Get(),
 	}
 }
 
@@ -63,12 +64,12 @@ func (component *Component) onResize(message tui.MsgResize) {
 
 func (component *Component) updateLayout() {
 	width := component.Size.Width
-	mainChildHeight := component.Size.Height - component.dockedChildHeight
+	mainChildHeight := component.Size.Height - component.dockedChildHeight.Get()
 
 	dockedChildSizeMessage := tui.MsgResize{
 		Size: size.Size{
 			Width:  width,
-			Height: component.dockedChildHeight,
+			Height: component.dockedChildHeight.Get(),
 		},
 	}
 	component.dockedChild.Handle(dockedChildSizeMessage)

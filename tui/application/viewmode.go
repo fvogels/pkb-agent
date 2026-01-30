@@ -87,9 +87,9 @@ func newViewMode(application *Application) *viewMode {
 		docknorth.New(
 			messageQueue,
 			"view:docknorth[nodes|nodeviewer]",
-			border.New(messageQueue, nodesView, &borderStyle),
+			nodesView,
 			border.New(messageQueue, highlightedNodeViewerHolder, &borderStyle),
-			20,
+			data.NewConstant(20),
 		),
 		statusBar,
 		1,

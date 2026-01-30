@@ -67,7 +67,7 @@ func New(messageQueue tui.MessageQueue, selectedNodes data.Value[list.List[*pkg.
 		"nodeselection[selected|intersection]",
 		selectedNodesView,
 		nodeIntersectionView,
-		0,
+		data.NewConstant(5),
 	)
 
 	component := Component{
@@ -116,8 +116,8 @@ func (component *Component) onResize(message tui.MsgResize) {
 }
 
 func (component *Component) updateLayout() {
-	selectedNodeCount := component.selectedNodes.Get().Size()
-	component.root.SetDockerChildHeight(selectedNodeCount)
+	// selectedNodeCount := component.selectedNodes.Get().Size()
+	// component.root.SetDockerChildHeight(selectedNodeCount)
 }
 
 func (component *Component) onStateUpdated() {
