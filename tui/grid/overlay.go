@@ -34,18 +34,5 @@ func (grid *overlay) At(pos position.Position) Cell {
 }
 
 func (grid *overlay) isValidPosition(position position.Position) bool {
-	if position.X < 0 {
-		return false
-	}
-	if position.Y < 0 {
-		return false
-	}
-	if position.X >= grid.size.Width {
-		return false
-	}
-	if position.Y >= grid.size.Height {
-		return false
-	}
-
-	return true
+	return grid.Size().IsValidPosition(position)
 }
