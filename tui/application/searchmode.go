@@ -80,7 +80,7 @@ func newSearchMode(application *Application) *searchMode {
 		docknorth.New(
 			messageQueue,
 			"input:docknorth[nodes|nodeviewer]",
-			border.New(messageQueue, nodesView, &borderStyle),
+			nodesView,
 			border.New(messageQueue, highlightedNodeViewerHolder, &borderStyle),
 			data.NewConstant(20),
 		),

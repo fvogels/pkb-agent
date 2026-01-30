@@ -4,6 +4,7 @@ import (
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
+	"pkb-agent/tui/component/border"
 	"pkb-agent/tui/component/docknorth"
 	"pkb-agent/tui/component/stringlist"
 	"pkb-agent/tui/component/stringsview"
@@ -23,7 +24,7 @@ type Component struct {
 	selectedIndex        data.Value[int]
 	selectedNodesView    *stringsview.Component
 	nodeIntersectionView *stringlist.Component
-	root                 *docknorth.Component
+	root                 tui.Component
 }
 
 func New(messageQueue tui.MessageQueue, selectedNodes data.Value[list.List[*pkg.Node]], nodeIntersection data.Value[list.List[*pkg.Node]], selectedIndex data.Value[int], lockCount data.Value[int]) *Component {
@@ -62,12 +63,17 @@ func New(messageQueue tui.MessageQueue, selectedNodes data.Value[list.List[*pkg.
 	)
 	nodeIntersectionView := stringlist.New(messageQueue, nodeIntersectionItems, selectedIndex)
 
-	root := docknorth.New(
+	borderStyle := tcell.StyleDefault.Foreground(color.Reset).Background(color.Reset)
+	root := border.New(
 		messageQueue,
-		"nodeselection[selected|intersection]",
-		selectedNodesView,
-		nodeIntersectionView,
-		data.NewConstant(5),
+		docknorth.New(
+			messageQueue,
+			"nodeselection[selected|intersection]",
+			selectedNodesView,
+			nodeIntersectionView,
+			data.MapValue(selectedNodes, func(nodes list.List[*pkg.Node]) int { return nodes.Size() }),
+		),
+		&borderStyle,
 	)
 
 	component := Component{
@@ -116,8 +122,9 @@ func (component *Component) onResize(message tui.MsgResize) {
 }
 
 func (component *Component) updateLayout() {
-	// selectedNodeCount := component.selectedNodes.Get().Size()
-	// component.root.SetDockerChildHeight(selectedNodeCount)
+	component.root.Handle(tui.MsgResize{
+		Size: component.Size,
+	})
 }
 
 func (component *Component) onStateUpdated() {
