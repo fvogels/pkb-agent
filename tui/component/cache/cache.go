@@ -56,5 +56,5 @@ func (component *Component) Invalidate() {
 }
 
 func (component *Component) Refresh() {
-	component.cached = grid.MaterializeGrid(component.child.Render())
+	component.cached = grid.Materialize(component.child.Render())
 }
