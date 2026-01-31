@@ -332,7 +332,11 @@ func (application *Application) loadGraph() error {
 		slog.Debug("Error occurred", slog.String("message", err.Error()))
 		return err
 	}
-	slog.Debug("Graph loaded", slog.String("loadTime", time.Since(before).String()))
+	slog.Debug(
+		"Graph loaded",
+		slog.String("loadTime", time.Since(before).String()),
+		slog.Int("nodeCount", graph.GetNodeCount()),
+	)
 
 	application.graph = graph
 

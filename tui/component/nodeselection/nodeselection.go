@@ -1,6 +1,7 @@
 package nodeselection
 
 import (
+	"fmt"
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg"
 	"pkb-agent/tui"
@@ -10,6 +11,7 @@ import (
 	"pkb-agent/tui/component/stringsview"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/grid"
+	"pkb-agent/tui/position"
 	"pkb-agent/util/uid"
 
 	"github.com/gdamore/tcell/v3"
@@ -115,7 +117,34 @@ func (component *Component) Handle(message tui.Message) {
 func (component *Component) Render() grid.FiniteGrid {
 	result := grid.Materialize(component.root.Render())
 
+	component.renderNodeCount(result)
+
 	return result
+}
+
+func (component *Component) renderNodeCount(g *grid.MaterializedGrid) {
+	str := fmt.Sprintf(" %d/%d ", component.selectedIndex.Get()+1, component.nodeIntersection.Get().Size())
+
+	// Only add node count if the grid is wide enough
+	if len(str)+4 < g.Size().Width {
+		style := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
+		x := g.Size().Width - 2
+		y := g.Size().Height - 1
+
+		for index, char := range str {
+			pos := position.Position{
+				X: x - len(str) + index,
+				Y: y,
+			}
+
+			cell := grid.Cell{
+				Contents: char,
+				Style:    &style,
+			}
+
+			g.Set(pos, cell)
+		}
+	}
 }
 
 func (component *Component) onResize(message tui.MsgResize) {

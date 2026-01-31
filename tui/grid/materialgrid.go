@@ -6,12 +6,12 @@ import (
 	"pkb-agent/tui/size"
 )
 
-type materializedGrid struct {
+type MaterializedGrid struct {
 	items []Cell
 	size  size.Size
 }
 
-func Materialize(g FiniteGrid) FiniteGrid {
+func Materialize(g FiniteGrid) *MaterializedGrid {
 	size := g.Size()
 	items := make([]Cell, size.Width*size.Height)
 
@@ -25,13 +25,13 @@ func Materialize(g FiniteGrid) FiniteGrid {
 		}
 	}
 
-	return &materializedGrid{
+	return &MaterializedGrid{
 		items: items,
 		size:  size,
 	}
 }
 
-func NewMaterializedGrid(size size.Size, initializer func(position.Position) Cell) *materializedGrid {
+func NewMaterializedGrid(size size.Size, initializer func(position.Position) Cell) *MaterializedGrid {
 	items := make([]Cell, size.Width*size.Height)
 
 	i := 0
@@ -43,7 +43,7 @@ func NewMaterializedGrid(size size.Size, initializer func(position.Position) Cel
 		}
 	}
 
-	result := materializedGrid{
+	result := MaterializedGrid{
 		items: items,
 		size:  size,
 	}
@@ -51,11 +51,11 @@ func NewMaterializedGrid(size size.Size, initializer func(position.Position) Cel
 	return &result
 }
 
-func (grid *materializedGrid) Size() size.Size {
+func (grid *MaterializedGrid) Size() size.Size {
 	return grid.size
 }
 
-func (grid *materializedGrid) At(position position.Position) Cell {
+func (grid *MaterializedGrid) At(position position.Position) Cell {
 	if !grid.isValidPosition(position) {
 		panic(fmt.Sprintf("invalid position (%d, %d), size %dx%d", position.X, position.Y, grid.size.Width, grid.size.Height))
 	}
@@ -63,7 +63,7 @@ func (grid *materializedGrid) At(position position.Position) Cell {
 	return grid.items[grid.computeIndexOfPosition(position)]
 }
 
-func (grid *materializedGrid) Set(position position.Position, cell Cell) {
+func (grid *MaterializedGrid) Set(position position.Position, cell Cell) {
 	if !grid.isValidPosition(position) {
 		panic("invalid position")
 	}
@@ -71,11 +71,11 @@ func (grid *materializedGrid) Set(position position.Position, cell Cell) {
 	grid.items[grid.computeIndexOfPosition(position)] = cell
 }
 
-func (grid *materializedGrid) isValidPosition(position position.Position) bool {
+func (grid *MaterializedGrid) isValidPosition(position position.Position) bool {
 	return grid.Size().IsValidPosition(position)
 }
 
-func (grid *materializedGrid) computeIndexOfPosition(position position.Position) int {
+func (grid *MaterializedGrid) computeIndexOfPosition(position position.Position) int {
 	width := grid.size.Width
 	x := position.X
 	y := position.Y
