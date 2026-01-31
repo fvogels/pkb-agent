@@ -113,7 +113,9 @@ func (component *Component) Handle(message tui.Message) {
 }
 
 func (component *Component) Render() grid.FiniteGrid {
-	return component.root.Render()
+	result := grid.Materialize(component.root.Render())
+
+	return result
 }
 
 func (component *Component) onResize(message tui.MsgResize) {
