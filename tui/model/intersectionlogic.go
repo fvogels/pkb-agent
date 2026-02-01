@@ -10,19 +10,23 @@ import (
 
 // determineIntersectionNodes computes which nodes are compatible with the selected nodes and the search filter.
 func determineIntersectionNodes(input string, graph *pkg.Graph, selectedNodes list.List[*pkg.Node], includeAncestors bool, includeIndirectDescendants bool) list.List[*pkg.Node] {
-	r1 := collectDescendantIntersection(graph, selectedNodes, includeIndirectDescendants)
+	intersectionNodes := collectDescendantIntersection(graph, selectedNodes, includeIndirectDescendants)
 
 	if includeAncestors {
-		r1 = collectAncestorsUnion(graph, r1)
+		intersectionNodes = collectAncestorsUnion(graph, intersectionNodes)
 	}
 
 	searchStrings := strings.Split(input, " ")
-	r2 := collectNodesMatchingSearches(graph, searchStrings)
-	r1.IntersectWith(r2)
+	intersectionNodesAncestors := collectNodesMatchingSearches(graph, searchStrings)
+	intersectionNodes.IntersectWith(intersectionNodesAncestors)
+
+	list.ForEach(selectedNodes, func(index int, selectedNode *pkg.Node) {
+		intersectionNodes.Remove(selectedNode.GetIndex())
+	})
 
 	result := []*pkg.Node{}
 	for i := range graph.GetNodeCount() {
-		if r1.Contains(i) {
+		if intersectionNodes.Contains(i) {
 			node := graph.FindNodeByIndex(i)
 			result = append(result, node)
 		}
