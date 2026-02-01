@@ -23,6 +23,12 @@ func (set *IntSet) Add(item int) {
 	set.members[item] = true
 }
 
+func (set *IntSet) Remove(item int) {
+	if set.Contains(item) {
+		set.members[item] = false
+	}
+}
+
 func (set *IntSet) Contains(item int) bool {
 	if item < len(set.members) {
 		return set.members[item]
