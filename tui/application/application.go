@@ -414,6 +414,7 @@ func (application *Application) selectHighlightedAndClearInput() {
 			model.SelectHighlightedNode()
 		}
 		model.Input = ""
+		model.HighlightedNodeIndex = 0
 		model.DetermineIntersectionNodes()
 	})
 }
