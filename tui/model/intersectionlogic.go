@@ -9,8 +9,8 @@ import (
 )
 
 // determineIntersectionNodes computes which nodes are compatible with the selected nodes and the search filter.
-func determineIntersectionNodes(input string, graph *pkg.Graph, selectedNodes list.List[*pkg.Node], includeLinked bool, includeIndirectAncestors bool) list.List[*pkg.Node] {
-	r1 := collectDescendantIntersection(graph, selectedNodes, includeIndirectAncestors)
+func determineIntersectionNodes(input string, graph *pkg.Graph, selectedNodes list.List[*pkg.Node], includeLinked bool, includeIndirectDescendants bool) list.List[*pkg.Node] {
+	r1 := collectDescendantIntersection(graph, selectedNodes, includeIndirectDescendants)
 
 	if includeLinked {
 		r1 = collectAncestorsUnion(graph, r1)
