@@ -50,6 +50,13 @@ func newViewMode(application *Application) *viewMode {
 			intersectionNodes,
 			selectedNodes,
 			func(highlightedNodeIndex int, intersectionNodes list.List[*pkg.Node], selectedNodes list.List[*pkg.Node]) *pkg.Node {
+				slog.Debug(
+					"Highlighted node determination",
+					slog.Int("highlightedNodeIndex", highlightedNodeIndex),
+					slog.Int("intersectionNodesSize", intersectionNodes.Size()),
+					slog.Int("selectedNodesSize", selectedNodes.Size()),
+				)
+
 				if intersectionNodes.Size() > 0 {
 					return intersectionNodes.At(highlightedNodeIndex)
 				} else if selectedNodes.Size() > 0 {
