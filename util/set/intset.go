@@ -70,3 +70,10 @@ func (set *IntSet) UnionWith(other *IntSet) {
 		set.members = append(set.members, other.members[len(set.members):]...)
 	}
 }
+
+func (set *IntSet) DifferenceWith(other *IntSet) {
+	imax := util.MinInt(len(set.members), len(other.members))
+	for i := range imax {
+		set.members[i] = set.members[i] && !other.members[i]
+	}
+}
