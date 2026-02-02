@@ -147,14 +147,21 @@ func collectAncestors(graph *pkg.Graph, node *pkg.Node) *set.IntSet {
 }
 
 func collectAncestorsUnion(graph *pkg.Graph, roots *set.IntSet) *set.IntSet {
-	result := set.NewIntSetWithInitialCapacity(graph.GetNodeCount())
+	intersection := set.NewIntSetWithInitialCapacity(graph.GetNodeCount())
+	for i := range graph.GetNodeCount() {
+		intersection.Add(i)
+	}
+
+	union := set.NewIntSetWithInitialCapacity(graph.GetNodeCount())
 
 	for i := range graph.GetNodeCount() {
 		if roots.Contains(i) {
-			r := collectAncestors(graph, graph.FindNodeByIndex(i))
-			result.UnionWith(r)
+			ancestors := collectAncestors(graph, graph.FindNodeByIndex(i))
+			union.UnionWith(ancestors)
+			intersection.IntersectWith(ancestors)
 		}
 	}
 
-	return result
+	union.DifferenceWith(intersection)
+	return union
 }
