@@ -200,6 +200,13 @@ func (component *Component) onKey(message tui.MsgKey) {
 		component.Handle(tui.MsgStateUpdated{})
 		component.Handle(tui.MsgResize{Size: component.Size})
 
+	case "Backtab":
+		component.withActivePage(func(page page.Page, viewer tui.Component) {
+			component.setActivePage((component.activePageIndex.Get() - 1 + len(component.pageViewers)) % len(component.pageViewers))
+		})
+		component.Handle(tui.MsgStateUpdated{})
+		component.Handle(tui.MsgResize{Size: component.Size})
+
 	default:
 		component.withActivePage(func(page page.Page, viewer tui.Component) {
 			viewer.Handle(message)
