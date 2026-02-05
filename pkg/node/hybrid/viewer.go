@@ -116,7 +116,7 @@ func (component *Component) signalNodeKeyBindingsUpdate() {
 }
 
 func (component *Component) createActionKeyBindings(actions []node.Action) []tui.KeyBinding {
-	keys := []rune{'z', 'x', 'c', 'v', 'b', 'n', 'm'}
+	keys := []rune{'z', 'x', 'v', 'b', 'n', 'm'}
 	keyBindings := make([]tui.KeyBinding, len(actions))
 
 	for index, action := range actions {
