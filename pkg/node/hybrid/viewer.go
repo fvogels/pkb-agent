@@ -7,6 +7,7 @@ import (
 	"pkb-agent/pkg/node"
 	"pkb-agent/pkg/node/hybrid/page"
 	"pkb-agent/pkg/node/hybrid/page/empty"
+	"pkb-agent/pkg/node/hybrid/page/overview"
 	"pkb-agent/tui"
 	"pkb-agent/tui/application/messages"
 	"pkb-agent/tui/component/docksouth"
@@ -49,7 +50,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 		data:            nodeData,
 	}
 
-	pages := nodeData.pages
+	pages := addOverviewPage(nodeData.pages)
 	component.pageViewers = component.createPageViewers(messageQueue, pages)
 
 	component.createKeyBindings(nodeData, &component.bindings)
@@ -87,6 +88,12 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 	)
 
 	return &component
+}
+
+func addOverviewPage(pages []page.Page) []page.Page {
+	overviewPage := overview.New()
+
+	return append([]page.Page{overviewPage}, pages...)
 }
 
 func (component *Component) createKeyBindings(nodeData *nodeData, bindings *keyBindings) {

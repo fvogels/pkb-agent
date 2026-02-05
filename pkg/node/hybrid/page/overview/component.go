@@ -1,0 +1,57 @@
+package overview
+
+import (
+	"pkb-agent/persistent/list"
+	"pkb-agent/pkg/node/hybrid/page"
+	"pkb-agent/tui"
+	"pkb-agent/tui/component/label"
+	"pkb-agent/tui/data"
+	"pkb-agent/tui/grid"
+	"pkb-agent/util/uid"
+)
+
+type pageComponent struct {
+	tui.ComponentBase
+	child *label.Component
+}
+
+func NewPageComponent(messageQueue tui.MessageQueue) *pageComponent {
+	component := pageComponent{
+		ComponentBase: tui.ComponentBase{
+			Identifier:   uid.Generate(),
+			Name:         "nameless overview page",
+			MessageQueue: messageQueue,
+		},
+		child: label.New(messageQueue, "overview page label", data.NewConstant("Page Overview")),
+	}
+
+	return &component
+}
+
+func (component *pageComponent) Render() grid.FiniteGrid {
+	return component.child.Render()
+}
+
+func (component *pageComponent) Handle(message tui.Message) {
+	switch message := message.(type) {
+	case tui.MsgKey:
+		component.onKey(message)
+
+	case tui.MsgStateUpdated:
+		component.child.Handle(message)
+		component.onStateUpdated()
+
+	default:
+		component.child.Handle(message)
+	}
+}
+
+func (component *pageComponent) onKey(message tui.MsgKey) {
+	// No key bindings for this page
+}
+
+func (component *pageComponent) onStateUpdated() {
+	component.MessageQueue.Enqueue(page.MsgSetPageKeyBindings{
+		Bindings: list.FromItems[tui.KeyBinding](),
+	})
+}
