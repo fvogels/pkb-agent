@@ -20,3 +20,11 @@ type MsgSetPageKeyBindings struct {
 func (message MsgSetPageKeyBindings) String() string {
 	return fmt.Sprintf("MsgSetPageKeyBindings[%s]", list.String(message.Bindings, func(b tui.KeyBinding) string { return b.Key }))
 }
+
+type MsgSetActivePage struct {
+	PageIndex int
+}
+
+func (message MsgSetActivePage) String() string {
+	return fmt.Sprintf("MsgSetActivePage[%d]", message.PageIndex)
+}

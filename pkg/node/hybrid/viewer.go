@@ -164,6 +164,9 @@ func (component *Component) Handle(message tui.Message) {
 	case page.MsgSetPageKeyBindings:
 		component.onSetPageKeyBindings(message)
 
+	case page.MsgSetActivePage:
+		component.onSetActivePage(message)
+
 	default:
 		component.root.Handle(message)
 	}
@@ -172,6 +175,14 @@ func (component *Component) Handle(message tui.Message) {
 func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindings) {
 	component.bindings.page.Set(message.Bindings)
 	component.signalNodeKeyBindingsUpdate()
+}
+
+func (component *Component) onSetActivePage(message page.MsgSetActivePage) {
+	component.withActivePage(func(page page.Page, viewer tui.Component) {
+		component.setActivePage(message.PageIndex)
+	})
+	component.Handle(tui.MsgStateUpdated{})
+	component.Handle(tui.MsgResize{Size: component.Size})
 }
 
 func (component *Component) Render() grid.FiniteGrid {
@@ -202,22 +213,12 @@ func (component *Component) onKey(message tui.MsgKey) {
 
 	switch message.Key {
 	case "Tab":
-		component.withActivePage(func(page page.Page, viewer tui.Component) {
-			newActivePageIndex := (component.activePageIndex.Get() + 1) % len(component.pageViewers)
-			slog.Debug("Updating active page", slog.Int("oldIndex", component.activePageIndex.Get()), slog.Int("newIndex", newActivePageIndex))
-			component.setActivePage(newActivePageIndex)
-		})
-		component.Handle(tui.MsgStateUpdated{})
-		component.Handle(tui.MsgResize{Size: component.Size})
+		newActivePageIndex := (component.activePageIndex.Get() + 1) % len(component.pageViewers)
+		component.Handle(page.MsgSetActivePage{PageIndex: newActivePageIndex})
 
 	case "Backtab":
-		component.withActivePage(func(page page.Page, viewer tui.Component) {
-			newActivePageIndex := (component.activePageIndex.Get() - 1 + len(component.pageViewers)) % len(component.pageViewers)
-			slog.Debug("Updating active page", slog.Int("oldIndex", component.activePageIndex.Get()), slog.Int("newIndex", newActivePageIndex))
-			component.setActivePage(newActivePageIndex)
-		})
-		component.Handle(tui.MsgStateUpdated{})
-		component.Handle(tui.MsgResize{Size: component.Size})
+		newActivePageIndex := (component.activePageIndex.Get() - 1 + len(component.pageViewers)) % len(component.pageViewers)
+		component.Handle(page.MsgSetActivePage{PageIndex: newActivePageIndex})
 
 	default:
 		component.withActivePage(func(page page.Page, viewer tui.Component) {
