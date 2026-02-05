@@ -34,8 +34,6 @@ func NewPageComponent(messageQueue tui.MessageQueue, parent *Page) *pageComponen
 }
 
 func createRoot(messageQueue tui.MessageQueue, pages []page.Page) tui.Component {
-	// return label.New(messageQueue, "label", data.NewConstant(fmt.Sprintf("%d pages", len(pages))))
-
 	captionStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
 	captionsAsSlice := util.Map(pages, func(page page.Page) stringsview.Item {
 		caption := page.GetCaption()
