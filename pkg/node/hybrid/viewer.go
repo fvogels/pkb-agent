@@ -91,7 +91,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 }
 
 func addOverviewPage(pages []page.Page) []page.Page {
-	overviewPage := overview.New()
+	overviewPage := overview.New(pages)
 
 	return append([]page.Page{overviewPage}, pages...)
 }

@@ -1,6 +1,7 @@
 package overview
 
 import (
+	"fmt"
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg/node/hybrid/page"
 	"pkb-agent/tui"
@@ -12,24 +13,25 @@ import (
 
 type pageComponent struct {
 	tui.ComponentBase
-	child *label.Component
+	page *Page
+	root tui.Component
 }
 
-func NewPageComponent(messageQueue tui.MessageQueue) *pageComponent {
+func NewPageComponent(messageQueue tui.MessageQueue, page *Page) *pageComponent {
 	component := pageComponent{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
 			Name:         "nameless overview page",
 			MessageQueue: messageQueue,
 		},
-		child: label.New(messageQueue, "overview page label", data.NewConstant("Page Overview")),
+		root: label.New(messageQueue, "label", data.NewConstant(fmt.Sprintf("%d pages", len(page.pages)))),
 	}
 
 	return &component
 }
 
 func (component *pageComponent) Render() grid.FiniteGrid {
-	return component.child.Render()
+	return component.root.Render()
 }
 
 func (component *pageComponent) Handle(message tui.Message) {
@@ -38,11 +40,11 @@ func (component *pageComponent) Handle(message tui.Message) {
 		component.onKey(message)
 
 	case tui.MsgStateUpdated:
-		component.child.Handle(message)
+		component.root.Handle(message)
 		component.onStateUpdated()
 
 	default:
-		component.child.Handle(message)
+		component.root.Handle(message)
 	}
 }
 
