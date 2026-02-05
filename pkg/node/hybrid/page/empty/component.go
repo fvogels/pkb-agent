@@ -15,17 +15,11 @@ type pageComponent struct {
 	child *label.Component
 }
 
-type msgCopySnippet struct{}
-
-func (message msgCopySnippet) String() string {
-	return "msgCopySnippet"
-}
-
 func NewPageComponent(messageQueue tui.MessageQueue) *pageComponent {
 	component := pageComponent{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
-			Name:         "nameless snippet page",
+			Name:         "nameless page",
 			MessageQueue: messageQueue,
 		},
 		child: label.New(messageQueue, "empty page label", data.NewConstant("no pages")),
