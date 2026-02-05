@@ -23,6 +23,7 @@ type Component struct {
 	rawNode                *RawNode
 	data                   *nodeData // (strong) pointer to the node data, keeps information alive while viewer exists
 	activePageIndex        data.Variable[int]
+	pages                  []page.Page
 	pageViewers            []tui.Component
 	bindings               keyBindings
 	activePageViewer       data.Value[tui.Component]
@@ -50,12 +51,12 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 		data:            nodeData,
 	}
 
-	pages := addOverviewPage(nodeData.pages)
-	component.pageViewers = component.createPageViewers(messageQueue, pages)
+	component.pages = addOverviewPage(nodeData.pages)
+	component.pageViewers = component.createPageViewers(messageQueue, component.pages)
 
 	component.createKeyBindings(nodeData, &component.bindings)
 
-	if len(pages) == 0 {
+	if len(component.pages) == 0 {
 		component.activePageViewer = data.NewConstant[tui.Component](empty.NewPageComponent(messageQueue))
 	} else {
 		component.activePageViewer = data.MapValue(&component.activePageIndex, func(index int) tui.Component {
@@ -66,8 +67,8 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 	component.pageStatus = data.MapValue(
 		&component.activePageIndex,
 		func(pageIndex int) string {
-			if len(pages) > 0 {
-				return fmt.Sprintf("Page %d/%d: %s", pageIndex+1, len(pages), pages[pageIndex].GetCaption())
+			if len(component.pages) > 0 {
+				return fmt.Sprintf("Page %d/%d: %s", pageIndex+1, len(component.pages), component.pages[pageIndex].GetCaption())
 			} else {
 				return "No pages"
 			}
@@ -187,7 +188,7 @@ func (component *Component) onResize(message tui.MsgResize) {
 
 func (component *Component) withActivePage(f func(page page.Page, viewer tui.Component)) {
 	if len(component.pageViewers) > 0 {
-		activePage := component.data.pages[component.activePageIndex.Get()]
+		activePage := component.pages[component.activePageIndex.Get()]
 		activeViewer := component.pageViewers[component.activePageIndex.Get()]
 
 		f(activePage, activeViewer)
@@ -202,14 +203,18 @@ func (component *Component) onKey(message tui.MsgKey) {
 	switch message.Key {
 	case "Tab":
 		component.withActivePage(func(page page.Page, viewer tui.Component) {
-			component.setActivePage((component.activePageIndex.Get() + 1) % len(component.pageViewers))
+			newActivePageIndex := (component.activePageIndex.Get() + 1) % len(component.pageViewers)
+			slog.Debug("Updating active page", slog.Int("oldIndex", component.activePageIndex.Get()), slog.Int("newIndex", newActivePageIndex))
+			component.setActivePage(newActivePageIndex)
 		})
 		component.Handle(tui.MsgStateUpdated{})
 		component.Handle(tui.MsgResize{Size: component.Size})
 
 	case "Backtab":
 		component.withActivePage(func(page page.Page, viewer tui.Component) {
-			component.setActivePage((component.activePageIndex.Get() - 1 + len(component.pageViewers)) % len(component.pageViewers))
+			newActivePageIndex := (component.activePageIndex.Get() - 1 + len(component.pageViewers)) % len(component.pageViewers)
+			slog.Debug("Updating active page", slog.Int("oldIndex", component.activePageIndex.Get()), slog.Int("newIndex", newActivePageIndex))
+			component.setActivePage(newActivePageIndex)
 		})
 		component.Handle(tui.MsgStateUpdated{})
 		component.Handle(tui.MsgResize{Size: component.Size})
