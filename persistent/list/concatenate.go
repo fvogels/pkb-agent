@@ -1,12 +1,20 @@
 package list
 
-func Concatenate[T any](xs List[T], ys List[T]) List[T] {
-	result := listConcat[T]{
-		xs: xs,
-		ys: ys,
+func Concatenate[T any](xss ...List[T]) List[T] {
+	if len(xss) == 0 {
+		return FromItems[T]()
 	}
 
-	return &result
+	result := xss[0]
+
+	for index := 1; index < len(xss); index++ {
+		result = &listConcat[T]{
+			xs: result,
+			ys: xss[index],
+		}
+	}
+
+	return result
 }
 
 type listConcat[T any] struct {
