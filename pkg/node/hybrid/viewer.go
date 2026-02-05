@@ -34,9 +34,10 @@ type Component struct {
 }
 
 type keyBindings struct {
-	actions []tui.KeyBinding                         // Key bindings associated with the node
-	page    data.Variable[list.List[tui.KeyBinding]] // Page specific key bindings
-	all     data.Value[list.List[tui.KeyBinding]]    // Concatenation of action key bindings and page key bindings
+	actions    []tui.KeyBinding                         // Key bindings associated with the node
+	jumpToPage []tui.KeyBinding                         // Key bindings to jump to page
+	page       data.Variable[list.List[tui.KeyBinding]] // Page specific key bindings
+	all        data.Value[list.List[tui.KeyBinding]]    // Concatenation of action key bindings and page key bindings
 }
 
 func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeData) *Component {
@@ -67,10 +68,19 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 	component.pageStatus = data.MapValue(
 		&component.activePageIndex,
 		func(pageIndex int) string {
-			if len(component.pages) > 0 {
-				return fmt.Sprintf("Page %d/%d: %s", pageIndex+1, len(component.pages), component.pages[pageIndex].GetCaption())
+			if pageIndex == 0 {
+				// First page is overview, do not mention index
+				return component.pages[0].GetCaption()
 			} else {
-				return "No pages"
+				totalPages := len(component.pages) - 1 // Subtract one for overview page
+				caption := component.pages[pageIndex].GetCaption()
+
+				return fmt.Sprintf(
+					"Page %d/%d: %s",
+					pageIndex,
+					totalPages,
+					caption,
+				)
 			}
 		},
 	)
@@ -99,14 +109,45 @@ func addOverviewPage(pages []page.Page) []page.Page {
 
 func (component *Component) createKeyBindings(nodeData *nodeData, bindings *keyBindings) {
 	bindings.actions = component.createActionKeyBindings(nodeData.actions)
+	bindings.jumpToPage = component.createJumpToPageKeyBindings()
 	bindings.page = data.NewVariable(list.New[tui.KeyBinding]())
 
 	bindings.all = data.MapValue(
 		&bindings.page,
 		func(pageBindings list.List[tui.KeyBinding]) list.List[tui.KeyBinding] {
-			return list.Concatenate(list.FromSlice(bindings.actions), pageBindings)
+			return list.Concatenate(
+				list.FromSlice(bindings.actions),
+				list.FromSlice(bindings.jumpToPage),
+				pageBindings,
+			)
 		},
 	)
+}
+
+func (component *Component) createJumpToPageKeyBindings() []tui.KeyBinding {
+	keys := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+	pageCount := len(component.pages)
+	keyBindings := make([]tui.KeyBinding, 0, pageCount)
+
+	for pageIndex := range pageCount {
+		var description string
+
+		if pageIndex == 0 {
+			description = "Overview"
+		} else {
+			description = fmt.Sprintf("To page %d", pageIndex)
+		}
+
+		keyBinding := tui.KeyBinding{
+			Key:         keys[pageIndex],
+			Description: description,
+			Message:     page.MsgSetActivePage{PageIndex: pageIndex},
+		}
+
+		keyBindings = append(keyBindings, keyBinding)
+	}
+
+	return keyBindings
 }
 
 func (component *Component) signalNodeKeyBindingsUpdate() {
@@ -208,6 +249,10 @@ func (component *Component) withActivePage(f func(page page.Page, viewer tui.Com
 
 func (component *Component) onKey(message tui.MsgKey) {
 	if tui.HandleKeyBindings(component.MessageQueue, message, component.bindings.actions...) {
+		return
+	}
+
+	if tui.HandleKeyBindings(component.MessageQueue, message, component.bindings.jumpToPage...) {
 		return
 	}
 
