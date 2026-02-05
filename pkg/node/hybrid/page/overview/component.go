@@ -13,21 +13,25 @@ import (
 
 type pageComponent struct {
 	tui.ComponentBase
-	page *Page
-	root tui.Component
+	parent *Page
+	root   tui.Component
 }
 
-func NewPageComponent(messageQueue tui.MessageQueue, page *Page) *pageComponent {
+func NewPageComponent(messageQueue tui.MessageQueue, parent *Page) *pageComponent {
 	component := pageComponent{
 		ComponentBase: tui.ComponentBase{
 			Identifier:   uid.Generate(),
 			Name:         "nameless overview page",
 			MessageQueue: messageQueue,
 		},
-		root: label.New(messageQueue, "label", data.NewConstant(fmt.Sprintf("%d pages", len(page.pages)))),
+		root: createRoot(messageQueue, parent.pages),
 	}
 
 	return &component
+}
+
+func createRoot(messageQueue tui.MessageQueue, pages []page.Page) tui.Component {
+	return label.New(messageQueue, "label", data.NewConstant(fmt.Sprintf("%d pages", len(pages))))
 }
 
 func (component *pageComponent) Render() grid.FiniteGrid {
