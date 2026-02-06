@@ -1,11 +1,8 @@
 package backblaze
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
-	"os"
-	bb "pkb-agent/backblaze"
 	"pkb-agent/extern"
 	"pkb-agent/persistent/list"
 	"pkb-agent/tui"
@@ -13,9 +10,7 @@ import (
 	"pkb-agent/tui/component/label"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/grid"
-	"pkb-agent/util/pathlib"
 	"pkb-agent/util/uid"
-	"pkb-agent/util/zipfile"
 )
 
 type Component struct {
@@ -43,7 +38,7 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode) *Component {
 			Description: "download",
 			Message: tui.MsgCommand{
 				Command: func() {
-					go downloadAndOpen(
+					go extern.BackblazeDownloadAndOpen(
 						rawNode.bucket,
 						rawNode.filename,
 					)
@@ -109,68 +104,4 @@ func (component *Component) onResize(message tui.MsgResize) {
 
 	component.Size = message.Size
 	component.root.Handle(message)
-}
-
-func downloadAndOpen(bucketName string, filename string) error {
-	application_key := os.Getenv("APPLICATION_KEY")
-	application_key_id := os.Getenv("APPLICATION_KEY_ID")
-	ctx := context.Background()
-
-	client, err := bb.New(ctx, application_key, application_key_id)
-	if err != nil {
-		slog.Error("Failed to create backblaze client")
-		return err
-	}
-
-	buffer, err := client.DownloadToBuffer(ctx, bucketName, filename, 1, func(bytesDownloaded int) {
-		slog.Debug(
-			"Received bytes",
-			slog.String("bucketName", bucketName),
-			slog.String("filename", filename),
-			slog.Int("bytesDownloaded", bytesDownloaded),
-		)
-	})
-	if err != nil {
-		slog.Error(
-			"Failed to download file from Backblaze",
-			slog.String("bucket", bucketName),
-			slog.String("filename", filename),
-		)
-		return err
-	}
-
-	slog.Debug(
-		"Unpacking zipfile",
-		slog.String("bucket", bucketName),
-		slog.String("filename", filename),
-	)
-	zippedFiles, err := zipfile.Unpack(buffer)
-	if err != nil {
-		slog.Error("Failed to unzip files")
-		return err
-	}
-
-	slog.Debug(
-		"Writing file to disk",
-		slog.String("bucket", bucketName),
-		slog.String("filename", filename),
-	)
-	zippedFile := zippedFiles[0]
-	path, err := zippedFile.SaveToDirectory(pathlib.New("."))
-	if err != nil {
-		slog.Error("Failed to save downloaded file")
-		return err
-	}
-
-	slog.Debug(
-		"Opening file with default viewer",
-		slog.String("bucket", bucketName),
-		slog.String("filename", filename),
-	)
-	if err := extern.OpenUsingDefaultViewer(path); err != nil {
-		slog.Error("Failed to open downloaded file using default viewer")
-		return err
-	}
-
-	return nil
 }
