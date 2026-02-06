@@ -6,7 +6,6 @@ import (
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg/node"
 	"pkb-agent/pkg/node/hybrid/page"
-	"pkb-agent/pkg/node/hybrid/page/empty"
 	"pkb-agent/pkg/node/hybrid/page/overview"
 	"pkb-agent/tui"
 	"pkb-agent/tui/application/messages"
@@ -66,13 +65,10 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 
 	component.createKeyBindings(nodeData, &component.bindings)
 
-	if len(component.pages) == 0 {
-		component.activePageViewer = data.NewConstant[tui.Component](empty.NewPageComponent(messageQueue))
-	} else {
-		component.activePageViewer = data.MapValue(&component.activePageIndex, func(index int) tui.Component {
-			return component.pageViewers[index]
-		})
-	}
+	component.activePageViewer = data.MapValue(&component.activePageIndex, func(index int) tui.Component {
+		return component.pageViewers[index]
+	})
+
 	component.activePageViewerHolder = *holder.New(messageQueue, component.activePageViewer)
 	component.pageStatus = data.MapValue(
 		&component.activePageIndex,
