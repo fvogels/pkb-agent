@@ -54,6 +54,8 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 	component.pages = addOverviewPage(nodeData.pages)
 	component.pageViewers = component.createPageViewers(messageQueue, component.pages)
 
+	// If there's only one page, show that one
+	// If there's zero or 2+ pages, show overview page
 	var initialActivePage int
 	if len(component.pages) == 2 {
 		initialActivePage = 1
