@@ -8,6 +8,7 @@ import (
 
 type Action struct {
 	description string
+	key         string
 }
 
 type B2 struct {
@@ -20,12 +21,21 @@ func (action Action) GetDescription() string {
 	return action.description
 }
 
+func (action Action) GetKey() string {
+	return action.key
+}
+
 func (action B2) Perform() {
 	extern.BackblazeDownloadAndOpen(action.bucket, action.filename)
 }
 
 func Parse(rawAction map[string]string) (node.Action, error) {
 	description, err := getAttribute(rawAction, "description")
+	if err != nil {
+		return nil, err
+	}
+
+	key, err := getAttribute(rawAction, "key")
 	if err != nil {
 		return nil, err
 	}
@@ -50,6 +60,7 @@ func Parse(rawAction map[string]string) (node.Action, error) {
 		return &B2{
 			Action: Action{
 				description: description,
+				key:         key,
 			},
 			bucket:   bucket,
 			filename: filename,

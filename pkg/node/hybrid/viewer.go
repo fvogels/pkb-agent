@@ -157,13 +157,12 @@ func (component *Component) signalNodeKeyBindingsUpdate() {
 }
 
 func (component *Component) createActionKeyBindings(actions []node.Action) []tui.KeyBinding {
-	keys := []rune{'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'}
 	keyBindings := make([]tui.KeyBinding, len(actions))
 
 	for index, action := range actions {
 		actionCopy := action
 		description := action.GetDescription()
-		key := string(keys[index])
+		key := action.GetKey()
 		keyBindings[index] = tui.KeyBinding{
 			Key:         key,
 			Description: description,
@@ -219,11 +218,25 @@ func (component *Component) onSetPageKeyBindings(message page.MsgSetPageKeyBindi
 }
 
 func (component *Component) onSetActivePage(message page.MsgSetActivePage) {
-	component.withActivePage(func(page page.Page, viewer tui.Component) {
-		component.setActivePage(message.PageIndex)
-	})
+	component.activePageIndex.Set(message.PageIndex)
 	component.Handle(tui.MsgStateUpdated{})
 	component.Handle(tui.MsgResize{Size: component.Size})
+
+	activePage := component.pages[message.PageIndex]
+	keyBindings := []tui.KeyBinding{}
+	for _, action := range activePage.GetActions() {
+		keyBinding := tui.KeyBinding{
+			Key:         action.GetKey(),
+			Description: action.GetDescription(),
+			Message: tui.MsgCommand{
+				Command: action.Perform,
+			},
+		}
+
+		keyBindings = append(keyBindings, keyBinding)
+	}
+	component.bindings.page.Set(list.FromSlice(keyBindings))
+	component.signalNodeKeyBindingsUpdate()
 }
 
 func (component *Component) Render() grid.FiniteGrid {
@@ -270,8 +283,4 @@ func (component *Component) onKey(message tui.MsgKey) {
 			viewer.Handle(message)
 		})
 	}
-}
-
-func (component *Component) setActivePage(index int) {
-	component.activePageIndex.Set(index)
 }

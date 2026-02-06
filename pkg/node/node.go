@@ -22,6 +22,7 @@ type RawNode interface {
 
 type Action interface {
 	GetDescription() string
+	GetKey() string
 	Perform()
 }
 

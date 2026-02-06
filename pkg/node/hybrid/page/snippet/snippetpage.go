@@ -19,7 +19,7 @@ func New(caption string, source string, language string) *Page {
 		source:   source,
 		language: language,
 		actions: []node.Action{
-			clipboard.New(source),
+			clipboard.New(source, "c"),
 		},
 	}
 }
