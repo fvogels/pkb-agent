@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"pkb-agent/pkg/node"
+	"pkb-agent/pkg/node/hybrid/actions/download"
 	"pkb-agent/pkg/node/hybrid/actions/www"
 	"pkb-agent/pkg/node/hybrid/page"
 	markdownpage "pkb-agent/pkg/node/hybrid/page/markdown"
@@ -80,7 +81,7 @@ func (rawNode *RawNode) getData() (*nodeData, error) {
 func (rawNode *RawNode) CreateViewer(messageQueue tui.MessageQueue) tui.Component {
 	data, err := rawNode.getData()
 	if err != nil {
-		panic("error loading data")
+		panic(fmt.Sprintf("error loading data: %s", err.Error()))
 	}
 
 	return NewViewer(messageQueue, rawNode, data)
@@ -181,6 +182,9 @@ func (rawNode *RawNode) parseAction(rawAction map[string]string) (node.Action, e
 	switch actionType {
 	case "www":
 		return www.Parse(rawAction)
+
+	case "download":
+		return download.Parse(rawAction)
 
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrUnknownActionType, actionType)
