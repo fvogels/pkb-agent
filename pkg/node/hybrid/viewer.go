@@ -47,13 +47,20 @@ func NewViewer(messageQueue tui.MessageQueue, rawNode *RawNode, nodeData *nodeDa
 			Name:         "unnamed hybrid node viewer",
 			MessageQueue: messageQueue,
 		},
-		rawNode:         rawNode,
-		activePageIndex: data.NewVariable(0),
-		data:            nodeData,
+		rawNode: rawNode,
+		data:    nodeData,
 	}
 
 	component.pages = addOverviewPage(nodeData.pages)
 	component.pageViewers = component.createPageViewers(messageQueue, component.pages)
+
+	var initialActivePage int
+	if len(component.pages) == 2 {
+		initialActivePage = 1
+	} else {
+		initialActivePage = 0
+	}
+	component.activePageIndex = data.NewVariable(initialActivePage)
 
 	component.createKeyBindings(nodeData, &component.bindings)
 
