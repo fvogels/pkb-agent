@@ -465,6 +465,24 @@ func (application *Application) unlockSelectedNodes() {
 func (application *Application) toggleShowOnlyLeaves() {
 	application.updateModel(func(model *model.Model) {
 		model.ToggleShowOnlyLeaves()
-		model.DetermineIntersectionNodes()
+		if model.HighlightedNodeIndex < model.IntersectionNodes.Size() {
+			currentlyHighlightedNode := model.IntersectionNodes.At(model.HighlightedNodeIndex).GetIndex()
+			model.DetermineIntersectionNodes()
+
+			// TODO Use binary search
+			index := 0
+			for index < model.IntersectionNodes.Size() && model.IntersectionNodes.At(index).GetIndex() != currentlyHighlightedNode {
+				index++
+			}
+
+			if index == model.IntersectionNodes.Size() {
+				model.HighlightedNodeIndex = 0
+			} else {
+				model.HighlightedNodeIndex = index
+			}
+		} else {
+			model.DetermineIntersectionNodes()
+			model.HighlightedNodeIndex = 0
+		}
 	})
 }
