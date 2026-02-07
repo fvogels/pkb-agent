@@ -149,6 +149,7 @@ func (component *viewMode) onStateUpdated() {
 			BindingSwitchLinksView,
 			BindingLockNodes,
 			BindingUnlockNodes,
+			BindingOnlyLeaves,
 		),
 	})
 }
@@ -163,6 +164,7 @@ func (component *viewMode) onKey(message tui.MsgKey) {
 		BindingSwitchLinksView,
 		BindingLockNodes,
 		BindingUnlockNodes,
+		BindingOnlyLeaves,
 	}
 
 	if !tui.HandleKeyBindings(application.messageQueue, message, activeBindings...) {

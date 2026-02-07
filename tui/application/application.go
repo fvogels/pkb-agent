@@ -263,6 +263,9 @@ func (application *Application) handleMessage(message tui.Message) {
 	case messages.MsgUnlockSelectedNodes:
 		application.unlockSelectedNodes()
 
+	case messages.MsgToggleShowOnlyLeaves:
+		application.toggleShowOnlyLeaves()
+
 	case tui.MsgCommand:
 		message.Command()
 
@@ -457,5 +460,12 @@ func (application *Application) lockSelectedNodes() {
 func (application *Application) unlockSelectedNodes() {
 	application.updateModel(func(model *model.Model) {
 		model.UnlockSelectedNodes()
+	})
+}
+
+func (application *Application) toggleShowOnlyLeaves() {
+	application.updateModel(func(model *model.Model) {
+		model.ToggleShowOnlyLeaves()
+		model.DetermineIntersectionNodes()
 	})
 }

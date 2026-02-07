@@ -14,6 +14,7 @@ type Model struct {
 	Input                string
 	SearchMode           bool
 	ShowNodeLinks        bool // Whether to show node contents (false) or node links/backlinks (true)
+	ShowOnlyLeaves       bool
 }
 
 func New(graph *pkg.Graph) *Model {
@@ -28,6 +29,7 @@ func New(graph *pkg.Graph) *Model {
 		HighlightedNodeIndex: highlightedNodeIndex,
 		SearchMode:           false,
 		ShowNodeLinks:        false,
+		ShowOnlyLeaves:       false,
 	}
 
 	return &result
@@ -42,7 +44,7 @@ func (model *Model) GetHighlightedNode() *pkg.Node {
 }
 
 func (model *Model) DetermineIntersectionNodes() {
-	model.IntersectionNodes = determineIntersectionNodes(model.Input, model.Graph, model.SelectedNodes, true, true)
+	model.IntersectionNodes = determineIntersectionNodes(model.Input, model.Graph, model.SelectedNodes, true, true, model.ShowOnlyLeaves)
 }
 
 func (model *Model) SelectHighlightedNode() {
@@ -68,4 +70,8 @@ func (model *Model) LockSelectedNodes() {
 
 func (model *Model) UnlockSelectedNodes() {
 	model.LockedNodeCount = 0
+}
+
+func (model *Model) ToggleShowOnlyLeaves() {
+	model.ShowOnlyLeaves = !model.ShowOnlyLeaves
 }

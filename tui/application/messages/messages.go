@@ -69,3 +69,9 @@ type MsgUnlockSelectedNodes struct{}
 func (message MsgUnlockSelectedNodes) String() string {
 	return "MsgUnlockSelectedNodes"
 }
+
+type MsgToggleShowOnlyLeaves struct{}
+
+func (message MsgToggleShowOnlyLeaves) String() string {
+	return "MsgShowOnlyLeaves"
+}

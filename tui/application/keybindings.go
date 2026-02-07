@@ -47,4 +47,10 @@ var (
 		Description: "unlock",
 		Message:     messages.MsgUnlockSelectedNodes{},
 	}
+
+	BindingOnlyLeaves = tui.KeyBinding{
+		Key:         "x",
+		Description: "leaves",
+		Message:     messages.MsgToggleShowOnlyLeaves{},
+	}
 )

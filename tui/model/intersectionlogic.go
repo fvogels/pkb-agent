@@ -9,7 +9,7 @@ import (
 )
 
 // determineIntersectionNodes computes which nodes are compatible with the selected nodes and the search filter.
-func determineIntersectionNodes(input string, graph *pkg.Graph, selectedNodes list.List[*pkg.Node], includeAncestors bool, includeIndirectDescendants bool) list.List[*pkg.Node] {
+func determineIntersectionNodes(input string, graph *pkg.Graph, selectedNodes list.List[*pkg.Node], includeAncestors bool, includeIndirectDescendants bool, onlyLeaves bool) list.List[*pkg.Node] {
 	intersectionNodes := collectDescendantIntersection(graph, selectedNodes, includeIndirectDescendants)
 
 	if includeAncestors {
@@ -28,7 +28,10 @@ func determineIntersectionNodes(input string, graph *pkg.Graph, selectedNodes li
 	for i := range graph.GetNodeCount() {
 		if intersectionNodes.Contains(i) {
 			node := graph.FindNodeByIndex(i)
-			result = append(result, node)
+
+			if !onlyLeaves || len(node.GetBacklinks()) == 0 {
+				result = append(result, node)
+			}
 		}
 	}
 
