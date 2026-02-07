@@ -4,11 +4,15 @@ import (
 	"pkb-agent/persistent/list"
 	"pkb-agent/pkg/node/hybrid/page"
 	"pkb-agent/tui"
+	"pkb-agent/tui/component/margin"
 	"pkb-agent/tui/component/numberedstringlist"
 	"pkb-agent/tui/data"
 	"pkb-agent/tui/grid"
 	"pkb-agent/util"
 	"pkb-agent/util/uid"
+
+	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 )
 
 type pageComponent struct {
@@ -35,7 +39,15 @@ func createRoot(messageQueue tui.MessageQueue, pages []page.Page) tui.Component 
 		return page.GetCaption()
 	})
 	captionsAsList := list.FromSlice(captionsAsSlice)
-	return numberedstringlist.New(messageQueue, data.NewConstant(captionsAsList))
+	pageList := numberedstringlist.New(messageQueue, data.NewConstant(captionsAsList))
+	marginStyle := tcell.StyleDefault.Background(color.Default).Foreground(color.Default)
+
+	return margin.New(
+		messageQueue,
+		pageList,
+		1,
+		&marginStyle,
+	)
 }
 
 func (component *pageComponent) Render() grid.FiniteGrid {
