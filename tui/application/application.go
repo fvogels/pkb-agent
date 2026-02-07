@@ -431,7 +431,6 @@ func (application *Application) clearInput() {
 
 		if highlightedNode != nil {
 			index := application.findIndexOfIntersectionNode(list.ToSlice(model.IntersectionNodes), highlightedNode.GetName())
-			slog.Debug("!!!", "name", highlightedNode.GetName(), "index", index)
 			model.HighlightedNodeIndex = index
 		}
 	})
