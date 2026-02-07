@@ -1,7 +1,6 @@
 package border
 
 import (
-	"log/slog"
 	"pkb-agent/tui"
 	tuigrid "pkb-agent/tui/grid"
 	"pkb-agent/tui/size"
@@ -39,8 +38,6 @@ func (component *Component) Handle(message tui.Message) {
 }
 
 func (component *Component) Render() tuigrid.FiniteGrid {
-	slog.Debug("Rendering border", slog.String("size", component.Size.String()))
-
 	return newGrid(component)
 }
 
